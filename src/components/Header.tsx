@@ -1,4 +1,6 @@
 import { Boxes } from "lucide-react";
+import { CompanyDialog } from "./CompanyDialog";
+import { CustomerDialog } from "./CustomerDialog";
 
 export const Header = () => {
   return (
@@ -6,16 +8,12 @@ export const Header = () => {
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <Boxes className="h-8 w-8 text-primary" />
-            <h1 className="text-xl font-bold text-gray-900">Warehouse Manager</h1>
+            <img src="/neva-logo.png" alt="NEVA Logo" className="h-8" />
+            <h1 className="text-xl font-bold text-[#212490]">Skladový Manažér</h1>
           </div>
-          <nav className="flex space-x-4">
-            <button className="px-4 py-2 text-gray-600 hover:text-primary transition-colors">
-              Inventory
-            </button>
-            <button className="px-4 py-2 text-gray-600 hover:text-primary transition-colors">
-              Scanner
-            </button>
+          <nav className="flex items-center space-x-4">
+            <CompanyDialog />
+            <CustomerDialog />
           </nav>
         </div>
       </div>

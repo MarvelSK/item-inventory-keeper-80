@@ -1,19 +1,19 @@
-import { Item } from './types';
+import { Item, Company, Customer } from './types';
 
 // Mock data for companies and customers
-export const companies = [
+export let companies: Company[] = [
   { id: '1', name: 'Tech Corp' },
   { id: '2', name: 'Global Industries' },
   { id: '3', name: 'Local Supplies' },
 ];
 
-export const customers = [
-  { id: '1', name: 'John Smith' },
-  { id: '2', name: 'Alice Johnson' },
-  { id: '3', name: 'Bob Williams' },
+export let customers: Customer[] = [
+  { id: '1', name: 'John Smith', companyId: '1' },
+  { id: '2', name: 'Alice Johnson', companyId: '2' },
+  { id: '3', name: 'Bob Williams', companyId: '3' },
 ];
 
-// In-memory storage for items (replace with proper backend later)
+// In-memory storage for items
 let items: Item[] = [];
 
 export const addItem = (item: Omit<Item, 'id' | 'createdAt' | 'updatedAt'>) => {
@@ -42,4 +42,33 @@ export const findItemByCode = (code: string) => {
 
 export const getAllItems = () => {
   return [...items];
+};
+
+// Company management
+export const addCompany = (name: string): Company => {
+  const newCompany = {
+    id: Math.random().toString(36).substr(2, 9),
+    name,
+  };
+  companies.push(newCompany);
+  return newCompany;
+};
+
+export const deleteCompany = (id: string) => {
+  companies = companies.filter(company => company.id !== id);
+};
+
+// Customer management
+export const addCustomer = (name: string, companyId: string): Customer => {
+  const newCustomer = {
+    id: Math.random().toString(36).substr(2, 9),
+    name,
+    companyId,
+  };
+  customers.push(newCustomer);
+  return newCustomer;
+};
+
+export const deleteCustomer = (id: string) => {
+  customers = customers.filter(customer => customer.id !== id);
 };

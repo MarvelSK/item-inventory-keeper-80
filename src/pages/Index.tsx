@@ -2,9 +2,10 @@ import { useState } from "react";
 import { Header } from "@/components/Header";
 import { ManualEntry } from "@/components/ManualEntry";
 import { Scanner } from "@/components/Scanner";
+import { InventoryList } from "@/components/InventoryList";
 
 const Index = () => {
-  const [activeTab, setActiveTab] = useState<"manual" | "scanner">("manual");
+  const [activeTab, setActiveTab] = useState<"manual" | "scanner" | "inventory">("inventory");
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -16,26 +17,38 @@ const Index = () => {
             onClick={() => setActiveTab("manual")}
             className={`px-4 py-2 rounded-md transition-colors ${
               activeTab === "manual"
-                ? "bg-primary text-white"
-                : "bg-white text-gray-600 hover:bg-gray-50"
+                ? "bg-[#212490] text-white"
+                : "bg-white text-gray-600 hover:bg-[#47acc9] hover:text-white"
             }`}
           >
-            Manual Entry
+            Manuálne pridanie
           </button>
           <button
             onClick={() => setActiveTab("scanner")}
             className={`px-4 py-2 rounded-md transition-colors ${
               activeTab === "scanner"
-                ? "bg-primary text-white"
-                : "bg-white text-gray-600 hover:bg-gray-50"
+                ? "bg-[#212490] text-white"
+                : "bg-white text-gray-600 hover:bg-[#47acc9] hover:text-white"
             }`}
           >
-            Scanner
+            Skener
+          </button>
+          <button
+            onClick={() => setActiveTab("inventory")}
+            className={`px-4 py-2 rounded-md transition-colors ${
+              activeTab === "inventory"
+                ? "bg-[#212490] text-white"
+                : "bg-white text-gray-600 hover:bg-[#47acc9] hover:text-white"
+            }`}
+          >
+            Inventár
           </button>
         </div>
 
-        <div className="max-w-2xl mx-auto">
-          {activeTab === "manual" ? <ManualEntry /> : <Scanner />}
+        <div className="max-w-7xl mx-auto">
+          {activeTab === "manual" && <ManualEntry />}
+          {activeTab === "scanner" && <Scanner />}
+          {activeTab === "inventory" && <InventoryList />}
         </div>
       </main>
     </div>
