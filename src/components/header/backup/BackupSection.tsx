@@ -1,23 +1,34 @@
 import { Button } from "../../ui/button";
 import { Save } from "lucide-react";
-import { backupInventory, backupCompanies, backupCustomers } from "@/lib/inventory";
+import { backupInventory, backupCompanies, backupCustomers } from "@/lib/services";
+import { useItems } from "@/hooks/useItems";
+import { useCompanies } from "@/hooks/useCompanies";
+import { useCustomers } from "@/hooks/useCustomers";
 import { toast } from "sonner";
 
 export const BackupSection = () => {
-  const handleBackup = (type: 'inventory' | 'companies' | 'customers') => {
-    switch (type) {
-      case 'inventory':
-        backupInventory();
-        toast.success("Záloha inventára bola vytvorená");
-        break;
-      case 'companies':
-        backupCompanies();
-        toast.success("Záloha spoločností bola vytvorená");
-        break;
-      case 'customers':
-        backupCustomers();
-        toast.success("Záloha zákazníkov bola vytvorená");
-        break;
+  const { items } = useItems();
+  const { companies } = useCompanies();
+  const { customers } = useCustomers();
+
+  const handleBackup = async (type: 'inventory' | 'companies' | 'customers') => {
+    try {
+      switch (type) {
+        case 'inventory':
+          await backupInventory(items);
+          toast.success("Záloha inventára bola vytvorená");
+          break;
+        case 'companies':
+          await backupCompanies(companies);
+          toast.success("Záloha spoločností bola vytvorená");
+          break;
+        case 'customers':
+          await backupCustomers(customers);
+          toast.success("Záloha zákazníkov bola vytvorená");
+          break;
+      }
+    } catch (error) {
+      toast.error("Chyba pri vytváraní zálohy");
     }
   };
 

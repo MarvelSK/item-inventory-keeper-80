@@ -1,23 +1,27 @@
 import { Button } from "../../ui/button";
 import { Trash2 } from "lucide-react";
-import { wipeInventory, wipeCompanies, wipeCustomers } from "@/lib/inventory";
+import { wipeItems, wipeCompanies, wipeCustomers } from "@/lib/services";
 import { toast } from "sonner";
 
 export const WipeSection = () => {
-  const handleWipe = (type: 'inventory' | 'companies' | 'customers') => {
-    switch (type) {
-      case 'inventory':
-        wipeInventory();
-        toast.success("Inventár bol vymazaný");
-        break;
-      case 'companies':
-        wipeCompanies();
-        toast.success("Spoločnosti boli vymazané");
-        break;
-      case 'customers':
-        wipeCustomers();
-        toast.success("Zákazníci boli vymazaní");
-        break;
+  const handleWipe = async (type: 'inventory' | 'companies' | 'customers') => {
+    try {
+      switch (type) {
+        case 'inventory':
+          await wipeItems();
+          toast.success("Inventár bol vymazaný");
+          break;
+        case 'companies':
+          await wipeCompanies();
+          toast.success("Spoločnosti boli vymazané");
+          break;
+        case 'customers':
+          await wipeCustomers();
+          toast.success("Zákazníci boli vymazaní");
+          break;
+      }
+    } catch (error) {
+      toast.error("Chyba pri vymazávaní dát");
     }
   };
 

@@ -7,7 +7,7 @@ export let customers: Customer[] = [
   { id: '3', name: 'Bob Williams', companyId: '3', deleted: false },
 ];
 
-export const addCustomer = (name: string, companyId: string): Customer => {
+export const addCustomer = async (name: string, companyId: string): Promise<Customer> => {
   const newCustomer = {
     id: Math.random().toString(36).substr(2, 9),
     name,
@@ -18,14 +18,14 @@ export const addCustomer = (name: string, companyId: string): Customer => {
   return newCustomer;
 };
 
-export const deleteCustomer = (id: string) => {
+export const deleteCustomer = async (id: string): Promise<void> => {
   const customer = customers.find(customer => customer.id === id);
   if (customer) {
     customer.deleted = true;
   }
 };
 
-export const getActiveCustomers = () => {
+export const getActiveCustomers = async (): Promise<Customer[]> => {
   const cachedCustomers = cache.get<Customer[]>('customers');
   if (cachedCustomers) {
     return cachedCustomers.filter(customer => !customer.deleted);
@@ -33,4 +33,9 @@ export const getActiveCustomers = () => {
   
   cache.set('customers', customers);
   return customers.filter(customer => !customer.deleted);
+};
+
+export const wipeCustomers = async () => {
+  customers = [];
+  cache.set('customers', customers);
 };

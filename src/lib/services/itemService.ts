@@ -3,7 +3,7 @@ import { cache } from '../cache';
 
 let items: Item[] = [];
 
-export const addItem = (item: Omit<Item, 'id' | 'createdAt' | 'updatedAt' | 'deleted'>) => {
+export const addItem = async (item: Omit<Item, 'id' | 'createdAt' | 'updatedAt' | 'deleted'>) => {
   const newItem = {
     ...item,
     id: Math.random().toString(36).substr(2, 9),
@@ -16,7 +16,7 @@ export const addItem = (item: Omit<Item, 'id' | 'createdAt' | 'updatedAt' | 'del
   return newItem;
 };
 
-export const updateItem = (updatedItem: Item) => {
+export const updateItem = async (updatedItem: Item) => {
   const index = items.findIndex((item) => item.id === updatedItem.id);
   if (index !== -1) {
     items[index] = {
@@ -29,7 +29,7 @@ export const updateItem = (updatedItem: Item) => {
   return null;
 };
 
-export const updateItemQuantity = (id: string, quantity: number) => {
+export const updateItemQuantity = async (id: string, quantity: number) => {
   const item = items.find(item => item.id === id);
   if (item) {
     item.quantity = quantity;
@@ -40,11 +40,11 @@ export const updateItemQuantity = (id: string, quantity: number) => {
   return null;
 };
 
-export const findItemByCode = (code: string) => {
+export const findItemByCode = async (code: string) => {
   return items.find((i) => i.code === code && !i.deleted);
 };
 
-export const deleteItem = (id: string) => {
+export const deleteItem = async (id: string) => {
   const item = items.find(item => item.id === id);
   if (item) {
     item.deleted = true;
@@ -53,7 +53,7 @@ export const deleteItem = (id: string) => {
   }
 };
 
-export const getAllItems = () => {
+export const getAllItems = async () => {
   const cachedItems = cache.get<Item[]>('items');
   if (cachedItems) {
     return cachedItems.filter(item => !item.deleted);
@@ -62,4 +62,9 @@ export const getAllItems = () => {
   const activeItems = items.filter(item => !item.deleted);
   cache.set('items', activeItems);
   return activeItems;
+};
+
+export const wipeItems = async () => {
+  items = [];
+  cache.set('items', items);
 };

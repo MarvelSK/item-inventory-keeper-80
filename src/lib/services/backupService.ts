@@ -9,7 +9,7 @@ const downloadCsv = (content: string, type: string) => {
   URL.revokeObjectURL(link.href);
 };
 
-export const backupInventory = (items: Item[]) => {
+export const backupInventory = async (items: Item[]) => {
   const csvContent = items.map(item => 
     `${item.code},${item.quantity},${item.company},${item.customer},${item.createdAt.toISOString()},${item.updatedAt.toISOString()}`
   ).join('\n');
@@ -17,7 +17,7 @@ export const backupInventory = (items: Item[]) => {
   downloadCsv(csvContent, 'inventory');
 };
 
-export const backupCompanies = (companies: Company[]) => {
+export const backupCompanies = async (companies: Company[]) => {
   const csvContent = companies.map(company => 
     `${company.id},${company.name}`
   ).join('\n');
@@ -25,7 +25,7 @@ export const backupCompanies = (companies: Company[]) => {
   downloadCsv(csvContent, 'companies');
 };
 
-export const backupCustomers = (customers: Customer[]) => {
+export const backupCustomers = async (customers: Customer[]) => {
   const csvContent = customers.map(customer => 
     `${customer.id},${customer.name},${customer.companyId}`
   ).join('\n');
