@@ -1,24 +1,12 @@
 import { useState } from "react";
-import { Input } from "./ui/input";
-import { Table, TableHeader, TableRow, TableHead, TableBody } from "./ui/table";
-import { Button } from "./ui/button";
-import { getAllItems, deleteItem, updateItem } from "@/lib/inventory";
 import { Item } from "@/lib/types";
-import { Search, ArrowUp, ArrowDown, Grid, List } from "lucide-react";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "./ui/alert-dialog";
+import { getAllItems, deleteItem, updateItem } from "@/lib/inventory";
 import { toast } from "sonner";
-import { InventoryListItem } from "./inventory/InventoryListItem";
-import { InventoryGridItem } from "./inventory/InventoryGridItem";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "./ui/alert-dialog";
 import { EditItemDialog } from "./inventory/EditItemDialog";
+import { InventorySearch } from "./inventory/InventorySearch";
+import { InventoryTable } from "./inventory/InventoryTable";
+import { InventoryGrid } from "./inventory/InventoryGrid";
 
 export const InventoryList = () => {
   const [search, setSearch] = useState("");
@@ -73,121 +61,40 @@ export const InventoryList = () => {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-2">
-        <div className="relative flex-1 w-full">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
-          <Input
-            placeholder="Vyhľadať položky..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-8"
-          />
-        </div>
-        <div className="flex space-x-2">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => setViewMode("list")}
-            className={viewMode === "list" ? "bg-accent" : ""}
-          >
-            <List className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => setViewMode("grid")}
-            className={viewMode === "grid" ? "bg-accent" : ""}
-          >
-            <Grid className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
+      <InventorySearch
+        search={search}
+        setSearch={setSearch}
+        viewMode={viewMode}
+        setViewMode={setViewMode}
+      />
 
       {viewMode === "list" ? (
-        <div className="rounded-md border overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead
-                  className="cursor-pointer hover:text-[#47acc9]"
-                  onClick={() => toggleSort("code")}
-                >
-                  Kód
-                  {sortField === "code" && (
-                    sortDirection === "asc" ? <ArrowUp className="inline ml-1 h-4 w-4" /> : 
-                    <ArrowDown className="inline ml-1 h-4 w-4" />
-                  )}
-                </TableHead>
-                <TableHead
-                  className="cursor-pointer hover:text-[#47acc9]"
-                  onClick={() => toggleSort("quantity")}
-                >
-                  Množstvo
-                  {sortField === "quantity" && (
-                    sortDirection === "asc" ? <ArrowUp className="inline ml-1 h-4 w-4" /> : 
-                    <ArrowDown className="inline ml-1 h-4 w-4" />
-                  )}
-                </TableHead>
-                <TableHead
-                  className="cursor-pointer hover:text-[#47acc9]"
-                  onClick={() => toggleSort("company")}
-                >
-                  Spoločnosť
-                  {sortField === "company" && (
-                    sortDirection === "asc" ? <ArrowUp className="inline ml-1 h-4 w-4" /> : 
-                    <ArrowDown className="inline ml-1 h-4 w-4" />
-                  )}
-                </TableHead>
-                <TableHead
-                  className="cursor-pointer hover:text-[#47acc9]"
-                  onClick={() => toggleSort("customer")}
-                >
-                  Zákazník
-                  {sortField === "customer" && (
-                    sortDirection === "asc" ? <ArrowUp className="inline ml-1 h-4 w-4" /> : 
-                    <ArrowDown className="inline ml-1 h-4 w-4" />
-                  )}
-                </TableHead>
-                <TableHead>Vytvorené</TableHead>
-                <TableHead>Upravené</TableHead>
-                <TableHead className="w-[100px]">Akcie</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {sortedAndFilteredItems.map((item) => (
-                <InventoryListItem
-                  key={item.id}
-                  item={item}
-                  onEdit={(item) => {
-                    setEditingItem(item);
-                    setIsEditDialogOpen(true);
-                  }}
-                  onDelete={(id) => {
-                    setDeletingItemId(id);
-                    setIsDeleteDialogOpen(true);
-                  }}
-                />
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+        <InventoryTable
+          items={sortedAndFilteredItems}
+          sortField={sortField}
+          sortDirection={sortDirection}
+          toggleSort={toggleSort}
+          onEdit={(item) => {
+            setEditingItem(item);
+            setIsEditDialogOpen(true);
+          }}
+          onDelete={(id) => {
+            setDeletingItemId(id);
+            setIsDeleteDialogOpen(true);
+          }}
+        />
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {sortedAndFilteredItems.map((item) => (
-            <InventoryGridItem
-              key={item.id}
-              item={item}
-              onEdit={(item) => {
-                setEditingItem(item);
-                setIsEditDialogOpen(true);
-              }}
-              onDelete={(id) => {
-                setDeletingItemId(id);
-                setIsDeleteDialogOpen(true);
-              }}
-            />
-          ))}
-        </div>
+        <InventoryGrid
+          items={sortedAndFilteredItems}
+          onEdit={(item) => {
+            setEditingItem(item);
+            setIsEditDialogOpen(true);
+          }}
+          onDelete={(id) => {
+            setDeletingItemId(id);
+            setIsDeleteDialogOpen(true);
+          }}
+        />
       )}
 
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
