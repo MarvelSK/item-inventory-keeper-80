@@ -9,10 +9,7 @@ export const useItems = () => {
   const { data: items = [], isLoading, error } = useQuery({
     queryKey: ['items'],
     queryFn: getAllItems,
-    onError: (error: Error) => {
-      console.error('Error fetching items:', error);
-      toast.error('Failed to load items');
-    }
+    retry: false
   });
 
   const addMutation = useMutation({
@@ -51,6 +48,11 @@ export const useItems = () => {
       toast.error('Chyba pri vymazaní položky');
     },
   });
+
+  if (error) {
+    console.error('Error fetching items:', error);
+    toast.error('Failed to load items');
+  }
 
   return {
     items,
