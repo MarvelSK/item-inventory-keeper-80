@@ -9,8 +9,10 @@ import {
   DialogTrigger,
   DialogDescription,
 } from "./ui/dialog";
-import { DatabaseBackup } from "lucide-react";
+import { DatabaseBackup, Trash2 } from "lucide-react";
 import { MobileMenu } from "./header/MobileMenu";
+import { ScrollArea } from "./ui/scroll-area";
+import { BackupDialog } from "./header/BackupDialog";
 
 export const Header = () => {
   return (
@@ -35,98 +37,7 @@ export const Header = () => {
 
           {/* Desktop Menu */}
           <nav className="hidden md:flex items-center space-x-4">
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button variant="outline" className="hover:text-[#47acc9]">
-                  <DatabaseBackup className="h-4 w-4 mr-2" />
-                  Záloha a vymazanie
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-md">
-                <DialogHeader>
-                  <DialogTitle>Záloha a vymazanie dát</DialogTitle>
-                  <DialogDescription>
-                    Zálohujte alebo vymažte dáta z aplikácie
-                  </DialogDescription>
-                </DialogHeader>
-                <ScrollArea className="h-[60vh] md:h-auto">
-                  <div className="space-y-4 p-1">
-                    <div className="flex flex-col gap-2">
-                      <Button
-                        onClick={handleBackupAll}
-                        variant="outline"
-                        className="w-full"
-                      >
-                        <DatabaseBackup className="h-4 w-4 mr-2" />
-                        Zálohovať všetko
-                      </Button>
-                      <Button
-                        onClick={handleWipeAll}
-                        variant="destructive"
-                        className="w-full"
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Vymazať všetko
-                      </Button>
-                    </div>
-                    <div className="flex space-x-2">
-                      <Button
-                        onClick={handleBackupCompanies}
-                        variant="outline"
-                        className="flex-1"
-                      >
-                        <DatabaseBackup className="h-4 w-4 mr-2" />
-                        Zálohovať spoločnosti
-                      </Button>
-                      <Button
-                        onClick={handleWipeCompanies}
-                        variant="destructive"
-                        className="flex-1"
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Vymazať spoločnosti
-                      </Button>
-                    </div>
-                    <div className="flex space-x-2">
-                      <Button
-                        onClick={handleBackupCustomers}
-                        variant="outline"
-                        className="flex-1"
-                      >
-                        <DatabaseBackup className="h-4 w-4 mr-2" />
-                        Zálohovať zákazníkov
-                      </Button>
-                      <Button
-                        onClick={handleWipeCustomers}
-                        variant="destructive"
-                        className="flex-1"
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Vymazať zákazníkov
-                      </Button>
-                    </div>
-                    <div className="flex space-x-2">
-                      <Button
-                        onClick={handleBackupItems}
-                        variant="outline"
-                        className="flex-1"
-                      >
-                        <DatabaseBackup className="h-4 w-4 mr-2" />
-                        Zálohovať položky
-                      </Button>
-                      <Button
-                        onClick={handleWipeItems}
-                        variant="destructive"
-                        className="flex-1"
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Vymazať položky
-                      </Button>
-                    </div>
-                  </div>
-                </ScrollArea>
-              </DialogContent>
-            </Dialog>
+            <BackupDialog />
             <CompanyDialog />
             <CustomerDialog />
           </nav>
