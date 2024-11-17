@@ -75,7 +75,7 @@ export const importInventory = async (file: File): Promise<Item[]> => {
   
   const items = lines.slice(1).map(line => {
     const values = line.split(',');
-    const item = {
+    const item: Item = {
       id: Math.random().toString(36).substr(2, 9),
       code: sanitizeString(values[0]),
       quantity: sanitizeNumber(values[1]),
@@ -84,7 +84,7 @@ export const importInventory = async (file: File): Promise<Item[]> => {
       createdAt: new Date(),
       updatedAt: new Date(),
       deleted: false,
-    } as const;
+    };
 
     try {
       return itemSchema.parse(item);
@@ -104,11 +104,11 @@ export const importCompanies = async (file: File): Promise<Company[]> => {
   
   const companies = lines.slice(1).map(line => {
     const [rawId, rawName] = line.split(',');
-    const company = {
+    const company: Company = {
       id: sanitizeString(rawId || Math.random().toString(36).substr(2, 9)),
       name: sanitizeString(rawName),
       deleted: false,
-    } as const;
+    };
 
     try {
       return companySchema.parse(company);
@@ -128,12 +128,12 @@ export const importCustomers = async (file: File): Promise<Customer[]> => {
   
   const customers = lines.slice(1).map(line => {
     const [rawId, rawName, rawCompanyId] = line.split(',');
-    const customer = {
+    const customer: Customer = {
       id: sanitizeString(rawId || Math.random().toString(36).substr(2, 9)),
       name: sanitizeString(rawName),
       companyId: sanitizeString(rawCompanyId),
       deleted: false,
-    } as const;
+    };
 
     try {
       return customerSchema.parse(customer);
