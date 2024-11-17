@@ -16,7 +16,7 @@ export const Scanner = () => {
           fps: 10, 
           qrbox: { width: 250, height: 250 },
           videoConstraints: {
-            facingMode: { exact: "environment" }  // This forces the back camera
+            facingMode: { exact: "environment" }
           }
         },
         false
@@ -33,16 +33,19 @@ export const Scanner = () => {
   }, [scanning]);
 
   const onScanSuccess = (decodedText: string) => {
+    console.log("Scanned code:", decodedText);
     setScanning(true);
     setScannedCode(decodedText);
     const item = findItemByCode(decodedText);
     
     if (!item) {
-      toast.error("Item not found in system");
+      toast.error("Položka nebola nájdená v systéme");
       setTimeout(() => {
         setScanning(false);
         setScannedCode(null);
       }, 2000);
+    } else {
+      toast.success("Položka nájdená, môžete upraviť množstvo");
     }
   };
 
@@ -52,9 +55,13 @@ export const Scanner = () => {
 
   const handleQuantityChange = (change: number) => {
     if (scannedCode) {
-      const updatedItem = updateItemQuantity(scannedCode, change);
-      if (updatedItem) {
-        toast.success(`Quantity updated to ${updatedItem.quantity}`);
+      const item = findItemByCode(scannedCode);
+      if (item) {
+        const newQuantity = item.quantity + change;
+        const updatedItem = updateItemQuantity(scannedCode, newQuantity);
+        if (updatedItem) {
+          toast.success(`Množstvo upravené na ${updatedItem.quantity}`);
+        }
       }
       setScanning(false);
       setScannedCode(null);
