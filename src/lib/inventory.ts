@@ -26,6 +26,22 @@ export const addItem = (item: Omit<Item, 'id' | 'createdAt' | 'updatedAt'>) => {
   return newItem;
 };
 
+export const updateItem = (updatedItem: Item) => {
+  const index = items.findIndex((item) => item.id === updatedItem.id);
+  if (index !== -1) {
+    items[index] = {
+      ...updatedItem,
+      updatedAt: new Date(),
+    };
+    return items[index];
+  }
+  return null;
+};
+
+export const deleteItem = (id: string) => {
+  items = items.filter((item) => item.id !== id);
+};
+
 export const updateItemQuantity = (code: string, quantityChange: number) => {
   const item = items.find((i) => i.code === code);
   if (!item) return null;
