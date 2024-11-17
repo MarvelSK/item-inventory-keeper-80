@@ -10,25 +10,29 @@ const downloadCsv = (content: string, type: string) => {
   URL.revokeObjectURL(link.href);
 };
 
-// Validation schemas
+// Validation schemas that match our required types exactly
 const itemSchema = z.object({
-  code: z.string().min(1),
-  quantity: z.number().int().min(0),
-  company: z.string().min(1),
-  customer: z.string().min(1),
+  id: z.string(),
+  code: z.string(),
+  quantity: z.number(),
+  company: z.string(),
+  customer: z.string(),
   createdAt: z.string().transform((str) => new Date(str)),
   updatedAt: z.string().transform((str) => new Date(str)),
+  deleted: z.boolean(),
 });
 
 const companySchema = z.object({
-  id: z.string().min(1),
-  name: z.string().min(1),
+  id: z.string(),
+  name: z.string(),
+  deleted: z.boolean(),
 });
 
 const customerSchema = z.object({
-  id: z.string().min(1),
-  name: z.string().min(1),
-  companyId: z.string().min(1),
+  id: z.string(),
+  name: z.string(),
+  companyId: z.string(),
+  deleted: z.boolean(),
 });
 
 // Data sanitization functions
@@ -72,22 +76,22 @@ export const importInventory = async (file: File): Promise<Item[]> => {
   
   return lines.slice(1).map(line => {
     const values = line.split(',');
+    const id = Math.random().toString(36).substr(2, 9);
+    
     const rawData = {
+      id,
       code: sanitizeString(values[0]),
       quantity: sanitizeNumber(values[1]),
       company: sanitizeString(values[2]),
       customer: sanitizeString(values[3]),
       createdAt: values[4],
       updatedAt: values[5],
+      deleted: false,
     };
 
     try {
       const validated = itemSchema.parse(rawData);
-      return {
-        id: Math.random().toString(36).substr(2, 9),
-        ...validated,
-        deleted: false,
-      };
+      return validated;
     } catch (error) {
       console.error('Invalid item data:', error);
       throw new Error(`Invalid item data in CSV: ${error.message}`);
@@ -101,18 +105,16 @@ export const importCompanies = async (file: File): Promise<Company[]> => {
   const lines = text.split('\n').filter(line => line.trim());
   
   return lines.slice(1).map(line => {
-    const [id, name] = line.split(',');
+    const [rawId, rawName] = line.split(',');
     const rawData = {
-      id: sanitizeString(id),
-      name: sanitizeString(name),
+      id: sanitizeString(rawId),
+      name: sanitizeString(rawName),
+      deleted: false,
     };
 
     try {
       const validated = companySchema.parse(rawData);
-      return {
-        ...validated,
-        deleted: false,
-      };
+      return validated;
     } catch (error) {
       console.error('Invalid company data:', error);
       throw new Error(`Invalid company data in CSV: ${error.message}`);
@@ -126,19 +128,17 @@ export const importCustomers = async (file: File): Promise<Customer[]> => {
   const lines = text.split('\n').filter(line => line.trim());
   
   return lines.slice(1).map(line => {
-    const [id, name, companyId] = line.split(',');
+    const [rawId, rawName, rawCompanyId] = line.split(',');
     const rawData = {
-      id: sanitizeString(id),
-      name: sanitizeString(name),
-      companyId: sanitizeString(companyId),
+      id: sanitizeString(rawId),
+      name: sanitizeString(rawName),
+      companyId: sanitizeString(rawCompanyId),
+      deleted: false,
     };
 
     try {
       const validated = customerSchema.parse(rawData);
-      return {
-        ...validated,
-        deleted: false,
-      };
+      return validated;
     } catch (error) {
       console.error('Invalid customer data:', error);
       throw new Error(`Invalid customer data in CSV: ${error.message}`);
