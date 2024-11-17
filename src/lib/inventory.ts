@@ -39,6 +39,16 @@ export const updateItem = (updatedItem: Item) => {
   return null;
 };
 
+export const updateItemQuantity = (id: string, quantity: number) => {
+  const item = items.find(item => item.id === id);
+  if (item) {
+    item.quantity = quantity;
+    item.updatedAt = new Date();
+    return item;
+  }
+  return null;
+};
+
 export const findItemByCode = (code: string) => {
   return items.find((i) => i.code === code && !i.deleted);
 };
@@ -65,11 +75,15 @@ export const deleteCustomer = (id: string) => {
   }
 };
 
-export const wipeInventory = () => {
-  items.forEach(item => {
-    item.deleted = true;
-    item.updatedAt = new Date();
-  });
+export const wipeInventory = (hardDelete: boolean = false) => {
+  if (hardDelete) {
+    items = [];
+  } else {
+    items.forEach(item => {
+      item.deleted = true;
+      item.updatedAt = new Date();
+    });
+  }
 };
 
 export const wipeCompanies = () => {
@@ -109,10 +123,6 @@ export const backupInventory = () => {
   link.download = `inventory_backup_${new Date().toISOString()}.csv`;
   link.click();
   URL.revokeObjectURL(link.href);
-};
-
-export const wipeInventory = () => {
-  items = [];
 };
 
 export const importInventory = async (file: File) => {
@@ -159,4 +169,3 @@ export const addCustomer = (name: string, companyId: string): Customer => {
   customers.push(newCustomer);
   return newCustomer;
 };
-
