@@ -1,22 +1,29 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getAllItems, addItem, updateItem, deleteItem } from '../lib/services';
+import { getAllItems, addItem, updateItem, deleteItem } from '../lib/services/itemService';
 import { toast } from 'sonner';
+import { Item } from '../lib/types';
 
 export const useItems = () => {
   const queryClient = useQueryClient();
 
-  const { data: items = [], isLoading } = useQuery({
+  const { data: items = [], isLoading, error } = useQuery({
     queryKey: ['items'],
     queryFn: getAllItems,
+    onError: (error) => {
+      console.error('Error fetching items:', error);
+      toast.error('Failed to load items');
+    }
   });
 
   const addMutation = useMutation({
-    mutationFn: addItem,
+    mutationFn: (newItem: Omit<Item, 'id' | 'createdAt' | 'updatedAt' | 'deleted'>) => 
+      addItem(newItem),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['items'] });
       toast.success('Položka bola pridaná');
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Error adding item:', error);
       toast.error('Chyba pri pridávaní položky');
     },
   });
@@ -27,7 +34,8 @@ export const useItems = () => {
       queryClient.invalidateQueries({ queryKey: ['items'] });
       toast.success('Položka bola upravená');
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Error updating item:', error);
       toast.error('Chyba pri úprave položky');
     },
   });
@@ -38,7 +46,8 @@ export const useItems = () => {
       queryClient.invalidateQueries({ queryKey: ['items'] });
       toast.success('Položka bola vymazaná');
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Error deleting item:', error);
       toast.error('Chyba pri vymazaní položky');
     },
   });
@@ -46,6 +55,7 @@ export const useItems = () => {
   return {
     items,
     isLoading,
+    error,
     addItem: addMutation.mutate,
     updateItem: updateMutation.mutate,
     deleteItem: deleteMutation.mutate,

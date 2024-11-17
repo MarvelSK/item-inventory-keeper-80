@@ -1,36 +1,41 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Item } from "@/lib/types";
-import { getAllItems, deleteItem, updateItem } from "@/lib/inventory";
 import { toast } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "./ui/alert-dialog";
 import { EditItemDialog } from "./inventory/EditItemDialog";
 import { InventorySearch } from "./inventory/InventorySearch";
 import { InventoryTable } from "./inventory/InventoryTable";
 import { InventoryGrid } from "./inventory/InventoryGrid";
+import { useItems } from "@/hooks/useItems";
+import { Loader2 } from "lucide-react";
 
 export const InventoryList = () => {
   const [search, setSearch] = useState("");
   const [sortField, setSortField] = useState<keyof Item>("code");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
-  const [items, setItems] = useState<Item[]>([]);
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const [deletingItemId, setDeletingItemId] = useState<string | null>(null);
   const [editingItem, setEditingItem] = useState<Item | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
-  useEffect(() => {
-    const fetchItems = async () => {
-      try {
-        const fetchedItems = await getAllItems();
-        setItems(fetchedItems);
-      } catch (error) {
-        console.error("Failed to fetch items:", error);
-        toast.error("Failed to load items");
-      }
-    };
-    fetchItems();
-  }, []);
+  const { items, isLoading, error, updateItem, deleteItem } = useItems();
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-[50vh] text-red-500">
+        Failed to load items. Please try again later.
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-[50vh]">
+        <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+      </div>
+    );
+  }
 
   const sortedAndFilteredItems = Array.isArray(items) 
     ? items
@@ -61,21 +66,15 @@ export const InventoryList = () => {
   const handleDelete = async () => {
     if (deletingItemId) {
       await deleteItem(deletingItemId);
-      const updatedItems = await getAllItems();
-      setItems(updatedItems);
       setDeletingItemId(null);
       setIsDeleteDialogOpen(false);
-      toast.success("Položka bola vymazaná");
     }
   };
 
   const handleEdit = async (updatedItem: Item) => {
     await updateItem(updatedItem);
-    const updatedItems = await getAllItems();
-    setItems(updatedItems);
     setEditingItem(null);
     setIsEditDialogOpen(false);
-    toast.success("Položka bola upravená");
   };
 
   return (
