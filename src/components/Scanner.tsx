@@ -16,7 +16,7 @@ export const Scanner = () => {
           fps: 10, 
           qrbox: { width: 250, height: 250 },
           videoConstraints: {
-            facingMode: { exact: "environment" }
+            facingMode: { exact: "environment" }  // This forces the back camera
           }
         },
         false
@@ -37,16 +37,13 @@ export const Scanner = () => {
     setScannedCode(decodedText);
     const item = findItemByCode(decodedText);
     
-    if (item) {
-      toast.success(`Found item: ${decodedText}`);
-    } else {
+    if (!item) {
       toast.error("Item not found in system");
+      setTimeout(() => {
+        setScanning(false);
+        setScannedCode(null);
+      }, 2000);
     }
-    
-    setTimeout(() => {
-      setScanning(false);
-      setScannedCode(null);
-    }, 2000);
   };
 
   const onScanFailure = (error: any) => {
@@ -65,23 +62,23 @@ export const Scanner = () => {
   };
 
   return (
-    <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm max-w-sm mx-auto">
-      <h2 className="text-lg sm:text-xl font-semibold mb-4 text-center">Skenovať položky</h2>
-      <div id="reader" className="w-full"></div>
+    <div className="bg-white p-6 rounded-lg shadow-sm">
+      <h2 className="text-xl font-semibold mb-4">Skenovať položky</h2>
+      <div id="reader" className="w-full max-w-sm mx-auto"></div>
       
       {scannedCode && (
-        <div className="mt-4 space-y-3">
-          <p className="text-center text-sm sm:text-base font-medium">Kód: {scannedCode}</p>
+        <div className="mt-4 space-y-4">
+          <p className="text-center font-medium">Kód: {scannedCode}</p>
           <div className="flex justify-center space-x-4">
             <button
               onClick={() => handleQuantityChange(-1)}
-              className="bg-destructive text-white py-1.5 px-3 rounded-md hover:bg-destructive/90 transition-colors text-sm"
+              className="bg-destructive text-white py-2 px-4 rounded-md hover:bg-destructive/90 transition-colors"
             >
               -1
             </button>
             <button
               onClick={() => handleQuantityChange(1)}
-              className="bg-success text-white py-1.5 px-3 rounded-md hover:bg-success/90 transition-colors text-sm"
+              className="bg-success text-white py-2 px-4 rounded-md hover:bg-success/90 transition-colors"
             >
               +1
             </button>
