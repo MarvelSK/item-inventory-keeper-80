@@ -26,7 +26,7 @@ export const MobileMenu = () => {
     <>
       <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="icon">
+          <Button variant="outline" size="icon" className="ml-auto">
             <Menu className="h-5 w-5" />
           </Button>
         </DropdownMenuTrigger>
@@ -65,18 +65,9 @@ export const MobileMenu = () => {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <CompanyDialog 
-        open={isCompanyDialogOpen} 
-        onOpenChange={setIsCompanyDialogOpen}
-      />
-      <CustomerDialog 
-        open={isCustomerDialogOpen} 
-        onOpenChange={setIsCustomerDialogOpen}
-      />
-      <BackupDialog 
-        open={isBackupDialogOpen} 
-        onOpenChange={setIsBackupDialogOpen}
-      />
+      <CompanyDialog open={isCompanyDialogOpen} onOpenChange={setIsCompanyDialogOpen} />
+      <CustomerDialog open={isCustomerDialogOpen} onOpenChange={setIsCustomerDialogOpen} />
+      <BackupDialog open={isBackupDialogOpen} onOpenChange={setIsBackupDialogOpen} />
     </>
   );
 };

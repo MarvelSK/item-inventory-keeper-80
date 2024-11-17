@@ -1,17 +1,7 @@
 import { CompanyDialog } from "./CompanyDialog";
 import { CustomerDialog } from "./CustomerDialog";
-import { Button } from "./ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogDescription,
-} from "./ui/dialog";
-import { DatabaseBackup, Trash2 } from "lucide-react";
+import { DatabaseBackup } from "lucide-react";
 import { MobileMenu } from "./header/MobileMenu";
-import { ScrollArea } from "./ui/scroll-area";
 import { BackupDialog } from "./header/BackupDialog";
 
 export const Header = () => {
@@ -37,9 +27,9 @@ export const Header = () => {
 
           {/* Desktop Menu */}
           <nav className="hidden md:flex items-center space-x-4">
-            <BackupDialog />
             <CompanyDialog />
             <CustomerDialog />
+            <BackupDialog />
           </nav>
         </div>
       </div>
