@@ -1,6 +1,9 @@
 import { Item, Company, Customer } from './types';
 import { cache } from './cache';
 
+// Initialize items array at the top level
+let items: Item[] = [];
+
 // Mock data for companies and customers
 export let companies: Company[] = [
   { id: '1', name: 'Tech Corp', deleted: false },
@@ -13,9 +16,6 @@ export let customers: Customer[] = [
   { id: '2', name: 'Alice Johnson', companyId: '2', deleted: false },
   { id: '3', name: 'Bob Williams', companyId: '3', deleted: false },
 ];
-
-// Initialize items array at the top level
-let items: Item[] = [];
 
 export const addItem = (item: Omit<Item, 'id' | 'createdAt' | 'updatedAt' | 'deleted'>) => {
   const newItem = {
@@ -81,6 +81,45 @@ export const deleteCustomer = (id: string) => {
   }
 };
 
+export const backupInventory = () => {
+  const csvContent = items.map(item => 
+    `${item.code},${item.quantity},${item.company},${item.customer},${item.createdAt.toISOString()},${item.updatedAt.toISOString()}`
+  ).join('\n');
+  
+  downloadCsv(csvContent, 'inventory');
+};
+
+export const backupCompanies = () => {
+  const csvContent = companies.map(company => 
+    `${company.id},${company.name}`
+  ).join('\n');
+  
+  downloadCsv(csvContent, 'companies');
+};
+
+export const backupCustomers = () => {
+  const csvContent = customers.map(customer => 
+    `${customer.id},${customer.name},${customer.companyId}`
+  ).join('\n');
+  
+  downloadCsv(csvContent, 'customers');
+};
+
+export const backupEverything = () => {
+  backupInventory();
+  backupCompanies();
+  backupCustomers();
+};
+
+const downloadCsv = (content: string, type: string) => {
+  const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `${type}_backup_${new Date().toISOString()}.csv`;
+  link.click();
+  URL.revokeObjectURL(link.href);
+};
+
 export const wipeInventory = (hardDelete: boolean = false) => {
   if (hardDelete) {
     items = [];
@@ -105,7 +144,13 @@ export const wipeCustomers = () => {
   });
 };
 
-// Update getter functions to filter out deleted items
+export const wipeEverything = () => {
+  wipeInventory(true);
+  wipeCompanies();
+  wipeCustomers();
+  cache.clear();
+};
+
 export const getAllItems = () => {
   const cachedItems = cache.get<Item[]>('items');
   if (cachedItems) {
@@ -135,20 +180,6 @@ export const getActiveCustomers = () => {
   
   cache.set('customers', customers);
   return customers.filter(customer => !customer.deleted);
-};
-
-export const backupInventory = () => {
-  const csvContent = items.map(item => 
-    `${item.code},${item.quantity},${item.company},${item.customer},${item.createdAt.toISOString()},${item.updatedAt.toISOString()}`
-  ).join('\n');
-  
-  const blob = new Blob([`code,quantity,company,customer,createdAt,updatedAt\n${csvContent}`], 
-    { type: 'text/csv;charset=utf-8;' });
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = `inventory_backup_${new Date().toISOString()}.csv`;
-  link.click();
-  URL.revokeObjectURL(link.href);
 };
 
 export const importInventory = async (file: File) => {
