@@ -5,6 +5,8 @@ import { addItem } from "@/lib/inventory";
 import { toast } from "sonner";
 import { CompanySelect } from "./CompanySelect";
 import { CustomerSelect } from "./CustomerSelect";
+import { CompanyDialog } from "../CompanyDialog";
+import { CustomerDialog } from "../CustomerDialog";
 
 export const AddItemForm = () => {
   const [formData, setFormData] = useState({
@@ -13,6 +15,8 @@ export const AddItemForm = () => {
     company: "",
     customer: "",
   });
+  const [isCompanyDialogOpen, setIsCompanyDialogOpen] = useState(false);
+  const [isCustomerDialogOpen, setIsCustomerDialogOpen] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,6 +69,7 @@ export const AddItemForm = () => {
         <CompanySelect
           value={formData.company}
           onChange={(value) => setFormData({ ...formData, company: value })}
+          onAddNew={() => setIsCompanyDialogOpen(true)}
         />
       </div>
 
@@ -76,6 +81,7 @@ export const AddItemForm = () => {
           value={formData.customer}
           companyId={formData.company}
           onChange={(value) => setFormData({ ...formData, customer: value })}
+          onAddNew={() => setIsCustomerDialogOpen(true)}
         />
       </div>
 
@@ -85,6 +91,20 @@ export const AddItemForm = () => {
       >
         Pridať položku
       </Button>
+
+      {isCompanyDialogOpen && (
+        <CompanyDialog
+          open={isCompanyDialogOpen}
+          onOpenChange={setIsCompanyDialogOpen}
+        />
+      )}
+      
+      {isCustomerDialogOpen && (
+        <CustomerDialog
+          open={isCustomerDialogOpen}
+          onOpenChange={setIsCustomerDialogOpen}
+        />
+      )}
     </form>
   );
 };
