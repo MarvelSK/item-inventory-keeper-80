@@ -12,8 +12,12 @@ export const Scanner = () => {
     if (!scanning) {
       const newScanner = new Html5QrcodeScanner(
         "reader",
-        { fps: 10, qrbox: { width: 250, height: 250 } },
-        /* verbose= */ false
+        { 
+          fps: 10, 
+          qrbox: { width: 250, height: 250 },
+          preferredCamera: "environment" // Forces back camera
+        },
+        false
       );
       setScanner(newScanner);
       newScanner.render(onScanSuccess, onScanFailure);
@@ -57,12 +61,12 @@ export const Scanner = () => {
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm">
-      <h2 className="text-xl font-semibold mb-4">Scan Items</h2>
+      <h2 className="text-xl font-semibold mb-4">Skenovať položky</h2>
       <div id="reader" className="w-full max-w-sm mx-auto"></div>
       
       {scannedCode && (
         <div className="mt-4 space-y-4">
-          <p className="text-center font-medium">Code: {scannedCode}</p>
+          <p className="text-center font-medium">Kód: {scannedCode}</p>
           <div className="flex justify-center space-x-4">
             <button
               onClick={() => handleQuantityChange(-1)}

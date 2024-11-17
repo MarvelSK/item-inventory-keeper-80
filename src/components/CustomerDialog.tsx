@@ -17,6 +17,7 @@ import {
 } from "./ui/select";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "./ui/table";
 import { customers, companies } from "@/lib/inventory";
+import { Trash2, Edit2 } from "lucide-react";
 
 export const CustomerDialog = () => {
   const [customerName, setCustomerName] = useState("");
@@ -75,19 +76,31 @@ export const CustomerDialog = () => {
                 <TableRow key={customer.id}>
                   <TableCell>{customer.name}</TableCell>
                   <TableCell>
-                    {companies.find((c) => c.id === customer.id)?.name}
+                    {companies.find((c) => c.id === customer.companyId)?.name}
                   </TableCell>
                   <TableCell>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="hover:text-[#47acc9]"
-                      onClick={() => {
-                        // TODO: Implement customer deletion
-                      }}
-                    >
-                      Vymazať
-                    </Button>
+                    <div className="flex space-x-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="hover:text-[#47acc9]"
+                        onClick={() => {
+                          // TODO: Implement customer edit
+                        }}
+                      >
+                        <Edit2 className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="hover:text-[#47acc9]"
+                        onClick={() => {
+                          // TODO: Implement customer deletion
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

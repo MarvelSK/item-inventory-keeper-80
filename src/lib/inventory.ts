@@ -13,7 +13,6 @@ export let customers: Customer[] = [
   { id: '3', name: 'Bob Williams', companyId: '3' },
 ];
 
-// In-memory storage for items
 let items: Item[] = [];
 
 export const addItem = (item: Omit<Item, 'id' | 'createdAt' | 'updatedAt'>) => {
@@ -42,6 +41,45 @@ export const findItemByCode = (code: string) => {
 
 export const getAllItems = () => {
   return [...items];
+};
+
+export const backupInventory = () => {
+  const csvContent = items.map(item => 
+    `${item.code},${item.quantity},${item.company},${item.customer},${item.createdAt.toISOString()},${item.updatedAt.toISOString()}`
+  ).join('\n');
+  
+  const blob = new Blob([`code,quantity,company,customer,createdAt,updatedAt\n${csvContent}`], 
+    { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `inventory_backup_${new Date().toISOString()}.csv`;
+  link.click();
+  URL.revokeObjectURL(link.href);
+};
+
+export const wipeInventory = () => {
+  items = [];
+};
+
+export const importInventory = async (file: File) => {
+  const text = await file.text();
+  const lines = text.split('\n');
+  const headers = lines[0].split(',');
+  
+  items = lines.slice(1).map(line => {
+    const values = line.split(',');
+    return {
+      id: Math.random().toString(36).substr(2, 9),
+      code: values[0],
+      quantity: parseInt(values[1]),
+      company: values[2],
+      customer: values[3],
+      createdAt: new Date(values[4]),
+      updatedAt: new Date(values[5])
+    };
+  });
+  
+  return items;
 };
 
 // Company management

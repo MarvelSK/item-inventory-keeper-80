@@ -10,6 +10,7 @@ import {
 import { Input } from "./ui/input";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "./ui/table";
 import { companies } from "@/lib/inventory";
+import { Trash2, Edit2 } from "lucide-react";
 
 export const CompanyDialog = () => {
   const [companyName, setCompanyName] = useState("");
@@ -53,16 +54,28 @@ export const CompanyDialog = () => {
                 <TableRow key={company.id}>
                   <TableCell>{company.name}</TableCell>
                   <TableCell>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="hover:text-[#47acc9]"
-                      onClick={() => {
-                        // TODO: Implement company deletion
-                      }}
-                    >
-                      Vymazať
-                    </Button>
+                    <div className="flex space-x-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="hover:text-[#47acc9]"
+                        onClick={() => {
+                          // TODO: Implement company edit
+                        }}
+                      >
+                        <Edit2 className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="hover:text-[#47acc9]"
+                        onClick={() => {
+                          // TODO: Implement company deletion
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
