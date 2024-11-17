@@ -8,18 +8,22 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "./ui/dialog";
-import { DatabaseBackup } from "lucide-react";
+import { DatabaseBackup, Trash2 } from "lucide-react";
 import { backupInventory, wipeInventory, companies, customers } from "@/lib/inventory";
 import { toast } from "sonner";
 
 export const Header = () => {
-  const handleBackupAndWipeAll = () => {
+  const handleBackupAll = () => {
     backupInventory();
-    wipeInventory();
-    toast.success("Inventár zálohovaný a vymazaný");
+    toast.success("Všetky dáta zálohované");
   };
 
-  const handleBackupAndWipeCompanies = () => {
+  const handleWipeAll = () => {
+    wipeInventory();
+    toast.success("Všetky dáta vymazané");
+  };
+
+  const handleBackupCompanies = () => {
     const csvContent = companies.map(company => 
       `${company.id},${company.name}`
     ).join('\n');
@@ -30,12 +34,15 @@ export const Header = () => {
     link.download = `companies_backup_${new Date().toISOString()}.csv`;
     link.click();
     URL.revokeObjectURL(link.href);
-
-    companies.length = 0;
-    toast.success("Spoločnosti zálohované a vymazané");
+    toast.success("Spoločnosti zálohované");
   };
 
-  const handleBackupAndWipeCustomers = () => {
+  const handleWipeCompanies = () => {
+    companies.length = 0;
+    toast.success("Spoločnosti vymazané");
+  };
+
+  const handleBackupCustomers = () => {
     const csvContent = customers.map(customer => 
       `${customer.id},${customer.name},${customer.companyId}`
     ).join('\n');
@@ -46,15 +53,22 @@ export const Header = () => {
     link.download = `customers_backup_${new Date().toISOString()}.csv`;
     link.click();
     URL.revokeObjectURL(link.href);
-
-    customers.length = 0;
-    toast.success("Zákazníci zálohovaní a vymazaní");
+    toast.success("Zákazníci zálohovaní");
   };
 
-  const handleBackupAndWipeItems = () => {
+  const handleWipeCustomers = () => {
+    customers.length = 0;
+    toast.success("Zákazníci vymazaní");
+  };
+
+  const handleBackupItems = () => {
     backupInventory();
+    toast.success("Položky zálohované");
+  };
+
+  const handleWipeItems = () => {
     wipeInventory();
-    toast.success("Položky zálohované a vymazané");
+    toast.success("Položky vymazané");
   };
 
   return (
@@ -82,38 +96,78 @@ export const Header = () => {
                   <DialogTitle>Záloha a vymazanie dát</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4 pt-4">
-                  <Button
-                    onClick={handleBackupAndWipeAll}
-                    variant="destructive"
-                    className="w-full"
-                  >
-                    <DatabaseBackup className="h-4 w-4 mr-2" />
-                    Zálohovať a vymazať všetky dáta
-                  </Button>
-                  <Button
-                    onClick={handleBackupAndWipeCompanies}
-                    variant="destructive"
-                    className="w-full"
-                  >
-                    <DatabaseBackup className="h-4 w-4 mr-2" />
-                    Zálohovať a vymazať spoločnosti
-                  </Button>
-                  <Button
-                    onClick={handleBackupAndWipeCustomers}
-                    variant="destructive"
-                    className="w-full"
-                  >
-                    <DatabaseBackup className="h-4 w-4 mr-2" />
-                    Zálohovať a vymazať zákazníkov
-                  </Button>
-                  <Button
-                    onClick={handleBackupAndWipeItems}
-                    variant="destructive"
-                    className="w-full"
-                  >
-                    <DatabaseBackup className="h-4 w-4 mr-2" />
-                    Zálohovať a vymazať položky
-                  </Button>
+                  <div className="flex space-x-2">
+                    <Button
+                      onClick={handleBackupAll}
+                      variant="outline"
+                      className="flex-1"
+                    >
+                      <DatabaseBackup className="h-4 w-4 mr-2" />
+                      Zálohovať všetko
+                    </Button>
+                    <Button
+                      onClick={handleWipeAll}
+                      variant="destructive"
+                      className="flex-1"
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Vymazať všetko
+                    </Button>
+                  </div>
+                  <div className="flex space-x-2">
+                    <Button
+                      onClick={handleBackupCompanies}
+                      variant="outline"
+                      className="flex-1"
+                    >
+                      <DatabaseBackup className="h-4 w-4 mr-2" />
+                      Zálohovať spoločnosti
+                    </Button>
+                    <Button
+                      onClick={handleWipeCompanies}
+                      variant="destructive"
+                      className="flex-1"
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Vymazať spoločnosti
+                    </Button>
+                  </div>
+                  <div className="flex space-x-2">
+                    <Button
+                      onClick={handleBackupCustomers}
+                      variant="outline"
+                      className="flex-1"
+                    >
+                      <DatabaseBackup className="h-4 w-4 mr-2" />
+                      Zálohovať zákazníkov
+                    </Button>
+                    <Button
+                      onClick={handleWipeCustomers}
+                      variant="destructive"
+                      className="flex-1"
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Vymazať zákazníkov
+                    </Button>
+                  </div>
+                  <div className="flex space-x-2">
+                    <Button
+                      onClick={handleBackupItems}
+                      variant="outline"
+                      className="flex-1"
+                    >
+                      <DatabaseBackup className="h-4 w-4 mr-2" />
+                      Zálohovať položky
+                    </Button>
+                    <Button
+                      onClick={handleWipeItems}
+                      variant="destructive"
+                      className="flex-1"
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Vymazať položky
+                    </Button>
+                  </div>
                 </div>
               </DialogContent>
             </Dialog>

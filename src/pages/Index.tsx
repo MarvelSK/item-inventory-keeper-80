@@ -4,32 +4,9 @@ import { Footer } from "@/components/Footer";
 import { ManualEntry } from "@/components/ManualEntry";
 import { Scanner } from "@/components/Scanner";
 import { InventoryList } from "@/components/InventoryList";
-import { backupInventory, wipeInventory, importInventory } from "@/lib/inventory";
-import { Button } from "@/components/ui/button";
-import { DatabaseBackup, Import, Trash2 } from "lucide-react";
-import { toast } from "sonner";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<"manual" | "scanner" | "inventory">("inventory");
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleBackupAndWipe = () => {
-    backupInventory();
-    wipeInventory();
-    toast.success("Inventár zálohovaný a vymazaný");
-  };
-
-  const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      try {
-        await importInventory(file);
-        toast.success("Dáta úspešne importované");
-      } catch (error) {
-        toast.error("Chyba pri importovaní dát");
-      }
-    }
-  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -68,40 +45,6 @@ const Index = () => {
             >
               Inventár
             </button>
-          </div>
-
-          <div className="flex space-x-2">
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleImport}
-              accept=".csv"
-              className="hidden"
-            />
-            <Button
-              variant="outline"
-              className="hover:text-[#47acc9]"
-              onClick={() => fileInputRef.current?.click()}
-            >
-              <Import className="h-4 w-4 mr-2" />
-              Import
-            </Button>
-            <Button
-              variant="outline"
-              className="hover:text-[#47acc9]"
-              onClick={() => backupInventory()}
-            >
-              <DatabaseBackup className="h-4 w-4 mr-2" />
-              Záloha
-            </Button>
-            <Button
-              variant="outline"
-              className="hover:text-destructive"
-              onClick={handleBackupAndWipe}
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Vymazať všetko
-            </Button>
           </div>
         </div>
 
