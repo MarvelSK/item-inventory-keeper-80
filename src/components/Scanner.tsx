@@ -2,11 +2,14 @@ import { useState, useEffect } from "react";
 import { Html5QrcodeScanner } from "html5-qrcode";
 import { findItemByCode, updateItemQuantity } from "@/lib/inventory";
 import { toast } from "sonner";
+import { Button } from "./ui/button";
+import { Plus, Minus } from "lucide-react";
 
 export const Scanner = () => {
   const [scanning, setScanning] = useState(false);
   const [scannedCode, setScannedCode] = useState<string | null>(null);
   const [scanner, setScanner] = useState<Html5QrcodeScanner | null>(null);
+  const [currentQuantity, setCurrentQuantity] = useState<number | null>(null);
 
   useEffect(() => {
     if (!scanning) {
@@ -43,8 +46,10 @@ export const Scanner = () => {
       setTimeout(() => {
         setScanning(false);
         setScannedCode(null);
+        setCurrentQuantity(null);
       }, 2000);
     } else {
+      setCurrentQuantity(item.quantity);
       toast.success("Položka nájdená, môžete upraviť množstvo");
     }
   };
@@ -54,18 +59,20 @@ export const Scanner = () => {
   };
 
   const handleQuantityChange = (change: number) => {
-    if (scannedCode) {
-      const item = findItemByCode(scannedCode);
-      if (item) {
-        const newQuantity = item.quantity + change;
-        const updatedItem = updateItemQuantity(scannedCode, newQuantity);
-        if (updatedItem) {
-          toast.success(`Množstvo upravené na ${updatedItem.quantity}`);
-        }
+    if (scannedCode && currentQuantity !== null) {
+      const newQuantity = currentQuantity + change;
+      const updatedItem = updateItemQuantity(scannedCode, newQuantity);
+      if (updatedItem) {
+        setCurrentQuantity(updatedItem.quantity);
+        toast.success(`Množstvo upravené na ${updatedItem.quantity}`);
       }
-      setScanning(false);
-      setScannedCode(null);
     }
+  };
+
+  const resetScanner = () => {
+    setScanning(false);
+    setScannedCode(null);
+    setCurrentQuantity(null);
   };
 
   return (
@@ -73,22 +80,38 @@ export const Scanner = () => {
       <h2 className="text-xl font-semibold mb-4">Skenovať položky</h2>
       <div id="reader" className="w-full max-w-sm mx-auto"></div>
       
-      {scannedCode && (
+      {scannedCode && currentQuantity !== null && (
         <div className="mt-4 space-y-4">
-          <p className="text-center font-medium">Kód: {scannedCode}</p>
-          <div className="flex justify-center space-x-4">
-            <button
+          <div className="text-center">
+            <p className="font-medium">Kód: {scannedCode}</p>
+            <p className="text-lg font-semibold mt-2">
+              Aktuálne množstvo: {currentQuantity}
+            </p>
+          </div>
+          <div className="flex justify-center gap-4">
+            <Button
               onClick={() => handleQuantityChange(-1)}
               className="bg-destructive text-white py-2 px-4 rounded-md hover:bg-destructive/90 transition-colors"
             >
+              <Minus className="h-4 w-4 mr-2" />
               -1
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => handleQuantityChange(1)}
               className="bg-success text-white py-2 px-4 rounded-md hover:bg-success/90 transition-colors"
             >
+              <Plus className="h-4 w-4 mr-2" />
               +1
-            </button>
+            </Button>
+          </div>
+          <div className="text-center mt-4">
+            <Button
+              variant="outline"
+              onClick={resetScanner}
+              className="text-gray-600 hover:text-gray-800"
+            >
+              Skenovať ďalší kód
+            </Button>
           </div>
         </div>
       )}
