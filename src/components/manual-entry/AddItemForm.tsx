@@ -92,13 +92,15 @@ export const AddItemForm = () => {
         Pridať položku
       </Button>
 
-      {isCompanyDialogOpen && (
-        <CompanyDialog />
-      )}
+      <CompanyDialog 
+        open={isCompanyDialogOpen} 
+        onOpenChange={setIsCompanyDialogOpen}
+      />
       
-      {isCustomerDialogOpen && (
-        <CustomerDialog />
-      )}
+      <CustomerDialog 
+        open={isCustomerDialogOpen} 
+        onOpenChange={setIsCustomerDialogOpen}
+      />
     </form>
   );
 };

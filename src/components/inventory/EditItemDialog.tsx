@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/select";
 import { companies, customers } from "@/lib/inventory";
 import { Item } from "@/lib/types";
+import { useState, useEffect } from "react";
 
 interface EditItemDialogProps {
   item: Item | null;
@@ -24,42 +25,55 @@ interface EditItemDialogProps {
 }
 
 export const EditItemDialog = ({ item, isOpen, onOpenChange, onSave }: EditItemDialogProps) => {
-  if (!item) return null;
+  const [editedItem, setEditedItem] = useState<Item | null>(null);
+
+  useEffect(() => {
+    if (item) {
+      setEditedItem({ ...item });
+    }
+  }, [item]);
+
+  if (!editedItem) return null;
+
+  const handleSave = () => {
+    onSave(editedItem);
+    onOpenChange(false);
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Upraviť položku</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           <Input
             placeholder="Kód"
-            value={item.code}
+            value={editedItem.code}
             onChange={(e) =>
-              onSave({ ...item, code: e.target.value })
+              setEditedItem({ ...editedItem, code: e.target.value })
             }
           />
           <Input
             type="number"
             placeholder="Množstvo"
-            value={item.quantity}
+            value={editedItem.quantity}
             onChange={(e) =>
-              onSave({
-                ...item,
+              setEditedItem({
+                ...editedItem,
                 quantity: parseInt(e.target.value) || 0,
               })
             }
           />
           <Select 
-            value={item.company} 
-            onValueChange={(value) => onSave({ ...item, company: value })}
+            value={editedItem.company} 
+            onValueChange={(value) => setEditedItem({ ...editedItem, company: value })}
           >
             <SelectTrigger>
               <SelectValue placeholder="Vybrať spoločnosť" />
             </SelectTrigger>
             <SelectContent>
-              {companies.map((company) => (
+              {companies.filter(c => !c.deleted).map((company) => (
                 <SelectItem key={company.id} value={company.id}>
                   {company.name}
                 </SelectItem>
@@ -67,14 +81,14 @@ export const EditItemDialog = ({ item, isOpen, onOpenChange, onSave }: EditItemD
             </SelectContent>
           </Select>
           <Select 
-            value={item.customer} 
-            onValueChange={(value) => onSave({ ...item, customer: value })}
+            value={editedItem.customer} 
+            onValueChange={(value) => setEditedItem({ ...editedItem, customer: value })}
           >
             <SelectTrigger>
               <SelectValue placeholder="Vybrať zákazníka" />
             </SelectTrigger>
             <SelectContent>
-              {customers.map((customer) => (
+              {customers.filter(c => !c.deleted).map((customer) => (
                 <SelectItem key={customer.id} value={customer.id}>
                   {customer.name}
                 </SelectItem>
@@ -82,7 +96,7 @@ export const EditItemDialog = ({ item, isOpen, onOpenChange, onSave }: EditItemD
             </SelectContent>
           </Select>
           <Button
-            onClick={() => onOpenChange(false)}
+            onClick={handleSave}
             className="w-full bg-[#212490] hover:bg-[#47acc9]"
           >
             Uložiť
