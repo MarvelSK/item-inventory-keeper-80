@@ -14,6 +14,7 @@ export let customers: Customer[] = [
   { id: '3', name: 'Bob Williams', companyId: '3', deleted: false },
 ];
 
+// Initialize items array at the top level
 let items: Item[] = [];
 
 export const addItem = (item: Omit<Item, 'id' | 'createdAt' | 'updatedAt' | 'deleted'>) => {
@@ -111,9 +112,9 @@ export const getAllItems = () => {
     return cachedItems.filter(item => !item.deleted);
   }
   
-  const items = items.filter(item => !item.deleted);
-  cache.set('items', items);
-  return items;
+  const activeItems = items.filter(item => !item.deleted);
+  cache.set('items', activeItems);
+  return activeItems;
 };
 
 export const getActiveCompanies = () => {
