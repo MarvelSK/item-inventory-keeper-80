@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { Input } from "./ui/input";
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "./ui/table";
+import { Table, TableHeader, TableRow, TableHead, TableBody } from "./ui/table";
 import { Button } from "./ui/button";
 import { getAllItems, deleteItem, updateItem } from "@/lib/inventory";
 import { Item } from "@/lib/types";
-import { Search, ArrowUp, ArrowDown, Edit2, Trash2, Grid, List } from "lucide-react";
+import { Search, ArrowUp, ArrowDown, Grid, List } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,13 +15,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "./ui/alert-dialog";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "./ui/dialog";
 import { toast } from "sonner";
+import { InventoryListItem } from "./inventory/InventoryListItem";
+import { InventoryGridItem } from "./inventory/InventoryGridItem";
+import { EditItemDialog } from "./inventory/EditItemDialog";
 
 export const InventoryList = () => {
   const [search, setSearch] = useState("");
@@ -151,43 +148,25 @@ export const InventoryList = () => {
                     <ArrowDown className="inline ml-1 h-4 w-4" />
                   )}
                 </TableHead>
+                <TableHead>Vytvorené</TableHead>
+                <TableHead>Upravené</TableHead>
                 <TableHead className="w-[100px]">Akcie</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {sortedAndFilteredItems.map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell>{item.code}</TableCell>
-                  <TableCell>{item.quantity}</TableCell>
-                  <TableCell>{item.company}</TableCell>
-                  <TableCell>{item.customer}</TableCell>
-                  <TableCell>
-                    <div className="flex space-x-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="hover:text-[#47acc9]"
-                        onClick={() => {
-                          setEditingItem(item);
-                          setIsEditDialogOpen(true);
-                        }}
-                      >
-                        <Edit2 className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="hover:text-[#47acc9]"
-                        onClick={() => {
-                          setDeletingItemId(item.id);
-                          setIsDeleteDialogOpen(true);
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
+                <InventoryListItem
+                  key={item.id}
+                  item={item}
+                  onEdit={(item) => {
+                    setEditingItem(item);
+                    setIsEditDialogOpen(true);
+                  }}
+                  onDelete={(id) => {
+                    setDeletingItemId(id);
+                    setIsDeleteDialogOpen(true);
+                  }}
+                />
               ))}
             </TableBody>
           </Table>
@@ -195,40 +174,18 @@ export const InventoryList = () => {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {sortedAndFilteredItems.map((item) => (
-            <div key={item.id} className="p-4 border rounded-lg space-y-2">
-              <div className="font-medium">{item.code}</div>
-              <div className="text-sm text-gray-500">
-                <div>Množstvo: {item.quantity}</div>
-                <div>Spoločnosť: {item.company}</div>
-                <div>Zákazník: {item.customer}</div>
-              </div>
-              <div className="flex space-x-2 pt-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex-1 hover:text-[#47acc9]"
-                  onClick={() => {
-                    setEditingItem(item);
-                    setIsEditDialogOpen(true);
-                  }}
-                >
-                  <Edit2 className="h-4 w-4 mr-2" />
-                  Upraviť
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex-1 hover:text-[#47acc9]"
-                  onClick={() => {
-                    setDeletingItemId(item.id);
-                    setIsDeleteDialogOpen(true);
-                  }}
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Vymazať
-                </Button>
-              </div>
-            </div>
+            <InventoryGridItem
+              key={item.id}
+              item={item}
+              onEdit={(item) => {
+                setEditingItem(item);
+                setIsEditDialogOpen(true);
+              }}
+              onDelete={(id) => {
+                setDeletingItemId(id);
+                setIsDeleteDialogOpen(true);
+              }}
+            />
           ))}
         </div>
       )}
@@ -248,55 +205,12 @@ export const InventoryList = () => {
         </AlertDialogContent>
       </AlertDialog>
 
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Upraviť položku</DialogTitle>
-          </DialogHeader>
-          {editingItem && (
-            <div className="space-y-4">
-              <Input
-                placeholder="Kód"
-                value={editingItem.code}
-                onChange={(e) =>
-                  setEditingItem({ ...editingItem, code: e.target.value })
-                }
-              />
-              <Input
-                type="number"
-                placeholder="Množstvo"
-                value={editingItem.quantity}
-                onChange={(e) =>
-                  setEditingItem({
-                    ...editingItem,
-                    quantity: parseInt(e.target.value) || 0,
-                  })
-                }
-              />
-              <Input
-                placeholder="Spoločnosť"
-                value={editingItem.company}
-                onChange={(e) =>
-                  setEditingItem({ ...editingItem, company: e.target.value })
-                }
-              />
-              <Input
-                placeholder="Zákazník"
-                value={editingItem.customer}
-                onChange={(e) =>
-                  setEditingItem({ ...editingItem, customer: e.target.value })
-                }
-              />
-              <Button
-                onClick={() => handleEdit(editingItem)}
-                className="w-full bg-[#212490] hover:bg-[#47acc9]"
-              >
-                Uložiť
-              </Button>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      <EditItemDialog
+        item={editingItem}
+        isOpen={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        onSave={handleEdit}
+      />
     </div>
   );
 };
