@@ -84,7 +84,7 @@ export const importInventory = async (file: File): Promise<Item[]> => {
       createdAt: new Date(),
       updatedAt: new Date(),
       deleted: false
-    } satisfies Item;
+    } as Item;
 
     try {
       return itemSchema.parse(item);
@@ -108,7 +108,7 @@ export const importCompanies = async (file: File): Promise<Company[]> => {
       id: sanitizeString(rawId) || Math.random().toString(36).substr(2, 9),
       name: sanitizeString(rawName) || '',
       deleted: false
-    } satisfies Company;
+    } as Company;
 
     try {
       return companySchema.parse(company);
@@ -133,7 +133,7 @@ export const importCustomers = async (file: File): Promise<Customer[]> => {
       name: sanitizeString(rawName) || '',
       companyId: sanitizeString(rawCompanyId) || '',
       deleted: false
-    } satisfies Customer;
+    } as Customer;
 
     try {
       return customerSchema.parse(customer);
