@@ -2,25 +2,26 @@ import { Item, Company, Customer } from './types';
 
 // Mock data for companies and customers
 export let companies: Company[] = [
-  { id: '1', name: 'Tech Corp' },
-  { id: '2', name: 'Global Industries' },
-  { id: '3', name: 'Local Supplies' },
+  { id: '1', name: 'Tech Corp', deleted: false },
+  { id: '2', name: 'Global Industries', deleted: false },
+  { id: '3', name: 'Local Supplies', deleted: false },
 ];
 
 export let customers: Customer[] = [
-  { id: '1', name: 'John Smith', companyId: '1' },
-  { id: '2', name: 'Alice Johnson', companyId: '2' },
-  { id: '3', name: 'Bob Williams', companyId: '3' },
+  { id: '1', name: 'John Smith', companyId: '1', deleted: false },
+  { id: '2', name: 'Alice Johnson', companyId: '2', deleted: false },
+  { id: '3', name: 'Bob Williams', companyId: '3', deleted: false },
 ];
 
 let items: Item[] = [];
 
-export const addItem = (item: Omit<Item, 'id' | 'createdAt' | 'updatedAt'>) => {
+export const addItem = (item: Omit<Item, 'id' | 'createdAt' | 'updatedAt' | 'deleted'>) => {
   const newItem = {
     ...item,
     id: Math.random().toString(36).substr(2, 9),
     createdAt: new Date(),
     updatedAt: new Date(),
+    deleted: false,
   };
   items.push(newItem);
   return newItem;
@@ -38,25 +39,62 @@ export const updateItem = (updatedItem: Item) => {
   return null;
 };
 
-export const deleteItem = (id: string) => {
-  items = items.filter((item) => item.id !== id);
-};
-
-export const updateItemQuantity = (code: string, quantityChange: number) => {
-  const item = items.find((i) => i.code === code);
-  if (!item) return null;
-  
-  item.quantity += quantityChange;
-  item.updatedAt = new Date();
-  return item;
-};
-
 export const findItemByCode = (code: string) => {
-  return items.find((i) => i.code === code);
+  return items.find((i) => i.code === code && !i.deleted);
 };
 
+export const deleteItem = (id: string) => {
+  const item = items.find(item => item.id === id);
+  if (item) {
+    item.deleted = true;
+    item.updatedAt = new Date();
+  }
+};
+
+export const deleteCompany = (id: string) => {
+  const company = companies.find(company => company.id === id);
+  if (company) {
+    company.deleted = true;
+  }
+};
+
+export const deleteCustomer = (id: string) => {
+  const customer = customers.find(customer => customer.id === id);
+  if (customer) {
+    customer.deleted = true;
+  }
+};
+
+export const wipeInventory = () => {
+  items.forEach(item => {
+    item.deleted = true;
+    item.updatedAt = new Date();
+  });
+};
+
+export const wipeCompanies = () => {
+  companies.forEach(company => {
+    company.deleted = true;
+  });
+};
+
+export const wipeCustomers = () => {
+  customers.forEach(customer => {
+    customer.deleted = true;
+  });
+};
+
+// Update getter functions to filter out deleted items
 export const getAllItems = () => {
-  return [...items];
+  return items.filter(item => !item.deleted);
+};
+
+export const getActiveCompanies = () => {
+  return companies.filter(company => !company.deleted);
+};
+
+export const getActiveCustomers = () => {
+  return customers.filter(customer => !customer.deleted);
 };
 
 export const backupInventory = () => {
@@ -91,7 +129,8 @@ export const importInventory = async (file: File) => {
       company: values[2],
       customer: values[3],
       createdAt: new Date(values[4]),
-      updatedAt: new Date(values[5])
+      updatedAt: new Date(values[5]),
+      deleted: false,
     };
   });
   
@@ -103,13 +142,10 @@ export const addCompany = (name: string): Company => {
   const newCompany = {
     id: Math.random().toString(36).substr(2, 9),
     name,
+    deleted: false,
   };
   companies.push(newCompany);
   return newCompany;
-};
-
-export const deleteCompany = (id: string) => {
-  companies = companies.filter(company => company.id !== id);
 };
 
 // Customer management
@@ -118,11 +154,9 @@ export const addCustomer = (name: string, companyId: string): Customer => {
     id: Math.random().toString(36).substr(2, 9),
     name,
     companyId,
+    deleted: false,
   };
   customers.push(newCustomer);
   return newCustomer;
 };
 
-export const deleteCustomer = (id: string) => {
-  customers = customers.filter(customer => customer.id !== id);
-};

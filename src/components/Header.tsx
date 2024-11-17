@@ -9,7 +9,14 @@ import {
   DialogTrigger,
 } from "./ui/dialog";
 import { DatabaseBackup, Trash2 } from "lucide-react";
-import { backupInventory, wipeInventory, companies, customers } from "@/lib/inventory";
+import {
+  backupInventory,
+  wipeInventory,
+  wipeCompanies,
+  wipeCustomers,
+  companies,
+  customers,
+} from "@/lib/inventory";
 import { toast } from "sonner";
 
 export const Header = () => {
@@ -20,13 +27,16 @@ export const Header = () => {
 
   const handleWipeAll = () => {
     wipeInventory();
+    wipeCompanies();
+    wipeCustomers();
     toast.success("Všetky dáta vymazané");
   };
 
   const handleBackupCompanies = () => {
-    const csvContent = companies.map(company => 
-      `${company.id},${company.name}`
-    ).join('\n');
+    const csvContent = companies
+      .filter(company => !company.deleted)
+      .map(company => `${company.id},${company.name}`)
+      .join('\n');
     
     const blob = new Blob([`id,name\n${csvContent}`], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
@@ -38,14 +48,15 @@ export const Header = () => {
   };
 
   const handleWipeCompanies = () => {
-    companies.length = 0;
+    wipeCompanies();
     toast.success("Spoločnosti vymazané");
   };
 
   const handleBackupCustomers = () => {
-    const csvContent = customers.map(customer => 
-      `${customer.id},${customer.name},${customer.companyId}`
-    ).join('\n');
+    const csvContent = customers
+      .filter(customer => !customer.deleted)
+      .map(customer => `${customer.id},${customer.name},${customer.companyId}`)
+      .join('\n');
     
     const blob = new Blob([`id,name,companyId\n${csvContent}`], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
@@ -57,7 +68,7 @@ export const Header = () => {
   };
 
   const handleWipeCustomers = () => {
-    customers.length = 0;
+    wipeCustomers();
     toast.success("Zákazníci vymazaní");
   };
 
@@ -77,7 +88,7 @@ export const Header = () => {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <img
-              src="https://zipscreeny.sk/images/NEVAlogo_blu.png"
+              src="https://www.somfy.cz/common/img/library//logo_neva.png"
               alt="NEVA Logo"
               className="h-8"
             />

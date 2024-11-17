@@ -6,15 +6,18 @@ export interface Item {
   customer: string;
   createdAt: Date;
   updatedAt: Date;
+  deleted: boolean;
 }
 
 export interface Company {
   id: string;
   name: string;
+  deleted: boolean;
 }
 
 export interface Customer {
   id: string;
   name: string;
   companyId: string;
+  deleted: boolean;
 }
