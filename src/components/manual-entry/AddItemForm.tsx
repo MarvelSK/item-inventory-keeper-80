@@ -93,17 +93,11 @@ export const AddItemForm = () => {
       </Button>
 
       {isCompanyDialogOpen && (
-        <CompanyDialog
-          open={isCompanyDialogOpen}
-          onOpenChange={setIsCompanyDialogOpen}
-        />
+        <CompanyDialog />
       )}
       
       {isCustomerDialogOpen && (
-        <CustomerDialog
-          open={isCustomerDialogOpen}
-          onOpenChange={setIsCustomerDialogOpen}
-        />
+        <CustomerDialog />
       )}
     </form>
   );
