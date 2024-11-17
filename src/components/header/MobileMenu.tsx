@@ -13,44 +13,70 @@ import { useState } from "react";
 
 export const MobileMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isCompanyDialogOpen, setIsCompanyDialogOpen] = useState(false);
+  const [isCustomerDialogOpen, setIsCustomerDialogOpen] = useState(false);
+  const [isBackupDialogOpen, setIsBackupDialogOpen] = useState(false);
 
-  const handleDialogClick = (e: Event) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleMenuItemClick = (dialogSetter: (open: boolean) => void) => {
     setIsOpen(false);
+    dialogSetter(true);
   };
 
   return (
-    <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="icon">
-          <Menu className="h-5 w-5" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent 
-        align="end" 
-        className="w-[250px] bg-white z-50"
-        sideOffset={5}
-      >
-        <DropdownMenuItem 
-          className="p-0 focus:bg-transparent"
-          onSelect={handleDialogClick}
+    <>
+      <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline" size="icon">
+            <Menu className="h-5 w-5" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent 
+          align="end" 
+          className="w-[250px] bg-white z-50"
+          sideOffset={5}
         >
-          <CompanyDialog />
-        </DropdownMenuItem>
-        <DropdownMenuItem 
-          className="p-0 focus:bg-transparent"
-          onSelect={handleDialogClick}
-        >
-          <CustomerDialog />
-        </DropdownMenuItem>
-        <DropdownMenuItem 
-          className="p-0 focus:bg-transparent"
-          onSelect={handleDialogClick}
-        >
-          <BackupDialog />
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+          <DropdownMenuItem 
+            className="p-2 focus:bg-transparent hover:bg-slate-50 cursor-pointer"
+            onSelect={(e) => {
+              e.preventDefault();
+              handleMenuItemClick(setIsCompanyDialogOpen);
+            }}
+          >
+            Správa spoločností
+          </DropdownMenuItem>
+          <DropdownMenuItem 
+            className="p-2 focus:bg-transparent hover:bg-slate-50 cursor-pointer"
+            onSelect={(e) => {
+              e.preventDefault();
+              handleMenuItemClick(setIsCustomerDialogOpen);
+            }}
+          >
+            Správa zákazníkov
+          </DropdownMenuItem>
+          <DropdownMenuItem 
+            className="p-2 focus:bg-transparent hover:bg-slate-50 cursor-pointer"
+            onSelect={(e) => {
+              e.preventDefault();
+              handleMenuItemClick(setIsBackupDialogOpen);
+            }}
+          >
+            Zálohovanie
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <CompanyDialog 
+        open={isCompanyDialogOpen} 
+        onOpenChange={setIsCompanyDialogOpen}
+      />
+      <CustomerDialog 
+        open={isCustomerDialogOpen} 
+        onOpenChange={setIsCustomerDialogOpen}
+      />
+      <BackupDialog 
+        open={isBackupDialogOpen} 
+        onOpenChange={setIsBackupDialogOpen}
+      />
+    </>
   );
 };
