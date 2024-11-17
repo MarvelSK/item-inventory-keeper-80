@@ -1,4 +1,5 @@
 import { Item, Company, Customer } from './types';
+import { cache } from './cache';
 
 // Mock data for companies and customers
 export let companies: Company[] = [
@@ -24,6 +25,7 @@ export const addItem = (item: Omit<Item, 'id' | 'createdAt' | 'updatedAt' | 'del
     deleted: false,
   };
   items.push(newItem);
+  cache.set('items', items);
   return newItem;
 };
 
@@ -34,6 +36,7 @@ export const updateItem = (updatedItem: Item) => {
       ...updatedItem,
       updatedAt: new Date(),
     };
+    cache.set('items', items);
     return items[index];
   }
   return null;
@@ -44,6 +47,7 @@ export const updateItemQuantity = (id: string, quantity: number) => {
   if (item) {
     item.quantity = quantity;
     item.updatedAt = new Date();
+    cache.set('items', items);
     return item;
   }
   return null;
@@ -58,6 +62,7 @@ export const deleteItem = (id: string) => {
   if (item) {
     item.deleted = true;
     item.updatedAt = new Date();
+    cache.set('items', items);
   }
 };
 
@@ -84,6 +89,7 @@ export const wipeInventory = (hardDelete: boolean = false) => {
       item.updatedAt = new Date();
     });
   }
+  cache.set('items', items);
 };
 
 export const wipeCompanies = () => {
@@ -100,14 +106,33 @@ export const wipeCustomers = () => {
 
 // Update getter functions to filter out deleted items
 export const getAllItems = () => {
-  return items.filter(item => !item.deleted);
+  const cachedItems = cache.get<Item[]>('items');
+  if (cachedItems) {
+    return cachedItems.filter(item => !item.deleted);
+  }
+  
+  const items = items.filter(item => !item.deleted);
+  cache.set('items', items);
+  return items;
 };
 
 export const getActiveCompanies = () => {
+  const cachedCompanies = cache.get<Company[]>('companies');
+  if (cachedCompanies) {
+    return cachedCompanies.filter(company => !company.deleted);
+  }
+  
+  cache.set('companies', companies);
   return companies.filter(company => !company.deleted);
 };
 
 export const getActiveCustomers = () => {
+  const cachedCustomers = cache.get<Customer[]>('customers');
+  if (cachedCustomers) {
+    return cachedCustomers.filter(customer => !customer.deleted);
+  }
+  
+  cache.set('customers', customers);
   return customers.filter(customer => !customer.deleted);
 };
 

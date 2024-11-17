@@ -25,6 +25,12 @@ export const AddItemForm = () => {
       return;
     }
 
+    // Validate that code contains only numbers
+    if (!/^\d+$/.test(formData.code)) {
+      toast.error("Kód môže obsahovať iba čísla");
+      return;
+    }
+
     addItem(formData);
     toast.success("Položka bola pridaná");
     setFormData({ code: "", quantity: 0, company: "", customer: "" });
