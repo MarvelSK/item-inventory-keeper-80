@@ -37,12 +37,11 @@ export const EditItemDialog = ({ item, isOpen, onOpenChange, onSave }: EditItemD
 
   const handleSave = () => {
     onSave(editedItem);
-    onOpenChange(false);
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="w-[95vw] max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Upraviť položku</DialogTitle>
         </DialogHeader>
@@ -69,7 +68,7 @@ export const EditItemDialog = ({ item, isOpen, onOpenChange, onSave }: EditItemD
             value={editedItem.company} 
             onValueChange={(value) => setEditedItem({ ...editedItem, company: value })}
           >
-            <SelectTrigger>
+            <SelectTrigger className="w-full">
               <SelectValue placeholder="Vybrať spoločnosť" />
             </SelectTrigger>
             <SelectContent>
@@ -84,7 +83,7 @@ export const EditItemDialog = ({ item, isOpen, onOpenChange, onSave }: EditItemD
             value={editedItem.customer} 
             onValueChange={(value) => setEditedItem({ ...editedItem, customer: value })}
           >
-            <SelectTrigger>
+            <SelectTrigger className="w-full">
               <SelectValue placeholder="Vybrať zákazníka" />
             </SelectTrigger>
             <SelectContent>

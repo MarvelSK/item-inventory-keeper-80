@@ -21,12 +21,12 @@ export const InventoryTable = ({
   onDelete,
 }: InventoryTableProps) => {
   return (
-    <div className="rounded-md border overflow-x-auto">
+    <div className="rounded-md border overflow-x-auto -mx-4 sm:mx-0">
       <Table>
         <TableHeader>
           <TableRow>
             <TableHead
-              className="cursor-pointer hover:text-[#47acc9]"
+              className="cursor-pointer hover:text-[#47acc9] min-w-[120px]"
               onClick={() => toggleSort("code")}
             >
               Kód
@@ -38,7 +38,7 @@ export const InventoryTable = ({
                 ))}
             </TableHead>
             <TableHead
-              className="cursor-pointer hover:text-[#47acc9]"
+              className="cursor-pointer hover:text-[#47acc9] min-w-[100px]"
               onClick={() => toggleSort("quantity")}
             >
               Množstvo
@@ -50,7 +50,7 @@ export const InventoryTable = ({
                 ))}
             </TableHead>
             <TableHead
-              className="cursor-pointer hover:text-[#47acc9]"
+              className="cursor-pointer hover:text-[#47acc9] hidden sm:table-cell min-w-[150px]"
               onClick={() => toggleSort("company")}
             >
               Spoločnosť
@@ -62,7 +62,7 @@ export const InventoryTable = ({
                 ))}
             </TableHead>
             <TableHead
-              className="cursor-pointer hover:text-[#47acc9]"
+              className="cursor-pointer hover:text-[#47acc9] hidden sm:table-cell min-w-[150px]"
               onClick={() => toggleSort("customer")}
             >
               Zákazník
@@ -73,8 +73,8 @@ export const InventoryTable = ({
                   <ArrowDown className="inline ml-1 h-4 w-4" />
                 ))}
             </TableHead>
-            <TableHead>Vytvorené</TableHead>
-            <TableHead className="w-[100px]">Akcie</TableHead>
+            <TableHead className="hidden sm:table-cell">Vytvorené</TableHead>
+            <TableHead className="w-[100px] text-right sm:text-left">Akcie</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>

@@ -60,7 +60,7 @@ export const InventoryList = () => {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 px-4 sm:px-0">
       <InventorySearch
         search={search}
         setSearch={setSearch}
@@ -98,7 +98,7 @@ export const InventoryList = () => {
       )}
 
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent className="w-[95vw] max-w-[425px]">
           <AlertDialogHeader>
             <AlertDialogTitle>Vymazať položku</AlertDialogTitle>
             <AlertDialogDescription>
