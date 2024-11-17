@@ -9,7 +9,7 @@ export const useItems = () => {
   const { data: items = [], isLoading, error } = useQuery({
     queryKey: ['items'],
     queryFn: getAllItems,
-    onError: (error) => {
+    onError: (error: Error) => {
       console.error('Error fetching items:', error);
       toast.error('Failed to load items');
     }
@@ -22,7 +22,7 @@ export const useItems = () => {
       queryClient.invalidateQueries({ queryKey: ['items'] });
       toast.success('Položka bola pridaná');
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       console.error('Error adding item:', error);
       toast.error('Chyba pri pridávaní položky');
     },
@@ -34,7 +34,7 @@ export const useItems = () => {
       queryClient.invalidateQueries({ queryKey: ['items'] });
       toast.success('Položka bola upravená');
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       console.error('Error updating item:', error);
       toast.error('Chyba pri úprave položky');
     },
@@ -46,7 +46,7 @@ export const useItems = () => {
       queryClient.invalidateQueries({ queryKey: ['items'] });
       toast.success('Položka bola vymazaná');
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       console.error('Error deleting item:', error);
       toast.error('Chyba pri vymazaní položky');
     },
