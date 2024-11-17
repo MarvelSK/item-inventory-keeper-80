@@ -1,37 +1,27 @@
 import { Item, Company, Customer } from '../models/types';
 import { z } from 'zod';
 
-const downloadCsv = (content: string, type: string) => {
-  const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = `${type}_backup_${new Date().toISOString()}.csv`;
-  link.click();
-  URL.revokeObjectURL(link.href);
-};
-
-// Validation schemas that match our required types exactly
 const itemSchema = z.object({
-  id: z.string().min(1),
-  code: z.string().min(1),
+  id: z.string(),
+  code: z.string(),
   quantity: z.number(),
-  company: z.string().min(1),
-  customer: z.string().min(1),
+  company: z.string(),
+  customer: z.string(),
   createdAt: z.date(),
   updatedAt: z.date(),
   deleted: z.boolean(),
 });
 
 const companySchema = z.object({
-  id: z.string().min(1),
-  name: z.string().min(1),
+  id: z.string(),
+  name: z.string(),
   deleted: z.boolean(),
 });
 
 const customerSchema = z.object({
-  id: z.string().min(1),
-  name: z.string().min(1),
-  companyId: z.string().min(1),
+  id: z.string(),
+  name: z.string(),
+  companyId: z.string(),
   deleted: z.boolean(),
 });
 
@@ -69,14 +59,23 @@ export const backupCustomers = async (customers: Customer[]) => {
   downloadCsv(csvContent, 'customers');
 };
 
+const downloadCsv = (content: string, type: string) => {
+  const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `${type}_backup_${new Date().toISOString()}.csv`;
+  link.click();
+  URL.revokeObjectURL(link.href);
+};
+
 export const importInventory = async (file: File): Promise<Item[]> => {
   console.log('Starting inventory import');
   const text = await file.text();
   const lines = text.split('\n').filter(line => line.trim());
   
-  const items: Item[] = lines.slice(1).map(line => {
+  const items = lines.slice(1).map(line => {
     const values = line.split(',');
-    const item: Item = {
+    const item = {
       id: Math.random().toString(36).substr(2, 9),
       code: sanitizeString(values[0]),
       quantity: sanitizeNumber(values[1]),
@@ -85,7 +84,7 @@ export const importInventory = async (file: File): Promise<Item[]> => {
       createdAt: new Date(),
       updatedAt: new Date(),
       deleted: false,
-    };
+    } as const;
 
     try {
       return itemSchema.parse(item);
@@ -103,13 +102,13 @@ export const importCompanies = async (file: File): Promise<Company[]> => {
   const text = await file.text();
   const lines = text.split('\n').filter(line => line.trim());
   
-  const companies: Company[] = lines.slice(1).map(line => {
+  const companies = lines.slice(1).map(line => {
     const [rawId, rawName] = line.split(',');
-    const company: Company = {
+    const company = {
       id: sanitizeString(rawId || Math.random().toString(36).substr(2, 9)),
       name: sanitizeString(rawName),
       deleted: false,
-    };
+    } as const;
 
     try {
       return companySchema.parse(company);
@@ -127,14 +126,14 @@ export const importCustomers = async (file: File): Promise<Customer[]> => {
   const text = await file.text();
   const lines = text.split('\n').filter(line => line.trim());
   
-  const customers: Customer[] = lines.slice(1).map(line => {
+  const customers = lines.slice(1).map(line => {
     const [rawId, rawName, rawCompanyId] = line.split(',');
-    const customer: Customer = {
+    const customer = {
       id: sanitizeString(rawId || Math.random().toString(36).substr(2, 9)),
       name: sanitizeString(rawName),
       companyId: sanitizeString(rawCompanyId),
       deleted: false,
-    };
+    } as const;
 
     try {
       return customerSchema.parse(customer);
