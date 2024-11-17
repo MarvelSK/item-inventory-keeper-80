@@ -14,6 +14,12 @@ import { useState } from "react";
 export const MobileMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
 
+  const handleDialogClick = (e: Event) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsOpen(false);
+  };
+
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
@@ -23,33 +29,24 @@ export const MobileMenu = () => {
       </DropdownMenuTrigger>
       <DropdownMenuContent 
         align="end" 
-        className="w-[250px] bg-white"
+        className="w-[250px] bg-white z-50"
         sideOffset={5}
       >
         <DropdownMenuItem 
-          className="p-0"
-          onSelect={(e) => {
-            e.preventDefault();
-            setIsOpen(false);
-          }}
+          className="p-0 focus:bg-transparent"
+          onSelect={handleDialogClick}
         >
           <CompanyDialog />
         </DropdownMenuItem>
         <DropdownMenuItem 
-          className="p-0"
-          onSelect={(e) => {
-            e.preventDefault();
-            setIsOpen(false);
-          }}
+          className="p-0 focus:bg-transparent"
+          onSelect={handleDialogClick}
         >
           <CustomerDialog />
         </DropdownMenuItem>
         <DropdownMenuItem 
-          className="p-0"
-          onSelect={(e) => {
-            e.preventDefault();
-            setIsOpen(false);
-          }}
+          className="p-0 focus:bg-transparent"
+          onSelect={handleDialogClick}
         >
           <BackupDialog />
         </DropdownMenuItem>

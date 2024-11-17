@@ -9,14 +9,26 @@ interface PasswordProtectProps {
 
 export const PasswordProtect = ({ onAuthenticated }: PasswordProtectProps) => {
   const [password, setPassword] = useState("");
+  const [attempts, setAttempts] = useState(0);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Password attempt:", attempts + 1);
+    
     if (password === "neva") {
       onAuthenticated();
       localStorage.setItem("authenticated", "true");
+      toast.success("Úspešne prihlásený");
     } else {
-      toast.error("Nesprávne heslo");
+      setAttempts(prev => prev + 1);
+      toast.error(`Nesprávne heslo (pokus ${attempts + 1}/3)`);
+      
+      if (attempts >= 2) {
+        toast.error("Príliš veľa pokusov. Skúste to znova neskôr.", {
+          duration: 5000
+        });
+        setAttempts(0);
+      }
     }
   };
 
