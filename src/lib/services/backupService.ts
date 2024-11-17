@@ -76,14 +76,14 @@ export const importInventory = async (file: File): Promise<Item[]> => {
   const items = lines.slice(1).map(line => {
     const values = line.split(',');
     const item: Item = {
-      id: Math.random().toString(36).substr(2, 9),
-      code: sanitizeString(values[0]),
-      quantity: sanitizeNumber(values[1]),
-      company: sanitizeString(values[2]),
-      customer: sanitizeString(values[3]),
+      id: sanitizeString(values[0] || Math.random().toString(36).substr(2, 9)),
+      code: sanitizeString(values[1] || ''),
+      quantity: sanitizeNumber(values[2]),
+      company: sanitizeString(values[3] || ''),
+      customer: sanitizeString(values[4] || ''),
       createdAt: new Date(),
       updatedAt: new Date(),
-      deleted: false,
+      deleted: false
     };
 
     try {
@@ -106,8 +106,8 @@ export const importCompanies = async (file: File): Promise<Company[]> => {
     const [rawId, rawName] = line.split(',');
     const company: Company = {
       id: sanitizeString(rawId || Math.random().toString(36).substr(2, 9)),
-      name: sanitizeString(rawName),
-      deleted: false,
+      name: sanitizeString(rawName || ''),
+      deleted: false
     };
 
     try {
@@ -130,9 +130,9 @@ export const importCustomers = async (file: File): Promise<Customer[]> => {
     const [rawId, rawName, rawCompanyId] = line.split(',');
     const customer: Customer = {
       id: sanitizeString(rawId || Math.random().toString(36).substr(2, 9)),
-      name: sanitizeString(rawName),
-      companyId: sanitizeString(rawCompanyId),
-      deleted: false,
+      name: sanitizeString(rawName || ''),
+      companyId: sanitizeString(rawCompanyId || ''),
+      deleted: false
     };
 
     try {
