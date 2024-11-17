@@ -204,6 +204,41 @@ export const importInventory = async (file: File) => {
   return items;
 };
 
+export const importCompanies = async (file: File) => {
+  const text = await file.text();
+  const lines = text.split('\n');
+  
+  companies = lines.slice(1).map(line => {
+    const [id, name] = line.split(',');
+    return {
+      id,
+      name,
+      deleted: false,
+    };
+  });
+  
+  cache.set('companies', companies);
+  return companies;
+};
+
+export const importCustomers = async (file: File) => {
+  const text = await file.text();
+  const lines = text.split('\n');
+  
+  customers = lines.slice(1).map(line => {
+    const [id, name, companyId] = line.split(',');
+    return {
+      id,
+      name,
+      companyId,
+      deleted: false,
+    };
+  });
+  
+  cache.set('customers', customers);
+  return customers;
+};
+
 // Company management
 export const addCompany = (name: string): Company => {
   const newCompany = {
