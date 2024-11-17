@@ -4,6 +4,7 @@ import { findItemByCode, updateItemQuantity } from "@/lib/inventory";
 import { toast } from "sonner";
 import { Button } from "./ui/button";
 import { Plus, Minus } from "lucide-react";
+import { Item } from "@/lib/types";
 
 export const Scanner = () => {
   const [scanning, setScanning] = useState(false);
@@ -35,11 +36,11 @@ export const Scanner = () => {
     };
   }, [scanning]);
 
-  const onScanSuccess = (decodedText: string) => {
+  const onScanSuccess = async (decodedText: string) => {
     console.log("Scanned code:", decodedText);
     setScanning(true);
     setScannedCode(decodedText);
-    const item = findItemByCode(decodedText);
+    const item = await findItemByCode(decodedText);
     
     if (!item) {
       toast.error("Položka nebola nájdená v systéme");
@@ -58,10 +59,10 @@ export const Scanner = () => {
     console.warn(`Code scan error = ${error}`);
   };
 
-  const handleQuantityChange = (change: number) => {
+  const handleQuantityChange = async (change: number) => {
     if (scannedCode && currentQuantity !== null) {
       const newQuantity = currentQuantity + change;
-      const updatedItem = updateItemQuantity(scannedCode, newQuantity);
+      const updatedItem = await updateItemQuantity(scannedCode, newQuantity);
       if (updatedItem) {
         setCurrentQuantity(updatedItem.quantity);
         toast.success(`Množstvo upravené na ${updatedItem.quantity}`);

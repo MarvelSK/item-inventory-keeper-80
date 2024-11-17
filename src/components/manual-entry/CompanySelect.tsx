@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -8,6 +9,7 @@ import {
 } from "@/components/ui/select";
 import { Plus } from "lucide-react";
 import { getActiveCompanies } from "@/lib/inventory";
+import { Company } from "@/lib/types";
 
 interface CompanySelectProps {
   value: string;
@@ -16,7 +18,15 @@ interface CompanySelectProps {
 }
 
 export const CompanySelect = ({ value, onChange, onAddNew }: CompanySelectProps) => {
-  const companies = getActiveCompanies();
+  const [companies, setCompanies] = useState<Company[]>([]);
+
+  useEffect(() => {
+    const fetchCompanies = async () => {
+      const fetchedCompanies = await getActiveCompanies();
+      setCompanies(fetchedCompanies);
+    };
+    fetchCompanies();
+  }, []);
 
   return (
     <div className="flex items-center space-x-2">

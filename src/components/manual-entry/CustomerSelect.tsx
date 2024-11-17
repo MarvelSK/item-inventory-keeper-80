@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -8,6 +9,7 @@ import {
 } from "@/components/ui/select";
 import { Plus } from "lucide-react";
 import { getActiveCustomers } from "@/lib/inventory";
+import { Customer } from "@/lib/types";
 
 interface CustomerSelectProps {
   value: string;
@@ -17,7 +19,17 @@ interface CustomerSelectProps {
 }
 
 export const CustomerSelect = ({ value, companyId, onChange, onAddNew }: CustomerSelectProps) => {
-  const customers = getActiveCustomers().filter(
+  const [customers, setCustomers] = useState<Customer[]>([]);
+
+  useEffect(() => {
+    const fetchCustomers = async () => {
+      const fetchedCustomers = await getActiveCustomers();
+      setCustomers(fetchedCustomers);
+    };
+    fetchCustomers();
+  }, []);
+
+  const filteredCustomers = customers.filter(
     (customer) => !companyId || customer.companyId === companyId
   );
 
@@ -29,7 +41,7 @@ export const CustomerSelect = ({ value, companyId, onChange, onAddNew }: Custome
             <SelectValue placeholder="Vyberte zákazníka" />
           </SelectTrigger>
           <SelectContent className="bg-white z-50">
-            {customers.map((customer) => (
+            {filteredCustomers.map((customer) => (
               <SelectItem key={customer.id} value={customer.id}>
                 {customer.name}
               </SelectItem>

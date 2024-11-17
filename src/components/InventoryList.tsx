@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Item } from "@/lib/types";
 import { getAllItems, deleteItem, updateItem } from "@/lib/inventory";
 import { toast } from "sonner";
@@ -12,12 +12,20 @@ export const InventoryList = () => {
   const [search, setSearch] = useState("");
   const [sortField, setSortField] = useState<keyof Item>("code");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
-  const [items] = useState(getAllItems());
+  const [items, setItems] = useState<Item[]>([]);
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const [deletingItemId, setDeletingItemId] = useState<string | null>(null);
   const [editingItem, setEditingItem] = useState<Item | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+
+  useEffect(() => {
+    const fetchItems = async () => {
+      const fetchedItems = await getAllItems();
+      setItems(fetchedItems);
+    };
+    fetchItems();
+  }, []);
 
   const sortedAndFilteredItems = items
     .filter(
@@ -43,17 +51,21 @@ export const InventoryList = () => {
     }
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (deletingItemId) {
-      deleteItem(deletingItemId);
+      await deleteItem(deletingItemId);
+      const updatedItems = await getAllItems();
+      setItems(updatedItems);
       setDeletingItemId(null);
       setIsDeleteDialogOpen(false);
       toast.success("Položka bola vymazaná");
     }
   };
 
-  const handleEdit = (updatedItem: Item) => {
-    updateItem(updatedItem);
+  const handleEdit = async (updatedItem: Item) => {
+    await updateItem(updatedItem);
+    const updatedItems = await getAllItems();
+    setItems(updatedItems);
     setEditingItem(null);
     setIsEditDialogOpen(false);
     toast.success("Položka bola upravená");
@@ -120,4 +132,3 @@ export const InventoryList = () => {
       />
     </div>
   );
-};
