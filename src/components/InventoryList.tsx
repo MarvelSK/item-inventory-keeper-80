@@ -21,26 +21,33 @@ export const InventoryList = () => {
 
   useEffect(() => {
     const fetchItems = async () => {
-      const fetchedItems = await getAllItems();
-      setItems(fetchedItems);
+      try {
+        const fetchedItems = await getAllItems();
+        setItems(fetchedItems);
+      } catch (error) {
+        console.error("Failed to fetch items:", error);
+        toast.error("Failed to load items");
+      }
     };
     fetchItems();
   }, []);
 
-  const sortedAndFilteredItems = items
-    .filter(
-      (item) =>
-        item.code.toLowerCase().includes(search.toLowerCase()) ||
-        item.company.toLowerCase().includes(search.toLowerCase()) ||
-        item.customer.toLowerCase().includes(search.toLowerCase())
-    )
-    .sort((a, b) => {
-      const aValue = a[sortField];
-      const bValue = b[sortField];
-      return sortDirection === "asc"
-        ? String(aValue).localeCompare(String(bValue))
-        : String(bValue).localeCompare(String(aValue));
-    });
+  const sortedAndFilteredItems = Array.isArray(items) 
+    ? items
+        .filter(
+          (item) =>
+            item.code.toLowerCase().includes(search.toLowerCase()) ||
+            item.company.toLowerCase().includes(search.toLowerCase()) ||
+            item.customer.toLowerCase().includes(search.toLowerCase())
+        )
+        .sort((a, b) => {
+          const aValue = a[sortField];
+          const bValue = b[sortField];
+          return sortDirection === "asc"
+            ? String(aValue).localeCompare(String(bValue))
+            : String(bValue).localeCompare(String(aValue));
+        })
+    : [];
 
   const toggleSort = (field: keyof Item) => {
     if (sortField === field) {
@@ -132,3 +139,4 @@ export const InventoryList = () => {
       />
     </div>
   );
+};
