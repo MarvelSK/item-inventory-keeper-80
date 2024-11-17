@@ -32,11 +32,11 @@ export const MobileMenu = () => {
         </DropdownMenuTrigger>
         <DropdownMenuContent 
           align="end" 
-          className="w-[250px] bg-white z-50"
+          className="w-[90vw] max-w-[250px] bg-white shadow-lg rounded-md border border-gray-200"
           sideOffset={5}
         >
           <DropdownMenuItem 
-            className="p-2 focus:bg-transparent hover:bg-slate-50 cursor-pointer"
+            className="p-3 focus:bg-transparent hover:bg-slate-50 cursor-pointer"
             onSelect={(e) => {
               e.preventDefault();
               handleMenuItemClick(setIsCompanyDialogOpen);
@@ -45,7 +45,7 @@ export const MobileMenu = () => {
             Správa spoločností
           </DropdownMenuItem>
           <DropdownMenuItem 
-            className="p-2 focus:bg-transparent hover:bg-slate-50 cursor-pointer"
+            className="p-3 focus:bg-transparent hover:bg-slate-50 cursor-pointer"
             onSelect={(e) => {
               e.preventDefault();
               handleMenuItemClick(setIsCustomerDialogOpen);
@@ -54,7 +54,7 @@ export const MobileMenu = () => {
             Správa zákazníkov
           </DropdownMenuItem>
           <DropdownMenuItem 
-            className="p-2 focus:bg-transparent hover:bg-slate-50 cursor-pointer"
+            className="p-3 focus:bg-transparent hover:bg-slate-50 cursor-pointer"
             onSelect={(e) => {
               e.preventDefault();
               handleMenuItemClick(setIsBackupDialogOpen);
