@@ -37,7 +37,7 @@ export const PasswordProtect = ({ onAuthenticated }: PasswordProtectProps) => {
       <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow-lg">
         <div className="flex flex-col items-center">
           <img
-            src="https://zipscreeny.sk/images/NEVAlogo_blu.png"
+            src="https://www.somfy.cz/common/img/library//logo_neva.png"
             alt="NEVA Logo"
             className="h-16 mb-6"
           />
