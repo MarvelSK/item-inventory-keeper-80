@@ -3,19 +3,13 @@ import { cache } from '../cache';
 
 let items: Item[] = [];
 
-export const addItem = async (item: Omit<Item, 'id' | 'createdAt' | 'updatedAt' | 'deleted'>) => {
+export const addItem = async (item: Item) => {
   console.log('Adding new item:', item);
-  const newItem = {
-    ...item,
-    id: Math.random().toString(36).substr(2, 9),
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    deleted: false,
-  };
-  items.push(newItem);
+  items.push(item);
   cache.set('items', items);
-  console.log('Item added successfully:', newItem);
-  return newItem;
+  console.log('Current items count after adding:', items.length);
+  console.log('Item added successfully:', item);
+  return item;
 };
 
 export const updateItem = async (updatedItem: Item) => {
@@ -71,12 +65,13 @@ export const getAllItems = async () => {
   const cachedItems = cache.get<Item[]>('items');
   if (cachedItems) {
     console.log('Returning cached items:', cachedItems.length);
+    console.log('Active cached items:', cachedItems.filter(item => !item.deleted).length);
     return cachedItems.filter(item => !item.deleted);
   }
   
   const activeItems = items.filter(item => !item.deleted);
+  console.log('No cached items found, returning from memory:', activeItems.length);
   cache.set('items', activeItems);
-  console.log('Returning fresh items:', activeItems.length);
   return activeItems;
 };
 

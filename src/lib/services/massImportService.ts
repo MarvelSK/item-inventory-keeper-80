@@ -12,6 +12,7 @@ interface ParsedItem {
 }
 
 const parseItems = (data: string): ParsedItem[] => {
+  console.log('Starting to parse items from data');
   const lines = data.split('\n');
   const items: ParsedItem[] = [];
   let currentOrder = '';
@@ -29,6 +30,7 @@ const parseItems = (data: string): ParsedItem[] => {
       const brand = line.split(' - ')[1]?.trim() || '';
       currentOrder = orderWithBrand.trim();
       currentBrand = brand;
+      console.log('Found new order:', { currentOrder, currentBrand });
       continue;
     }
 
@@ -38,7 +40,7 @@ const parseItems = (data: string): ParsedItem[] => {
       const [description, length, width, height, , packageNumber] = parts;
       
       if (packageNumber && packageNumber.startsWith('24P')) {
-        items.push({
+        const parsedItem = {
           orderNumber: currentOrder,
           brand: currentBrand,
           description,
@@ -46,11 +48,14 @@ const parseItems = (data: string): ParsedItem[] => {
           width: Number(width),
           height: Number(height),
           packageNumber
-        });
+        };
+        console.log('Parsed item:', parsedItem);
+        items.push(parsedItem);
       }
     }
   }
 
+  console.log('Total parsed items:', items.length);
   return items;
 };
 
@@ -60,31 +65,46 @@ export const importMassItems = async (data: string) => {
   
   // Get unique brands to create customers
   const uniqueBrands = [...new Set(parsedItems.map(item => item.brand))];
+  console.log('Unique brands found:', uniqueBrands);
   
   // Create customers for each brand
   const customerMap = new Map();
   for (const brand of uniqueBrands) {
     if (brand) {
       console.log(`Creating customer for brand: ${brand}`);
-      const customer = await addCustomer(brand, "1"); // Using default company ID "1"
+      const customer = await addCustomer({
+        id: uuidv4(),
+        name: brand,
+        companyId: "1", // Using default company ID
+        deleted: false
+      });
+      console.log('Created customer:', customer);
       customerMap.set(brand, customer.id);
     }
   }
 
   // Create items
+  const createdItems = [];
   for (const item of parsedItems) {
     console.log(`Creating item for package: ${item.packageNumber}`);
     const customerId = customerMap.get(item.brand);
     
     if (customerId) {
-      await addItem({
+      const newItem = await addItem({
+        id: uuidv4(),
         code: item.packageNumber,
         quantity: 1,
         company: "1", // Using default company ID
         customer: customerId,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        deleted: false
       });
+      console.log('Created item:', newItem);
+      createdItems.push(newItem);
     }
   }
 
-  console.log('Mass import completed');
+  console.log('Mass import completed. Total items created:', createdItems.length);
+  return createdItems;
 };
