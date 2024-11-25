@@ -7,7 +7,7 @@ export const parseHtmlTable = (htmlContent: string) => {
     throw new Error('No table found in HTML file');
   }
 
-  const table = tables[0]; // Get first table
+  const table = tables[0];
   const headers: string[] = [];
   const rows: Record<string, string>[] = [];
 
@@ -19,7 +19,8 @@ export const parseHtmlTable = (htmlContent: string) => {
       : headerRow.getElementsByTagName('td');
     
     for (let i = 0; i < headerCells.length; i++) {
-      headers.push(headerCells[i].textContent?.trim().toLowerCase() || `column${i}`);
+      const headerText = headerCells[i].textContent?.trim().toLowerCase() || `column${i}`;
+      headers.push(headerText);
     }
   }
 
@@ -28,13 +29,18 @@ export const parseHtmlTable = (htmlContent: string) => {
   for (let i = 1; i < dataRows.length; i++) {
     const row = dataRows[i];
     const cells = row.getElementsByTagName('td');
-    const rowData: Record<string, string> = {};
+    if (cells.length === 0) continue;
     
+    const rowData: Record<string, string> = {};
     for (let j = 0; j < cells.length; j++) {
-      rowData[headers[j]] = cells[j].textContent?.trim() || '';
+      if (j < headers.length) {
+        rowData[headers[j]] = cells[j].textContent?.trim() || '';
+      }
     }
     
-    rows.push(rowData);
+    if (Object.keys(rowData).length > 0) {
+      rows.push(rowData);
+    }
   }
 
   return { headers, rows };

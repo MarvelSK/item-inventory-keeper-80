@@ -86,17 +86,22 @@ export const ImportSection = () => {
       
       const items: Item[] = rows.map((row): Item => ({
         id: Math.random().toString(36).substr(2, 9),
-        code: row.code || row.kód || '',
-        quantity: parseInt(row.quantity || row.množstvo || '0'),
-        company: row.company || row.spoločnosť || '',
-        customer: row.customer || row.zákazník || '',
+        code: row['číslo zakázky'] || row['značka'] || '',
+        quantity: 1,
+        company: row['popis'] || '',
+        customer: `${row['délka (cm)'] || ''}x${row['šířka (cm)'] || ''}x${row['výška (cm)'] || ''} - ${row['č. balení'] || ''}`,
         createdAt: new Date(),
         updatedAt: new Date(),
         deleted: false
       }));
 
+      if (items.length === 0) {
+        toast.error("Neboli nájdené žiadne dáta na import");
+        return;
+      }
+
       await importInventory(items);
-      toast.success("Dáta boli úspešne importované z HTML");
+      toast.success(`Úspešne importovaných ${items.length} položiek z HTML`);
       window.location.reload();
     } catch (error) {
       toast.error(`Chyba pri importovaní HTML: ${error}`);
