@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 import { Item } from '../types';
 
 // Configure worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsLib.DefaultWorkerMessageHandler;
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`;
 
 interface PDFData {
   orderNumber: string;    // Číslo zakázky
