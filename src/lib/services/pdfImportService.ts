@@ -1,10 +1,6 @@
-import * as pdfjsLib from 'pdfjs-dist';
+import PDFParser from 'pdf-parse';
 import { addItem } from './itemService';
 import { toast } from 'sonner';
-import { Item } from '../types';
-
-// Configure worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`;
 
 interface PDFData {
   orderNumber: string;    // Číslo zakázky
@@ -17,48 +13,44 @@ interface PDFData {
 
 export const parsePDFData = async (file: File): Promise<void> => {
   try {
-    const arrayBuffer = await file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-    const items: PDFData[] = [];
-
-    for (let i = 1; i <= pdf.numPages; i++) {
-      const page = await pdf.getPage(i);
-      const textContent = await page.getTextContent();
-      const text = textContent.items.map((item: any) => item.str).join(' ');
+    const buffer = await file.arrayBuffer();
+    const data = await PDFParser(buffer);
+    const text = data.text;
+    
+    // Split text into lines
+    const lines = text.split('\n').filter(line => line.trim());
+    
+    // Process each line
+    const items = lines.map(line => {
+      const parts = line.split(/\s+/);
       
-      const lines = text.split('\n').filter(line => line.trim());
-      
-      lines.forEach(line => {
-        const parts = line.split(/\s+/);
-        
-        const item: PDFData = {
-          orderNumber: parts[0] || '',
-          description: parts[1] || '',
-          length: parseFloat(parts[2]) || 0,
-          width: parseFloat(parts[3]) || 0,
-          height: parseFloat(parts[4]) || 0,
-          code: parts[5] || '',
-        };
-        
-        if (item.code && item.orderNumber) {
-          items.push(item);
-        }
-      });
-    }
-
-    for (const item of items) {
-      const newItem: Item = {
-        id: Math.random().toString(36).substr(2, 9),
-        code: item.code,
-        quantity: 1,
-        company: 'default',
-        customer: item.orderNumber,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        deleted: false
+      // Try to extract data based on column positions or labels
+      const item: PDFData = {
+        orderNumber: parts[0] || '',
+        description: parts[1] || '',
+        length: parseFloat(parts[2]) || 0,
+        width: parseFloat(parts[3]) || 0,
+        height: parseFloat(parts[4]) || 0,
+        code: parts[5] || '',
       };
       
-      await addItem(newItem);
+      return item;
+    }).filter(item => item.code && item.orderNumber); // Only keep items with required fields
+
+    // Add each item to inventory
+    for (const item of items) {
+      await addItem({
+        code: item.code,
+        quantity: 1,
+        company: 'default', // You might want to map this differently
+        customer: item.orderNumber,
+        description: item.description,
+        dimensions: {
+          length: item.length,
+          width: item.width,
+          height: item.height
+        }
+      });
     }
 
     toast.success(`Successfully imported ${items.length} items from PDF`);
