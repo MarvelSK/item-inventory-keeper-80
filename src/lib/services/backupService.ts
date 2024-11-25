@@ -1,6 +1,10 @@
 import { Item, Company, Customer, Tag } from '../types';
 import { z } from 'zod';
 import { v4 as uuidv4 } from 'uuid';
+import { items } from './itemService';
+import { companies } from './companyService';
+import { customers } from './customerService';
+import { wipeItems, wipeCompanies, wipeCustomers } from './index';
 
 const tagSchema = z.object({
   id: z.string(),
@@ -37,113 +41,60 @@ const customerSchema = z.object({
   deleted: z.boolean(),
 });
 
-export const importInventory = async (file: File): Promise<Item[]> => {
-  console.log('Starting inventory import');
-  const text = await file.text();
-  const lines = text.split('\n').filter(line => line.trim());
+export const backupAll = async () => {
+  const allData = {
+    items,
+    companies,
+    customers
+  };
   
-  const items: Item[] = lines.slice(1).map(line => {
-    const values = line.split(',');
-    const item: Item = {
-      id: sanitizeString(values[0]) || uuidv4(),
-      code: sanitizeString(values[1]) || "",
-      quantity: sanitizeNumber(values[2]),
-      company: sanitizeString(values[3]) || "",
-      customer: sanitizeString(values[4]) || "",
-      description: sanitizeString(values[5]),
-      length: sanitizeNumber(values[6]),
-      width: sanitizeNumber(values[7]),
-      height: sanitizeNumber(values[8]),
-      tags: [],
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      deleted: false
-    };
-
-    return itemSchema.parse(item);
-  });
-
-  return items;
-};
-
-export const importCompanies = async (file: File): Promise<Company[]> => {
-  console.log('Starting companies import');
-  const text = await file.text();
-  const lines = text.split('\n').filter(line => line.trim());
-  
-  const companies: Company[] = lines.slice(1).map(line => {
-    const [rawId, rawName] = line.split(',');
-    const company: Company = {
-      id: sanitizeString(rawId) || uuidv4(),
-      name: sanitizeString(rawName) || "",
-      deleted: false
-    };
-
-    return companySchema.parse(company);
-  });
-
-  return companies;
-};
-
-export const importCustomers = async (file: File): Promise<Customer[]> => {
-  console.log('Starting customers import');
-  const text = await file.text();
-  const lines = text.split('\n').filter(line => line.trim());
-  
-  const customers: Customer[] = lines.slice(1).map(line => {
-    const [rawId, rawName] = line.split(',');
-    const customer: Customer = {
-      id: sanitizeString(rawId) || uuidv4(),
-      name: sanitizeString(rawName) || "",
-      tags: [],
-      deleted: false
-    };
-
-    return customerSchema.parse(customer);
-  });
-
-  return customers;
-};
-
-// Data sanitization functions
-const sanitizeString = (str: string): string => {
-  return (str || '').trim().replace(/[<>]/g, '');
-};
-
-const sanitizeNumber = (num: string): number => {
-  const parsed = parseInt(num, 10);
-  return isNaN(parsed) ? 0 : parsed;
-};
-
-export const backupInventory = async (items: Item[]) => {
-  const csvContent = items.map(item => 
-    `${item.code},${item.quantity},${item.company},${item.customer},${item.createdAt.toISOString()},${item.updatedAt.toISOString()}`
-  ).join('\n');
-  
-  downloadCsv(csvContent, 'inventory');
-};
-
-export const backupCompanies = async (companies: Company[]) => {
-  const csvContent = companies.map(company => 
-    `${company.id},${company.name}`
-  ).join('\n');
-  
-  downloadCsv(csvContent, 'companies');
-};
-
-export const backupCustomers = async (customers: Customer[]) => {
-  const csvContent = customers.map(customer => 
-    `${customer.id},${customer.name}`
-  ).join('\n');
-  
-  downloadCsv(csvContent, 'customers');
-};
-
-const downloadCsv = (content: string, type: string) => {
-  const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+  const csvContent = JSON.stringify(allData);
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   const link = document.createElement('a');
   link.href = URL.createObjectURL(blob);
-  link.download = `${type}_backup_${new Date().toISOString()}.csv`;
+  link.download = `backup_${new Date().toISOString()}.csv`;
   link.click();
   URL.revokeObjectURL(link.href);
+};
+
+export const importAll = async (file: File) => {
+  const text = await file.text();
+  const data = JSON.parse(text);
+
+  if (data.items) {
+    const parsedItems = data.items.map((item: any) => ({
+      ...item,
+      id: item.id || uuidv4(),
+      createdAt: new Date(item.createdAt),
+      updatedAt: new Date(item.updatedAt),
+      tags: item.tags || [],
+      deleted: false
+    }));
+    items.push(...itemSchema.array().parse(parsedItems));
+  }
+
+  if (data.companies) {
+    const parsedCompanies = data.companies.map((company: any) => ({
+      ...company,
+      id: company.id || uuidv4(),
+      deleted: false
+    }));
+    companies.push(...companySchema.array().parse(parsedCompanies));
+  }
+
+  if (data.customers) {
+    const parsedCustomers = data.customers.map((customer: any) => ({
+      ...customer,
+      id: customer.id || uuidv4(),
+      tags: customer.tags || [],
+      deleted: false
+    }));
+    customers.push(...customerSchema.array().parse(parsedCustomers));
+  }
+};
+
+export const wipeAll = async () => {
+  await wipeItems();
+  await wipeCompanies();
+  await wipeCustomers();
 };
