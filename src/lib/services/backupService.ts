@@ -71,9 +71,9 @@ export const importInventory = async (file: File): Promise<Item[]> => {
   const text = await file.text();
   const lines = text.split('\n').filter(line => line.trim());
   
-  const items: Item[] = lines.slice(1).map(line => {
+  const items = lines.slice(1).map(line => {
     const values = line.split(',');
-    const item: Item = {
+    const item = {
       id: sanitizeString(values[0]) || Math.random().toString(36).substr(2, 9),
       code: sanitizeString(values[1]) || '',
       quantity: sanitizeNumber(values[2]),
@@ -82,7 +82,8 @@ export const importInventory = async (file: File): Promise<Item[]> => {
       createdAt: new Date(),
       updatedAt: new Date(),
       deleted: false
-    };
+    } satisfies Item;
+    
     return itemSchema.parse(item);
   });
   
@@ -93,13 +94,14 @@ export const importCompanies = async (file: File): Promise<Company[]> => {
   const text = await file.text();
   const lines = text.split('\n').filter(line => line.trim());
   
-  const companies: Company[] = lines.slice(1).map(line => {
+  const companies = lines.slice(1).map(line => {
     const [rawId, rawName] = line.split(',');
-    const company: Company = {
+    const company = {
       id: sanitizeString(rawId) || Math.random().toString(36).substr(2, 9),
       name: sanitizeString(rawName) || '',
       deleted: false
-    };
+    } satisfies Company;
+    
     return companySchema.parse(company);
   });
   
@@ -110,14 +112,15 @@ export const importCustomers = async (file: File): Promise<Customer[]> => {
   const text = await file.text();
   const lines = text.split('\n').filter(line => line.trim());
   
-  const customers: Customer[] = lines.slice(1).map(line => {
+  const customers = lines.slice(1).map(line => {
     const [rawId, rawName, rawCompanyId] = line.split(',');
-    const customer: Customer = {
+    const customer = {
       id: sanitizeString(rawId) || Math.random().toString(36).substr(2, 9),
       name: sanitizeString(rawName) || '',
       companyId: sanitizeString(rawCompanyId) || '',
       deleted: false
-    };
+    } satisfies Customer;
+    
     return customerSchema.parse(customer);
   });
   
