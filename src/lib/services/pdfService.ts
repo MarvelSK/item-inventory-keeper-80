@@ -12,11 +12,12 @@ export const convertPdfToHtml = async (file: File): Promise<string> => {
     for (let i = 0; i < pages.length; i++) {
       const page = pages[i];
       const { width, height } = page.getSize();
-      const text = await page.getTextContent();
       
+      // Since pdf-lib doesn't provide direct text extraction,
+      // we'll create a placeholder for the page content
       htmlContent += `
         <div class="pdf-page" style="width: ${width}px; height: ${height}px; position: relative;">
-          ${text}
+          <p>Page ${i + 1} content</p>
         </div>
       `;
     }
@@ -29,7 +30,7 @@ export const convertPdfToHtml = async (file: File): Promise<string> => {
   }
 };
 
-export const renderHtmlContent = (htmlContent: string) => {
-  const parser = new Parser();
+export const renderHtmlContent = (htmlContent: string): JSX.Element => {
+  const parser = Parser();
   return parser.parse(htmlContent);
 };

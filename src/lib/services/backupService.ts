@@ -73,9 +73,9 @@ export const importInventory = async (file: File): Promise<Item[]> => {
   const text = await file.text();
   const lines = text.split('\n').filter(line => line.trim());
   
-  return lines.slice(1).map(line => {
+  const items: Item[] = lines.slice(1).map(line => {
     const values = line.split(',');
-    const item = {
+    const item: Item = {
       id: sanitizeString(values[0]) || Math.random().toString(36).substr(2, 9),
       code: sanitizeString(values[1]) || '',
       quantity: sanitizeNumber(values[2]),
@@ -84,15 +84,12 @@ export const importInventory = async (file: File): Promise<Item[]> => {
       createdAt: new Date(),
       updatedAt: new Date(),
       deleted: false
-    } satisfies Item;
+    };
 
-    try {
-      return itemSchema.parse(item);
-    } catch (error) {
-      console.error('Invalid item data:', error);
-      throw new Error(`Invalid item data in CSV: ${error.message}`);
-    }
+    return itemSchema.parse(item);
   });
+
+  return items;
 };
 
 export const importCompanies = async (file: File): Promise<Company[]> => {
@@ -100,21 +97,18 @@ export const importCompanies = async (file: File): Promise<Company[]> => {
   const text = await file.text();
   const lines = text.split('\n').filter(line => line.trim());
   
-  return lines.slice(1).map(line => {
+  const companies: Company[] = lines.slice(1).map(line => {
     const [rawId, rawName] = line.split(',');
-    const company = {
+    const company: Company = {
       id: sanitizeString(rawId) || Math.random().toString(36).substr(2, 9),
       name: sanitizeString(rawName) || '',
       deleted: false
-    } satisfies Company;
+    };
 
-    try {
-      return companySchema.parse(company);
-    } catch (error) {
-      console.error('Invalid company data:', error);
-      throw new Error(`Invalid company data in CSV: ${error.message}`);
-    }
+    return companySchema.parse(company);
   });
+
+  return companies;
 };
 
 export const importCustomers = async (file: File): Promise<Customer[]> => {
@@ -122,20 +116,17 @@ export const importCustomers = async (file: File): Promise<Customer[]> => {
   const text = await file.text();
   const lines = text.split('\n').filter(line => line.trim());
   
-  return lines.slice(1).map(line => {
+  const customers: Customer[] = lines.slice(1).map(line => {
     const [rawId, rawName, rawCompanyId] = line.split(',');
-    const customer = {
+    const customer: Customer = {
       id: sanitizeString(rawId) || Math.random().toString(36).substr(2, 9),
       name: sanitizeString(rawName) || '',
       companyId: sanitizeString(rawCompanyId) || '',
       deleted: false
-    } satisfies Customer;
+    };
 
-    try {
-      return customerSchema.parse(customer);
-    } catch (error) {
-      console.error('Invalid customer data:', error);
-      throw new Error(`Invalid customer data in CSV: ${error.message}`);
-    }
+    return customerSchema.parse(customer);
   });
+
+  return customers;
 };
