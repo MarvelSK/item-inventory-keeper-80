@@ -19,15 +19,8 @@ import {
   AlertDialogTitle,
 } from "./ui/alert-dialog";
 import { Input } from "./ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "./ui/select";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "./ui/table";
-import { customers, companies, addCustomer, deleteCustomer } from "@/lib/inventory";
+import { customers, addCustomer, deleteCustomer } from "@/lib/inventory";
 import { Trash2, Edit2 } from "lucide-react";
 import { EditCustomerForm } from "./EditCustomerForm";
 import { toast } from "sonner";
@@ -40,8 +33,7 @@ interface CustomerDialogProps {
 
 export const CustomerDialog = ({ open, onOpenChange }: CustomerDialogProps) => {
   const [customerName, setCustomerName] = useState("");
-  const [selectedCompany, setSelectedCompany] = useState("");
-  const [editingCustomer, setEditingCustomer] = useState<null | { id: string; name: string; companyId: string }>(null);
+  const [editingCustomer, setEditingCustomer] = useState<null | { id: string; name: string }>(null);
   const [deletingCustomerId, setDeletingCustomerId] = useState<string | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -51,21 +43,19 @@ export const CustomerDialog = ({ open, onOpenChange }: CustomerDialogProps) => {
   const handleOpenChange = onOpenChange || setIsMainDialogOpen;
 
   const handleAddCustomer = () => {
-    if (!customerName.trim() || !selectedCompany) {
-      toast.error("Vyplňte všetky polia");
+    if (!customerName.trim()) {
+      toast.error("Vyplňte meno zákazníka");
       return;
     }
-    addCustomer(customerName, selectedCompany);
+    addCustomer(customerName);
     setCustomerName("");
-    setSelectedCompany("");
     toast.success("Zákazník bol pridaný");
   };
 
-  const handleEditCustomer = (customer: { id: string; name: string; companyId: string }) => {
+  const handleEditCustomer = (customer: { id: string; name: string }) => {
     const customerToUpdate = customers.find(c => c.id === customer.id);
     if (customerToUpdate) {
       customerToUpdate.name = customer.name;
-      customerToUpdate.companyId = customer.companyId;
       setIsEditDialogOpen(false);
       toast.success("Zákazník bol upravený");
     }
@@ -106,18 +96,6 @@ export const CustomerDialog = ({ open, onOpenChange }: CustomerDialogProps) => {
                   onChange={(e) => setCustomerName(e.target.value)}
                   className="flex-1"
                 />
-                <Select value={selectedCompany} onValueChange={setSelectedCompany}>
-                  <SelectTrigger className="w-full md:w-[180px]">
-                    <SelectValue placeholder="Vybrať spoločnosť" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {companies.filter(c => !c.deleted).map((company) => (
-                      <SelectItem key={company.id} value={company.id}>
-                        {company.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
                 <Button 
                   onClick={handleAddCustomer} 
                   className="bg-[#212490] hover:bg-[#47acc9] w-full md:w-auto"
@@ -130,7 +108,6 @@ export const CustomerDialog = ({ open, onOpenChange }: CustomerDialogProps) => {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Meno</TableHead>
-                      <TableHead>Spoločnosť</TableHead>
                       <TableHead className="w-[100px]">Akcie</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -138,9 +115,6 @@ export const CustomerDialog = ({ open, onOpenChange }: CustomerDialogProps) => {
                     {customers.filter(c => !c.deleted).map((customer) => (
                       <TableRow key={customer.id}>
                         <TableCell className="font-medium">{customer.name}</TableCell>
-                        <TableCell>
-                          {companies.find((c) => c.id === customer.companyId)?.name}
-                        </TableCell>
                         <TableCell>
                           <div className="flex space-x-2">
                             <Button

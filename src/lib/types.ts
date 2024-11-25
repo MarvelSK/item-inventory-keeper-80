@@ -18,6 +18,5 @@ export interface Company {
 export interface Customer {
   id: string;
   name: string;
-  companyId: string;
   deleted: boolean;
 }
