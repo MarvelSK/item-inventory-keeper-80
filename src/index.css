@@ -63,6 +63,8 @@
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
   overflow-y: auto !important;
   z-index: 1000 !important;
+  display: flex !important;
+  flex-direction: column !important;
 }
 
 @media (max-width: 640px) {
