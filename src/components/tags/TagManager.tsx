@@ -6,6 +6,7 @@ import { Tag } from "@/lib/types";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { ChromePicker } from "react-color";
+import { TagBadge } from "./TagBadge";
 
 interface TagManagerProps {
   tags: Tag[];
