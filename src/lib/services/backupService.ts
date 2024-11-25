@@ -70,7 +70,8 @@ export const importAll = async (file: File) => {
       tags: item.tags || [],
       deleted: false
     }));
-    items.push(...itemSchema.array().parse(parsedItems));
+    const validatedItems = itemSchema.array().parse(parsedItems);
+    items.push(...validatedItems);
   }
 
   if (data.companies) {
@@ -79,7 +80,8 @@ export const importAll = async (file: File) => {
       id: company.id || uuidv4(),
       deleted: false
     }));
-    companies.push(...companySchema.array().parse(parsedCompanies));
+    const validatedCompanies = companySchema.array().parse(parsedCompanies);
+    companies.push(...validatedCompanies);
   }
 
   if (data.customers) {
@@ -89,7 +91,8 @@ export const importAll = async (file: File) => {
       tags: customer.tags || [],
       deleted: false
     }));
-    customers.push(...customerSchema.array().parse(parsedCustomers));
+    const validatedCustomers = customerSchema.array().parse(parsedCustomers);
+    customers.push(...validatedCustomers);
   }
 };
 
@@ -97,4 +100,34 @@ export const wipeAll = async () => {
   await wipeItems();
   await wipeCompanies();
   await wipeCustomers();
+};
+
+export const backupInventory = async (items: Item[]) => {
+  const csvContent = JSON.stringify(items);
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `inventory_${new Date().toISOString()}.csv`;
+  link.click();
+  URL.revokeObjectURL(link.href);
+};
+
+export const backupCompanies = async (companies: Company[]) => {
+  const csvContent = JSON.stringify(companies);
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `companies_${new Date().toISOString()}.csv`;
+  link.click();
+  URL.revokeObjectURL(link.href);
+};
+
+export const backupCustomers = async (customers: Customer[]) => {
+  const csvContent = JSON.stringify(customers);
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `customers_${new Date().toISOString()}.csv`;
+  link.click();
+  URL.revokeObjectURL(link.href);
 };

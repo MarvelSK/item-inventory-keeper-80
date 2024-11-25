@@ -2,7 +2,7 @@ import { Button } from "../../ui/button";
 import { Upload } from "lucide-react";
 import { Input } from "../../ui/input";
 import { useRef } from "react";
-import { importInventory, importCompanies, importCustomers } from "@/lib/inventory";
+import { importInventory, importCompanies, importCustomers } from "@/lib/services/backupService";
 import { toast } from "sonner";
 
 export const ImportSection = () => {

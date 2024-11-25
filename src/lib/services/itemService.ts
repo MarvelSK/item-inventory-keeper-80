@@ -1,7 +1,7 @@
-import { Item } from '../models/types';
+import { Item } from '../types';
 import { cache } from '../cache';
 
-let items: Item[] = [];
+export let items: Item[] = [];
 
 const areItemsEqual = (item1: Item, item2: Item) => {
   return (

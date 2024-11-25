@@ -1,6 +1,6 @@
 import { Button } from "../../ui/button";
 import { Save } from "lucide-react";
-import { backupInventory, backupCompanies, backupCustomers } from "@/lib/services";
+import { backupInventory, backupCompanies, backupCustomers } from "@/lib/services/backupService";
 import { useItems } from "@/hooks/useItems";
 import { useCompanies } from "@/hooks/useCompanies";
 import { useCustomers } from "@/hooks/useCustomers";
