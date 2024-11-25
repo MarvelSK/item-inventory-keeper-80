@@ -33,7 +33,7 @@ interface CustomerDialogProps {
 
 export const CustomerDialog = ({ open, onOpenChange }: CustomerDialogProps) => {
   const [customerName, setCustomerName] = useState("");
-  const [editingCustomer, setEditingCustomer] = useState<null | { id: string; name: string }>(null);
+  const [editingCustomer, setEditingCustomer] = useState<null | Customer>(null);
   const [deletingCustomerId, setDeletingCustomerId] = useState<string | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -52,10 +52,11 @@ export const CustomerDialog = ({ open, onOpenChange }: CustomerDialogProps) => {
     toast.success("Zákazník bol pridaný");
   };
 
-  const handleEditCustomer = (customer: { id: string; name: string }) => {
+  const handleEditCustomer = (customer: Customer) => {
     const customerToUpdate = customers.find(c => c.id === customer.id);
     if (customerToUpdate) {
       customerToUpdate.name = customer.name;
+      customerToUpdate.labels = customer.labels;
       setIsEditDialogOpen(false);
       toast.success("Zákazník bol upravený");
     }
@@ -108,6 +109,7 @@ export const CustomerDialog = ({ open, onOpenChange }: CustomerDialogProps) => {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Meno</TableHead>
+                      <TableHead>Štítky</TableHead>
                       <TableHead className="w-[100px]">Akcie</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -115,6 +117,13 @@ export const CustomerDialog = ({ open, onOpenChange }: CustomerDialogProps) => {
                     {customers.filter(c => !c.deleted).map((customer) => (
                       <TableRow key={customer.id}>
                         <TableCell className="font-medium">{customer.name}</TableCell>
+                        <TableCell>
+                          <div className="flex flex-wrap gap-1">
+                            {customer.labels?.map((label) => (
+                              <LabelBadge key={label.id} label={label} />
+                            ))}
+                          </div>
+                        </TableCell>
                         <TableCell>
                           <div className="flex space-x-2">
                             <Button

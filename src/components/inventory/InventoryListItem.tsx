@@ -11,6 +11,7 @@ import {
   DialogTitle,
 } from "../ui/dialog";
 import { useState, useEffect } from "react";
+import { LabelBadge } from "../labels/LabelBadge";
 
 interface InventoryListItemProps {
   item: Item;
@@ -23,7 +24,8 @@ export const InventoryListItem = ({ item, onEdit, onDelete }: InventoryListItemP
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   
   const company = companies.find((c) => c.id === item.company)?.name || "Unknown";
-  const customer = customers.find((c) => c.id === item.customer)?.name || "Unknown";
+  const customer = customers.find((c) => c.id === item.customer);
+  const customerName = customer?.name || "Unknown";
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 640);
@@ -44,7 +46,16 @@ export const InventoryListItem = ({ item, onEdit, onDelete }: InventoryListItemP
         <TableCell className="font-medium">{item.code}</TableCell>
         <TableCell>{item.quantity}</TableCell>
         <TableCell className="hidden sm:table-cell">{company}</TableCell>
-        <TableCell className="hidden sm:table-cell">{customer}</TableCell>
+        <TableCell className="hidden sm:table-cell">
+          <div>
+            {customerName}
+            <div className="flex flex-wrap gap-1 mt-1">
+              {customer?.labels?.map((label) => (
+                <LabelBadge key={label.id} label={label} />
+              ))}
+            </div>
+          </div>
+        </TableCell>
         <TableCell className="hidden sm:table-cell">
           {format(item.createdAt, "dd.MM.yyyy HH:mm")}
         </TableCell>
@@ -100,7 +111,17 @@ export const InventoryListItem = ({ item, onEdit, onDelete }: InventoryListItemP
                 <p><strong>Kód:</strong> {item.code}</p>
                 <p><strong>Množstvo:</strong> {item.quantity}</p>
                 <p><strong>Spoločnosť:</strong> {company}</p>
-                <p><strong>Zákazník:</strong> {customer}</p>
+                <p><strong>Zákazník:</strong> {customerName}</p>
+                {customer?.labels?.length > 0 && (
+                  <div>
+                    <strong>Štítky:</strong>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {customer.labels.map((label) => (
+                        <LabelBadge key={label.id} label={label} />
+                      ))}
+                    </div>
+                  </div>
+                )}
                 <p><strong>Vytvorené:</strong> {format(item.createdAt, "dd.MM.yyyy HH:mm")}</p>
               </div>
               <div className="flex space-x-2">
