@@ -3,8 +3,32 @@ import { cache } from '../cache';
 
 let items: Item[] = [];
 
+const areItemsEqual = (item1: Item, item2: Item) => {
+  return (
+    item1.code === item2.code &&
+    item1.company === item2.company &&
+    item1.customer === item2.customer &&
+    item1.description === item2.description &&
+    item1.length === item2.length &&
+    item1.width === item2.width &&
+    item1.height === item2.height
+  );
+};
+
 export const addItem = async (item: Item) => {
   console.log('Adding new item:', item);
+  
+  // Check for existing item with same attributes
+  const existingItem = items.find(i => !i.deleted && areItemsEqual(i, item));
+  
+  if (existingItem) {
+    console.log('Found existing item, updating quantity:', existingItem);
+    existingItem.quantity += item.quantity;
+    existingItem.updatedAt = new Date();
+    cache.set('items', items);
+    return existingItem;
+  }
+
   items.push(item);
   cache.set('items', items);
   console.log('Current items count after adding:', items.length);

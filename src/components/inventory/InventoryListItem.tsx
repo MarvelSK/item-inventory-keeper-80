@@ -2,7 +2,7 @@ import { Item } from "@/lib/types";
 import { Button } from "../ui/button";
 import { TableCell, TableRow } from "../ui/table";
 import { Edit2, Trash2, ChevronRight } from "lucide-react";
-import { companies, customers } from "@/lib/inventory";
+import { customers } from "@/lib/inventory";
 import { format } from "date-fns";
 import {
   Dialog,
@@ -23,7 +23,6 @@ export const InventoryListItem = ({ item, onEdit, onDelete }: InventoryListItemP
   const [isMobile, setIsMobile] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   
-  const company = companies.find((c) => c.id === item.company)?.name || "Unknown";
   const customer = customers.find((c) => c.id === item.customer);
   const customerName = customer?.name || "Unknown";
 
@@ -40,12 +39,18 @@ export const InventoryListItem = ({ item, onEdit, onDelete }: InventoryListItemP
     }
   };
 
+  const formatDimensions = (item: Item) => {
+    if (item.length && item.width && item.height) {
+      return `${item.length}×${item.width}×${item.height}`;
+    }
+    return "-";
+  };
+
   return (
     <>
       <TableRow className="group cursor-pointer" onClick={handleRowClick}>
         <TableCell className="font-medium">{item.code}</TableCell>
         <TableCell>{item.quantity}</TableCell>
-        <TableCell className="hidden sm:table-cell">{company}</TableCell>
         <TableCell className="hidden sm:table-cell">
           <div>
             {customerName}
@@ -58,9 +63,7 @@ export const InventoryListItem = ({ item, onEdit, onDelete }: InventoryListItemP
         </TableCell>
         <TableCell className="hidden lg:table-cell">{item.description || "-"}</TableCell>
         <TableCell className="hidden lg:table-cell">
-          {item.length && item.width && item.height
-            ? `${item.length}×${item.width}×${item.height}`
-            : "-"}
+          {formatDimensions(item)}
         </TableCell>
         <TableCell className="hidden sm:table-cell">
           {format(item.createdAt, "dd.MM.yyyy HH:mm")}
@@ -116,13 +119,9 @@ export const InventoryListItem = ({ item, onEdit, onDelete }: InventoryListItemP
               <div className="space-y-2">
                 <p><strong>Kód:</strong> {item.code}</p>
                 <p><strong>Množstvo:</strong> {item.quantity}</p>
-                <p><strong>Spoločnosť:</strong> {company}</p>
                 <p><strong>Zákazník:</strong> {customerName}</p>
                 <p><strong>Popis:</strong> {item.description || "-"}</p>
-                <p><strong>Rozmery:</strong> {item.length && item.width && item.height
-                  ? `${item.length}×${item.width}×${item.height} cm`
-                  : "-"}
-                </p>
+                <p><strong>Rozmery (D×Š×V):</strong> {formatDimensions(item)} cm</p>
                 {customer?.tags?.length > 0 && (
                   <div>
                     <strong>Štítky:</strong>
