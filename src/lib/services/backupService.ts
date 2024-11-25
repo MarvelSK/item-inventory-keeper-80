@@ -62,42 +62,51 @@ export const importAll = async (file: File) => {
   const data = JSON.parse(text);
 
   if (data.items) {
-    const parsedItems = data.items.map((item: any) => ({
-      id: item.id || uuidv4(),
-      code: item.code || '',
-      quantity: item.quantity || 0,
-      company: item.company || '',
-      customer: item.customer || '',
-      description: item.description || '',
-      length: item.length,
-      width: item.width,
-      height: item.height,
-      tags: item.tags || [],
-      createdAt: new Date(item.createdAt || Date.now()),
-      updatedAt: new Date(item.updatedAt || Date.now()),
-      deleted: false
-    }));
+    const parsedItems = data.items.map((item: any) => {
+      const newItem: Item = {
+        id: item.id || uuidv4(),
+        code: item.code || '',
+        quantity: item.quantity || 0,
+        company: item.company || '',
+        customer: item.customer || '',
+        description: item.description || '',
+        length: item.length || undefined,
+        width: item.width || undefined,
+        height: item.height || undefined,
+        tags: item.tags || [],
+        createdAt: new Date(item.createdAt || Date.now()),
+        updatedAt: new Date(item.updatedAt || Date.now()),
+        deleted: false
+      };
+      return newItem;
+    });
     const validatedItems = itemSchema.array().parse(parsedItems);
     items.push(...validatedItems);
   }
 
   if (data.companies) {
-    const parsedCompanies = data.companies.map((company: any) => ({
-      id: company.id || uuidv4(),
-      name: company.name || '',
-      deleted: false
-    }));
+    const parsedCompanies = data.companies.map((company: any) => {
+      const newCompany: Company = {
+        id: company.id || uuidv4(),
+        name: company.name || '',
+        deleted: false
+      };
+      return newCompany;
+    });
     const validatedCompanies = companySchema.array().parse(parsedCompanies);
     companies.push(...validatedCompanies);
   }
 
   if (data.customers) {
-    const parsedCustomers = data.customers.map((customer: any) => ({
-      id: customer.id || uuidv4(),
-      name: customer.name || '',
-      tags: customer.tags || [],
-      deleted: false
-    }));
+    const parsedCustomers = data.customers.map((customer: any) => {
+      const newCustomer: Customer = {
+        id: customer.id || uuidv4(),
+        name: customer.name || '',
+        tags: customer.tags || [],
+        deleted: false
+      };
+      return newCustomer;
+    });
     const validatedCustomers = customerSchema.array().parse(parsedCustomers);
     customers.push(...validatedCustomers);
   }
@@ -150,21 +159,24 @@ export const backupCustomers = async (customers: Customer[]) => {
 export const importInventory = async (file: File) => {
   const text = await file.text();
   const data = JSON.parse(text);
-  const parsedItems = data.map((item: any) => ({
-    id: item.id || uuidv4(),
-    code: item.code || '',
-    quantity: item.quantity || 0,
-    company: item.company || '',
-    customer: item.customer || '',
-    description: item.description || '',
-    length: item.length,
-    width: item.width,
-    height: item.height,
-    tags: item.tags || [],
-    createdAt: new Date(item.createdAt || Date.now()),
-    updatedAt: new Date(item.updatedAt || Date.now()),
-    deleted: false
-  }));
+  const parsedItems = data.map((item: any) => {
+    const newItem: Item = {
+      id: item.id || uuidv4(),
+      code: item.code || '',
+      quantity: item.quantity || 0,
+      company: item.company || '',
+      customer: item.customer || '',
+      description: item.description || '',
+      length: item.length || undefined,
+      width: item.width || undefined,
+      height: item.height || undefined,
+      tags: item.tags || [],
+      createdAt: new Date(item.createdAt || Date.now()),
+      updatedAt: new Date(item.updatedAt || Date.now()),
+      deleted: false
+    };
+    return newItem;
+  });
   const validatedItems = itemSchema.array().parse(parsedItems);
   items.push(...validatedItems);
 };
@@ -172,11 +184,14 @@ export const importInventory = async (file: File) => {
 export const importCompanies = async (file: File) => {
   const text = await file.text();
   const data = JSON.parse(text);
-  const parsedCompanies = data.map((company: any) => ({
-    id: company.id || uuidv4(),
-    name: company.name || '',
-    deleted: false
-  }));
+  const parsedCompanies = data.map((company: any) => {
+    const newCompany: Company = {
+      id: company.id || uuidv4(),
+      name: company.name || '',
+      deleted: false
+    };
+    return newCompany;
+  });
   const validatedCompanies = companySchema.array().parse(parsedCompanies);
   companies.push(...validatedCompanies);
 };
@@ -184,12 +199,15 @@ export const importCompanies = async (file: File) => {
 export const importCustomers = async (file: File) => {
   const text = await file.text();
   const data = JSON.parse(text);
-  const parsedCustomers = data.map((customer: any) => ({
-    id: customer.id || uuidv4(),
-    name: customer.name || '',
-    tags: customer.tags || [],
-    deleted: false
-  }));
+  const parsedCustomers = data.map((customer: any) => {
+    const newCustomer: Customer = {
+      id: customer.id || uuidv4(),
+      name: customer.name || '',
+      tags: customer.tags || [],
+      deleted: false
+    };
+    return newCustomer;
+  });
   const validatedCustomers = customerSchema.array().parse(parsedCustomers);
   customers.push(...validatedCustomers);
 };
