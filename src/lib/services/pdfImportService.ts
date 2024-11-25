@@ -1,6 +1,7 @@
 import PDFParser from 'pdf-parse';
 import { addItem } from './itemService';
 import { toast } from 'sonner';
+import { Item } from '../types';
 
 interface PDFData {
   orderNumber: string;    // Číslo zakázky
@@ -17,14 +18,11 @@ export const parsePDFData = async (file: File): Promise<void> => {
     const data = await PDFParser(buffer);
     const text = data.text;
     
-    // Split text into lines
     const lines = text.split('\n').filter(line => line.trim());
     
-    // Process each line
     const items = lines.map(line => {
       const parts = line.split(/\s+/);
       
-      // Try to extract data based on column positions or labels
       const item: PDFData = {
         orderNumber: parts[0] || '',
         description: parts[1] || '',
@@ -35,22 +33,22 @@ export const parsePDFData = async (file: File): Promise<void> => {
       };
       
       return item;
-    }).filter(item => item.code && item.orderNumber); // Only keep items with required fields
+    }).filter(item => item.code && item.orderNumber);
 
-    // Add each item to inventory
     for (const item of items) {
-      await addItem({
+      const newItem: Omit<Item, 'id' | 'createdAt' | 'updatedAt' | 'deleted'> = {
         code: item.code,
         quantity: 1,
-        company: 'default', // You might want to map this differently
+        company: 'default',
         customer: item.orderNumber,
-        description: item.description,
         dimensions: {
           length: item.length,
           width: item.width,
           height: item.height
         }
-      });
+      };
+      
+      await addItem(newItem);
     }
 
     toast.success(`Successfully imported ${items.length} items from PDF`);
