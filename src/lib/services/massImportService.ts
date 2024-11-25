@@ -138,7 +138,7 @@ export const importMassItems = async (data: string) => {
       const newItem = await addItem({
         id: uuidv4(),
         code: item.packageNumber,
-        quantity: 1,
+        quantity: 0, // Set initial quantity to 0
         company: "1",
         customer: customerId,
         description: item.description,

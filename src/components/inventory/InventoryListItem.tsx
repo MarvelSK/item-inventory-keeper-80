@@ -11,7 +11,7 @@ import {
   DialogTitle,
 } from "../ui/dialog";
 import { useState, useEffect } from "react";
-import { LabelBadge } from "../labels/LabelBadge";
+import { TagBadge } from "../tags/TagBadge";
 
 interface InventoryListItemProps {
   item: Item;
@@ -41,7 +41,7 @@ export const InventoryListItem = ({ item, onEdit, onDelete }: InventoryListItemP
 
   const formatDimensions = (item: Item) => {
     if (item.length && item.width && item.height) {
-      return `${item.length}×${item.width}×${item.height}`;
+      return `D:${item.length}×Š:${item.width}×V:${item.height}`;
     }
     return "-";
   };
@@ -54,11 +54,13 @@ export const InventoryListItem = ({ item, onEdit, onDelete }: InventoryListItemP
         <TableCell className="hidden sm:table-cell">
           <div>
             {customerName}
-            <div className="flex flex-wrap gap-1 mt-1">
-              {customer?.tags?.map((tag) => (
-                <LabelBadge key={tag.id} label={tag} />
-              ))}
-            </div>
+            {customer?.tags && customer.tags.length > 0 && (
+              <div className="flex flex-wrap gap-1 mt-1">
+                {customer.tags.map((tag) => (
+                  <TagBadge key={tag.id} tag={tag} />
+                ))}
+              </div>
+            )}
           </div>
         </TableCell>
         <TableCell className="hidden lg:table-cell">{item.description || "-"}</TableCell>
@@ -120,18 +122,18 @@ export const InventoryListItem = ({ item, onEdit, onDelete }: InventoryListItemP
                 <p><strong>Kód:</strong> {item.code}</p>
                 <p><strong>Množstvo:</strong> {item.quantity}</p>
                 <p><strong>Zákazník:</strong> {customerName}</p>
-                <p><strong>Popis:</strong> {item.description || "-"}</p>
-                <p><strong>Rozmery (D×Š×V):</strong> {formatDimensions(item)} cm</p>
-                {customer?.tags?.length > 0 && (
+                {customer?.tags && customer.tags.length > 0 && (
                   <div>
                     <strong>Štítky:</strong>
                     <div className="flex flex-wrap gap-1 mt-1">
                       {customer.tags.map((tag) => (
-                        <LabelBadge key={tag.id} label={tag} />
+                        <TagBadge key={tag.id} tag={tag} />
                       ))}
                     </div>
                   </div>
                 )}
+                <p><strong>Popis:</strong> {item.description || "-"}</p>
+                <p><strong>Rozmery:</strong> {formatDimensions(item)} cm</p>
                 <p><strong>Vytvorené:</strong> {format(item.createdAt, "dd.MM.yyyy HH:mm")}</p>
               </div>
               <div className="flex space-x-2">
