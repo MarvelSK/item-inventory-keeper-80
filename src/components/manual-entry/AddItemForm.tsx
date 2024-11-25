@@ -5,6 +5,8 @@ import { CustomerSelect } from "./CustomerSelect";
 import { v4 as uuidv4 } from 'uuid';
 import { useItems } from "@/hooks/useItems";
 import { Textarea } from "../ui/textarea";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 export const AddItemForm = () => {
   const [code, setCode] = useState("");
@@ -12,6 +14,7 @@ export const AddItemForm = () => {
   const [selectedCustomer, setSelectedCustomer] = useState("");
   const [description, setDescription] = useState("");
   const [size, setSize] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { addItem } = useItems();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -21,26 +24,41 @@ export const AddItemForm = () => {
       return;
     }
 
-    const newItem = {
-      id: uuidv4(),
-      code,
-      quantity,
-      description,
-      size,
-      tags: [], // Tags will be inherited from customer
-      customer: selectedCustomer,
-      company: "",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      deleted: false
-    };
+    setIsSubmitting(true);
 
-    await addItem(newItem);
-    setCode("");
-    setQuantity(1);
-    setSelectedCustomer("");
-    setDescription("");
-    setSize("");
+    try {
+      const newItem = {
+        id: uuidv4(),
+        code,
+        quantity,
+        description,
+        size,
+        tags: [], // Tags will be inherited from customer
+        customer: selectedCustomer,
+        company: "",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        deleted: false
+      };
+
+      await addItem(newItem);
+      setCode("");
+      setQuantity(1);
+      setSelectedCustomer("");
+      setDescription("");
+      setSize("");
+      toast.success("Položka bola úspešne pridaná");
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.message === 'Item with this code already exists') {
+          toast.error("Položka s týmto kódom už existuje");
+        } else {
+          toast.error("Chyba pri pridávaní položky");
+        }
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -70,8 +88,19 @@ export const AddItemForm = () => {
         className="min-h-[100px]"
       />
       <CustomerSelect value={selectedCustomer} onChange={setSelectedCustomer} onAddNew={() => {}} />
-      <Button type="submit" className="w-full bg-[#212490] hover:bg-[#47acc9]">
-        Pridať položku
+      <Button 
+        type="submit" 
+        className="w-full bg-[#212490] hover:bg-[#47acc9]"
+        disabled={isSubmitting}
+      >
+        {isSubmitting ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Pridávam...
+          </>
+        ) : (
+          'Pridať položku'
+        )}
       </Button>
     </form>
   );

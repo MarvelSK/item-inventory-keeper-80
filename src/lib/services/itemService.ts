@@ -15,18 +15,22 @@ const areItemsEqual = (item1: Item, item2: Item) => {
   );
 };
 
+export const findItemByCode = async (code: string) => {
+  console.log('Finding item by code:', code);
+  const item = items.find((i) => i.code === code && !i.deleted);
+  console.log('Item found:', item);
+  return item;
+};
+
 export const addItem = async (item: Item) => {
   console.log('Adding new item:', item);
   
-  // Check for existing item with same attributes
-  const existingItem = items.find(i => !i.deleted && areItemsEqual(i, item));
+  // Check for existing item with same code
+  const existingItem = items.find(i => !i.deleted && i.code === item.code);
   
   if (existingItem) {
-    console.log('Found existing item, updating quantity:', existingItem);
-    existingItem.quantity += item.quantity;
-    existingItem.updatedAt = new Date();
-    cache.set('items', items);
-    return existingItem;
+    console.log('Item with this code already exists:', existingItem);
+    throw new Error('Item with this code already exists');
   }
 
   items.push(item);
@@ -64,13 +68,6 @@ export const updateItemQuantity = async (id: string, quantity: number) => {
   }
   console.log('Item not found for quantity update:', id);
   return null;
-};
-
-export const findItemByCode = async (code: string) => {
-  console.log('Finding item by code:', code);
-  const item = items.find((i) => i.code === code && !i.deleted);
-  console.log('Item found:', item);
-  return item;
 };
 
 export const deleteItem = async (id: string) => {

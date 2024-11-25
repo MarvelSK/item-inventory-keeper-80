@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { addCustomer } from './customerService';
 import { addItem } from './itemService';
+import { toast } from 'sonner';
 
 const VALID_DESCRIPTIONS = ['Příslušenství', 'Plechy', 'Žaluzie', 'Vodící profily'];
 
@@ -130,31 +131,50 @@ export const importMassItems = async (data: string) => {
 
   // Create items
   const createdItems = [];
+  const duplicates = [];
+  
   for (const item of parsedItems) {
     console.log(`Creating item for package: ${item.packageNumber}`);
     const customerId = customerMap.get(item.orderNumber);
     
     if (customerId) {
-      const newItem = await addItem({
-        id: uuidv4(),
-        code: item.packageNumber,
-        quantity: 0, // Set initial quantity to 0
-        company: "1",
-        customer: customerId,
-        description: item.description,
-        length: item.length,
-        width: item.width,
-        height: item.height,
-        tags: [],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        deleted: false
-      });
-      console.log('Created item:', newItem);
-      createdItems.push(newItem);
+      try {
+        const newItem = await addItem({
+          id: uuidv4(),
+          code: item.packageNumber,
+          quantity: 0,
+          company: "1",
+          customer: customerId,
+          description: item.description,
+          length: item.length,
+          width: item.width,
+          height: item.height,
+          tags: [],
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          deleted: false
+        });
+        console.log('Created item:', newItem);
+        createdItems.push(newItem);
+      } catch (error) {
+        if (error instanceof Error && error.message === 'Item with this code already exists') {
+          duplicates.push(item.packageNumber);
+        } else {
+          throw error;
+        }
+      }
     }
   }
 
   console.log('Mass import completed. Total items created:', createdItems.length);
+  
+  if (duplicates.length > 0) {
+    toast.warning(`${duplicates.length} položiek nebolo importovaných (duplicitné kódy)`);
+  }
+  
+  if (createdItems.length > 0) {
+    toast.success(`Úspešne importovaných ${createdItems.length} položiek`);
+  }
+  
   return createdItems;
 };
