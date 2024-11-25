@@ -63,12 +63,15 @@ export const importAll = async (file: File) => {
 
   if (data.items) {
     const parsedItems = data.items.map((item: any) => ({
-      ...item,
       id: item.id || uuidv4(),
       code: item.code || '',
       quantity: item.quantity || 0,
       company: item.company || '',
       customer: item.customer || '',
+      description: item.description || '',
+      length: item.length,
+      width: item.width,
+      height: item.height,
       tags: item.tags || [],
       createdAt: new Date(item.createdAt || Date.now()),
       updatedAt: new Date(item.updatedAt || Date.now()),
@@ -80,7 +83,6 @@ export const importAll = async (file: File) => {
 
   if (data.companies) {
     const parsedCompanies = data.companies.map((company: any) => ({
-      ...company,
       id: company.id || uuidv4(),
       name: company.name || '',
       deleted: false
@@ -91,7 +93,6 @@ export const importAll = async (file: File) => {
 
   if (data.customers) {
     const parsedCustomers = data.customers.map((customer: any) => ({
-      ...customer,
       id: customer.id || uuidv4(),
       name: customer.name || '',
       tags: customer.tags || [],
@@ -103,9 +104,17 @@ export const importAll = async (file: File) => {
 };
 
 export const wipeAll = async () => {
-  await wipeItems();
-  await wipeCompanies();
-  await wipeCustomers();
+  try {
+    await Promise.all([
+      wipeItems(),
+      wipeCompanies(),
+      wipeCustomers()
+    ]);
+    console.log('All data wiped successfully');
+  } catch (error) {
+    console.error('Error wiping data:', error);
+    throw error;
+  }
 };
 
 export const backupInventory = async (items: Item[]) => {
@@ -142,8 +151,16 @@ export const importInventory = async (file: File) => {
   const text = await file.text();
   const data = JSON.parse(text);
   const parsedItems = data.map((item: any) => ({
-    ...item,
     id: item.id || uuidv4(),
+    code: item.code || '',
+    quantity: item.quantity || 0,
+    company: item.company || '',
+    customer: item.customer || '',
+    description: item.description || '',
+    length: item.length,
+    width: item.width,
+    height: item.height,
+    tags: item.tags || [],
     createdAt: new Date(item.createdAt || Date.now()),
     updatedAt: new Date(item.updatedAt || Date.now()),
     deleted: false
@@ -156,8 +173,8 @@ export const importCompanies = async (file: File) => {
   const text = await file.text();
   const data = JSON.parse(text);
   const parsedCompanies = data.map((company: any) => ({
-    ...company,
     id: company.id || uuidv4(),
+    name: company.name || '',
     deleted: false
   }));
   const validatedCompanies = companySchema.array().parse(parsedCompanies);
@@ -168,8 +185,8 @@ export const importCustomers = async (file: File) => {
   const text = await file.text();
   const data = JSON.parse(text);
   const parsedCustomers = data.map((customer: any) => ({
-    ...customer,
     id: customer.id || uuidv4(),
+    name: customer.name || '',
     tags: customer.tags || [],
     deleted: false
   }));
