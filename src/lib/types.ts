@@ -32,3 +32,6 @@ export interface Customer {
   tags: Tag[];
   deleted: boolean;
 }
+
+// Alias Label to Tag for backward compatibility
+export type Label = Tag;

@@ -58,7 +58,7 @@ export const CustomerDialog = ({ open, onOpenChange }: CustomerDialogProps) => {
     const customerToUpdate = customers.find(c => c.id === customer.id);
     if (customerToUpdate) {
       customerToUpdate.name = customer.name;
-      customerToUpdate.labels = customer.labels;
+      customerToUpdate.tags = customer.tags;
       setIsEditDialogOpen(false);
       toast.success("Zákazník bol upravený");
     }
@@ -121,8 +121,8 @@ export const CustomerDialog = ({ open, onOpenChange }: CustomerDialogProps) => {
                         <TableCell className="font-medium">{customer.name}</TableCell>
                         <TableCell>
                           <div className="flex flex-wrap gap-1">
-                            {customer.labels?.map((label) => (
-                              <LabelBadge key={label.id} label={label} />
+                            {customer.tags?.map((tag) => (
+                              <LabelBadge key={tag.id} label={tag} />
                             ))}
                           </div>
                         </TableCell>
