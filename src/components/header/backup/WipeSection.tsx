@@ -17,7 +17,7 @@ export const WipeSection = () => {
           break;
         case 'customers':
           await wipeCustomers();
-          toast.success("Zákazníci boli vymazaní");
+          toast.success("Zakázky boli vymazané");
           break;
       }
     } catch (error) {

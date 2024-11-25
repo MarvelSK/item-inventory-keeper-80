@@ -23,7 +23,7 @@ export const ImportSection = () => {
           break;
         case 'customers':
           await importCustomers(file);
-          toast.success("Zákazníci boli úspešne importovaní");
+          toast.success("Zakázky boli úspešne importované");
           break;
       }
       window.location.reload(); // Refresh the page to show imported data
@@ -81,7 +81,7 @@ export const ImportSection = () => {
           onClick={() => customersFileRef.current?.click()}
         >
           <Upload className="mr-2 h-4 w-4" />
-          Zákazníci
+          Zakázky
         </Button>
         <Input
           type="file"

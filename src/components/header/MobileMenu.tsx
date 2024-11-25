@@ -40,7 +40,7 @@ export const MobileMenu = () => {
               handleMenuItemClick(setIsCustomerDialogOpen);
             }}
           >
-            Správa zákazníkov
+            Správa zakázok
           </DropdownMenuItem>
           <DropdownMenuItem 
             className="p-3 focus:bg-transparent hover:bg-slate-50 cursor-pointer"

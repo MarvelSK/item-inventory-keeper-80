@@ -16,7 +16,7 @@ export const EditCustomerForm = ({ customer, onSave }: EditCustomerFormProps) =>
 
   const handleSubmit = () => {
     if (!name.trim()) {
-      toast.error("Vyplňte meno zákazníka");
+      toast.error("Vyplňte názov zakázky");
       return;
     }
     onSave({ ...customer, name, tags });
@@ -25,7 +25,7 @@ export const EditCustomerForm = ({ customer, onSave }: EditCustomerFormProps) =>
   return (
     <div className="space-y-4">
       <Input
-        placeholder="Meno zákazníka"
+        placeholder="Názov zakázky"
         value={name}
         onChange={(e) => setName(e.target.value)}
       />
