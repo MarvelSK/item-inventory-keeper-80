@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ManualEntry } from "@/components/ManualEntry";
@@ -51,7 +51,12 @@ const Index = () => {
         <div className="max-w-7xl mx-auto">
           {activeTab === "manual" && <ManualEntry />}
           {activeTab === "scanner" && <Scanner />}
-          {activeTab === "inventory" && <InventoryList />}
+          {activeTab === "inventory" && (
+            <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm">
+              <h2 className="text-xl font-semibold mb-4 text-[#212490]">Inventár položiek</h2>
+              <InventoryList />
+            </div>
+          )}
         </div>
       </main>
 

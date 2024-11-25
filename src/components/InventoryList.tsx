@@ -99,7 +99,7 @@ export const InventoryList = () => {
   };
 
   return (
-    <div className="space-y-4 px-4 sm:px-0">
+    <div className="space-y-4">
       <div className="flex justify-between items-center">
         <InventorySearch
           search={search}
