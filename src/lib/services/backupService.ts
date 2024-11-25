@@ -35,6 +35,69 @@ const sanitizeNumber = (num: string): number => {
   return isNaN(parsed) ? 0 : parsed;
 };
 
+export const importInventory = async (file: File): Promise<Item[]> => {
+  console.log('Starting inventory import');
+  const text = await file.text();
+  const lines = text.split('\n').filter(line => line.trim());
+  
+  const items = lines.slice(1).map(line => {
+    const values = line.split(',');
+    const item = {
+      id: sanitizeString(values[0]) || Math.random().toString(36).substr(2, 9),
+      code: sanitizeString(values[1]) || '',
+      quantity: sanitizeNumber(values[2]),
+      company: sanitizeString(values[3]) || '',
+      customer: sanitizeString(values[4]) || '',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      deleted: false
+    } as Item;
+
+    return itemSchema.parse(item);
+  });
+
+  return items;
+};
+
+export const importCompanies = async (file: File): Promise<Company[]> => {
+  console.log('Starting companies import');
+  const text = await file.text();
+  const lines = text.split('\n').filter(line => line.trim());
+  
+  const companies = lines.slice(1).map(line => {
+    const [rawId, rawName] = line.split(',');
+    const company = {
+      id: sanitizeString(rawId) || Math.random().toString(36).substr(2, 9),
+      name: sanitizeString(rawName) || '',
+      deleted: false
+    } as Company;
+
+    return companySchema.parse(company);
+  });
+
+  return companies;
+};
+
+export const importCustomers = async (file: File): Promise<Customer[]> => {
+  console.log('Starting customers import');
+  const text = await file.text();
+  const lines = text.split('\n').filter(line => line.trim());
+  
+  const customers = lines.slice(1).map(line => {
+    const [rawId, rawName, rawCompanyId] = line.split(',');
+    const customer = {
+      id: sanitizeString(rawId) || Math.random().toString(36).substr(2, 9),
+      name: sanitizeString(rawName) || '',
+      companyId: sanitizeString(rawCompanyId) || '',
+      deleted: false
+    } as Customer;
+
+    return customerSchema.parse(customer);
+  });
+
+  return customers;
+};
+
 export const backupInventory = async (items: Item[]) => {
   const csvContent = items.map(item => 
     `${item.code},${item.quantity},${item.company},${item.customer},${item.createdAt.toISOString()},${item.updatedAt.toISOString()}`
@@ -66,67 +129,4 @@ const downloadCsv = (content: string, type: string) => {
   link.download = `${type}_backup_${new Date().toISOString()}.csv`;
   link.click();
   URL.revokeObjectURL(link.href);
-};
-
-export const importInventory = async (file: File): Promise<Item[]> => {
-  console.log('Starting inventory import');
-  const text = await file.text();
-  const lines = text.split('\n').filter(line => line.trim());
-  
-  const items: Item[] = lines.slice(1).map(line => {
-    const values = line.split(',');
-    const item: Item = {
-      id: sanitizeString(values[0]) || Math.random().toString(36).substr(2, 9),
-      code: sanitizeString(values[1]) || '',
-      quantity: sanitizeNumber(values[2]),
-      company: sanitizeString(values[3]) || '',
-      customer: sanitizeString(values[4]) || '',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      deleted: false
-    };
-
-    return itemSchema.parse(item);
-  });
-
-  return items;
-};
-
-export const importCompanies = async (file: File): Promise<Company[]> => {
-  console.log('Starting companies import');
-  const text = await file.text();
-  const lines = text.split('\n').filter(line => line.trim());
-  
-  const companies: Company[] = lines.slice(1).map(line => {
-    const [rawId, rawName] = line.split(',');
-    const company: Company = {
-      id: sanitizeString(rawId) || Math.random().toString(36).substr(2, 9),
-      name: sanitizeString(rawName) || '',
-      deleted: false
-    };
-
-    return companySchema.parse(company);
-  });
-
-  return companies;
-};
-
-export const importCustomers = async (file: File): Promise<Customer[]> => {
-  console.log('Starting customers import');
-  const text = await file.text();
-  const lines = text.split('\n').filter(line => line.trim());
-  
-  const customers: Customer[] = lines.slice(1).map(line => {
-    const [rawId, rawName, rawCompanyId] = line.split(',');
-    const customer: Customer = {
-      id: sanitizeString(rawId) || Math.random().toString(36).substr(2, 9),
-      name: sanitizeString(rawName) || '',
-      companyId: sanitizeString(rawCompanyId) || '',
-      deleted: false
-    };
-
-    return customerSchema.parse(customer);
-  });
-
-  return customers;
 };
