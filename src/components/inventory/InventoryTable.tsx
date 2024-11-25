@@ -53,7 +53,7 @@ export const InventoryTable = ({
               className="cursor-pointer hover:text-[#47acc9] hidden sm:table-cell min-w-[150px]"
               onClick={() => toggleSort("customer")}
             >
-              Zákazník
+              Zakázka
               {sortField === "customer" &&
                 (sortDirection === "asc" ? (
                   <ArrowUp className="inline ml-1 h-4 w-4" />
@@ -62,7 +62,7 @@ export const InventoryTable = ({
                 ))}
             </TableHead>
             <TableHead className="hidden sm:table-cell min-w-[150px]">
-              Štítky zákazníka
+              Značky zakázok
             </TableHead>
             <TableHead
               className="cursor-pointer hover:text-[#47acc9] hidden lg:table-cell min-w-[150px]"
