@@ -21,6 +21,11 @@ export const InventoryGridItem = ({ item, onEdit, onDelete }: InventoryGridItemP
         <div>Množstvo: {item.quantity}</div>
         <div>Spoločnosť: {company}</div>
         <div>Zákazník: {customer}</div>
+        <div>Popis: {item.description || "-"}</div>
+        <div>Rozmery: {item.length && item.width && item.height
+          ? `${item.length}×${item.width}×${item.height} cm`
+          : "-"}
+        </div>
         <div>Vytvorené: {format(item.createdAt, "dd.MM.yyyy HH:mm")}</div>
         <div>Upravené: {format(item.updatedAt, "dd.MM.yyyy HH:mm")}</div>
       </div>

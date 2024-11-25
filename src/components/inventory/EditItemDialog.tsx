@@ -16,6 +16,7 @@ import {
 import { companies, customers } from "@/lib/inventory";
 import { Item } from "@/lib/types";
 import { useState, useEffect } from "react";
+import { Textarea } from "../ui/textarea";
 
 interface EditItemDialogProps {
   item: Item | null;
@@ -94,6 +95,48 @@ export const EditItemDialog = ({ item, isOpen, onOpenChange, onSave }: EditItemD
               ))}
             </SelectContent>
           </Select>
+          <Textarea
+            placeholder="Popis"
+            value={editedItem.description || ""}
+            onChange={(e) =>
+              setEditedItem({ ...editedItem, description: e.target.value })
+            }
+          />
+          <div className="grid grid-cols-3 gap-2">
+            <Input
+              type="number"
+              placeholder="Délka (cm)"
+              value={editedItem.length || ""}
+              onChange={(e) =>
+                setEditedItem({
+                  ...editedItem,
+                  length: parseInt(e.target.value) || undefined,
+                })
+              }
+            />
+            <Input
+              type="number"
+              placeholder="Šířka (cm)"
+              value={editedItem.width || ""}
+              onChange={(e) =>
+                setEditedItem({
+                  ...editedItem,
+                  width: parseInt(e.target.value) || undefined,
+                })
+              }
+            />
+            <Input
+              type="number"
+              placeholder="Výška (cm)"
+              value={editedItem.height || ""}
+              onChange={(e) =>
+                setEditedItem({
+                  ...editedItem,
+                  height: parseInt(e.target.value) || undefined,
+                })
+              }
+            />
+          </div>
           <Button
             onClick={handleSave}
             className="w-full bg-[#212490] hover:bg-[#47acc9]"

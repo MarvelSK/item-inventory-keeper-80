@@ -50,11 +50,17 @@ export const InventoryListItem = ({ item, onEdit, onDelete }: InventoryListItemP
           <div>
             {customerName}
             <div className="flex flex-wrap gap-1 mt-1">
-              {customer?.labels?.map((label) => (
-                <LabelBadge key={label.id} label={label} />
+              {customer?.tags?.map((tag) => (
+                <LabelBadge key={tag.id} label={tag} />
               ))}
             </div>
           </div>
+        </TableCell>
+        <TableCell className="hidden lg:table-cell">{item.description || "-"}</TableCell>
+        <TableCell className="hidden lg:table-cell">
+          {item.length && item.width && item.height
+            ? `${item.length}×${item.width}×${item.height}`
+            : "-"}
         </TableCell>
         <TableCell className="hidden sm:table-cell">
           {format(item.createdAt, "dd.MM.yyyy HH:mm")}
@@ -112,12 +118,17 @@ export const InventoryListItem = ({ item, onEdit, onDelete }: InventoryListItemP
                 <p><strong>Množstvo:</strong> {item.quantity}</p>
                 <p><strong>Spoločnosť:</strong> {company}</p>
                 <p><strong>Zákazník:</strong> {customerName}</p>
-                {customer?.labels?.length > 0 && (
+                <p><strong>Popis:</strong> {item.description || "-"}</p>
+                <p><strong>Rozmery:</strong> {item.length && item.width && item.height
+                  ? `${item.length}×${item.width}×${item.height} cm`
+                  : "-"}
+                </p>
+                {customer?.tags?.length > 0 && (
                   <div>
                     <strong>Štítky:</strong>
                     <div className="flex flex-wrap gap-1 mt-1">
-                      {customer.labels.map((label) => (
-                        <LabelBadge key={label.id} label={label} />
+                      {customer.tags.map((tag) => (
+                        <LabelBadge key={tag.id} label={tag} />
                       ))}
                     </div>
                   </div>

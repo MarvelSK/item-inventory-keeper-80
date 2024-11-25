@@ -5,7 +5,9 @@ export interface Item {
   company: string;
   customer: string;
   description?: string;
-  size?: string;
+  length?: number;
+  width?: number;
+  height?: number;
   tags: Tag[];
   createdAt: Date;
   updatedAt: Date;
