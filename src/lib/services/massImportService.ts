@@ -21,6 +21,7 @@ const parseItems = (data: string): ParsedItem[] => {
   
   let currentOrder = '';
   let currentBrand = '';
+  let currentCustomerName = '';
   
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
@@ -32,39 +33,47 @@ const parseItems = (data: string): ParsedItem[] => {
 
     // Check if this is an order number line (24ZA...)
     if (line.includes('24ZA')) {
-      const parts = line.split(' ');
-      const orderInfo = parts.filter(part => part.includes('24ZA')).join(' ');
-      if (orderInfo) {
-        const [orderNumber, brand] = orderInfo.split(' - ');
-        currentOrder = orderNumber;
-        currentBrand = brand;
-        
-        // Extract item details from the same line
-        const description = parts.slice(parts.findIndex(p => p === brand) + 1)
-          .find(part => VALID_DESCRIPTIONS.includes(part)) || '';
-        const remainingParts = parts.slice(parts.indexOf(description) + 1);
-        const [length, width, height] = remainingParts.slice(0, 3).map(Number);
-        const packageNumber = remainingParts[3] || '';
-        
-        console.log('Parsed order line:', {
-          orderNumber: currentOrder,
+      // Find the index of the first valid description
+      const descriptionIndex = line.split(' ').findIndex(part => VALID_DESCRIPTIONS.includes(part));
+      if (descriptionIndex === -1) continue;
+
+      // Everything before the description is the customer name
+      const orderParts = line.split(' ').slice(0, descriptionIndex);
+      const orderInfo = orderParts.join(' ');
+      
+      // Extract order number and brand
+      const dashIndex = orderInfo.indexOf(' - ');
+      if (dashIndex !== -1) {
+        currentOrder = orderInfo.substring(0, dashIndex).trim();
+        currentCustomerName = orderInfo;
+        currentBrand = orderInfo.substring(dashIndex + 3).trim();
+      }
+      
+      // Parse the rest of the line for item details
+      const itemParts = line.split(' ').slice(descriptionIndex);
+      const description = VALID_DESCRIPTIONS.find(desc => itemParts.includes(desc)) || '';
+      const remainingParts = itemParts.slice(itemParts.indexOf(description) + 1);
+      const [length, width, height] = remainingParts.slice(0, 3).map(Number);
+      const packageNumber = remainingParts[3] || '';
+      
+      console.log('Parsed order line:', {
+        orderNumber: currentOrder,
+        customerName: currentCustomerName,
+        description,
+        dimensions: { length, width, height },
+        packageNumber
+      });
+      
+      if (packageNumber) {
+        items.push({
+          orderNumber: currentCustomerName,
           brand: currentBrand,
           description,
-          dimensions: { length, width, height },
+          length,
+          width,
+          height,
           packageNumber
         });
-        
-        if (packageNumber) {
-          items.push({
-            orderNumber: `${currentOrder} - ${currentBrand}`,
-            brand: currentBrand,
-            description,
-            length,
-            width,
-            height,
-            packageNumber
-          });
-        }
       }
     } else if (currentOrder && !line.includes('Počet')) {
       // This is a continuation line with additional items
@@ -76,7 +85,7 @@ const parseItems = (data: string): ParsedItem[] => {
       
       console.log('Parsed continuation line:', {
         orderNumber: currentOrder,
-        brand: currentBrand,
+        customerName: currentCustomerName,
         description,
         dimensions: { length, width, height },
         packageNumber
@@ -84,7 +93,7 @@ const parseItems = (data: string): ParsedItem[] => {
       
       if (packageNumber) {
         items.push({
-          orderNumber: `${currentOrder} - ${currentBrand}`,
+          orderNumber: currentCustomerName,
           brand: currentBrand,
           description,
           length,

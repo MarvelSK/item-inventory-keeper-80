@@ -74,14 +74,14 @@ export const importInventory = async (file: File): Promise<Item[]> => {
   const text = await file.text();
   const lines = text.split('\n').filter(line => line.trim());
   
-  return lines.slice(1).map(line => {
+  const items: Item[] = lines.slice(1).map(line => {
     const values = line.split(',');
     const item: Item = {
       id: sanitizeString(values[0]) || uuidv4(),
-      code: sanitizeString(values[1]) || '',
+      code: sanitizeString(values[1]),
       quantity: sanitizeNumber(values[2]),
-      company: sanitizeString(values[3]) || '',
-      customer: sanitizeString(values[4]) || '',
+      company: sanitizeString(values[3]),
+      customer: sanitizeString(values[4]),
       createdAt: new Date(),
       updatedAt: new Date(),
       deleted: false
@@ -94,6 +94,8 @@ export const importInventory = async (file: File): Promise<Item[]> => {
       throw new Error(`Invalid item data in CSV: ${error.message}`);
     }
   });
+
+  return items;
 };
 
 export const importCompanies = async (file: File): Promise<Company[]> => {
@@ -101,11 +103,11 @@ export const importCompanies = async (file: File): Promise<Company[]> => {
   const text = await file.text();
   const lines = text.split('\n').filter(line => line.trim());
   
-  return lines.slice(1).map(line => {
+  const companies: Company[] = lines.slice(1).map(line => {
     const [rawId, rawName] = line.split(',');
     const company: Company = {
       id: sanitizeString(rawId) || uuidv4(),
-      name: sanitizeString(rawName) || '',
+      name: sanitizeString(rawName),
       deleted: false
     };
 
@@ -116,6 +118,8 @@ export const importCompanies = async (file: File): Promise<Company[]> => {
       throw new Error(`Invalid company data in CSV: ${error.message}`);
     }
   });
+
+  return companies;
 };
 
 export const importCustomers = async (file: File): Promise<Customer[]> => {
@@ -123,12 +127,12 @@ export const importCustomers = async (file: File): Promise<Customer[]> => {
   const text = await file.text();
   const lines = text.split('\n').filter(line => line.trim());
   
-  return lines.slice(1).map(line => {
+  const customers: Customer[] = lines.slice(1).map(line => {
     const [rawId, rawName, rawCompanyId] = line.split(',');
     const customer: Customer = {
       id: sanitizeString(rawId) || uuidv4(),
-      name: sanitizeString(rawName) || '',
-      companyId: sanitizeString(rawCompanyId) || '',
+      name: sanitizeString(rawName),
+      companyId: sanitizeString(rawCompanyId),
       deleted: false
     };
 
@@ -139,4 +143,6 @@ export const importCustomers = async (file: File): Promise<Customer[]> => {
       throw new Error(`Invalid customer data in CSV: ${error.message}`);
     }
   });
+
+  return customers;
 };
