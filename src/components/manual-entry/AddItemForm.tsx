@@ -31,7 +31,7 @@ export const AddItemForm = () => {
       deleted: false
     };
 
-    await addItem(newItem); // Adding the new item
+    await addItem(newItem);
     setCode("");
     setQuantity(1);
     setSelectedCompany("");
@@ -54,7 +54,7 @@ export const AddItemForm = () => {
         required
       />
       <CompanySelect value={selectedCompany} onChange={setSelectedCompany} onAddNew={() => {}} />
-      <CustomerSelect value={selectedCustomer} companyId={selectedCompany} onChange={setSelectedCustomer} onAddNew={() => {}} />
+      <CustomerSelect value={selectedCustomer} onChange={setSelectedCustomer} onAddNew={() => {}} />
       <Button type="submit" className="w-full bg-[#212490] hover:bg-[#47acc9]">
         Pridať položku
       </Button>

@@ -22,7 +22,6 @@ const companySchema = z.object({
 const customerSchema = z.object({
   id: z.string(),
   name: z.string(),
-  companyId: z.string(),
   deleted: z.boolean(),
 });
 
@@ -54,7 +53,7 @@ export const backupCompanies = async (companies: Company[]) => {
 
 export const backupCustomers = async (customers: Customer[]) => {
   const csvContent = customers.map(customer => 
-    `${customer.id},${customer.name},${customer.companyId}`
+    `${customer.id},${customer.name}`
   ).join('\n');
   
   downloadCsv(csvContent, 'customers');
@@ -128,11 +127,10 @@ export const importCustomers = async (file: File): Promise<Customer[]> => {
   const lines = text.split('\n').filter(line => line.trim());
   
   const customers: Customer[] = lines.slice(1).map(line => {
-    const [rawId, rawName, rawCompanyId] = line.split(',');
+    const [rawId, rawName] = line.split(',');
     const customer: Customer = {
       id: sanitizeString(rawId) || uuidv4(),
       name: sanitizeString(rawName),
-      companyId: sanitizeString(rawCompanyId),
       deleted: false
     };
 

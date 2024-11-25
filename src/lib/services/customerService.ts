@@ -8,7 +8,7 @@ export let customers: Customer[] = [
 ];
 
 export const addCustomer = async (name: string): Promise<Customer> => {
-  const newCustomer = {
+  const newCustomer: Customer = {
     id: Math.random().toString(36).substr(2, 9),
     name,
     deleted: false,
