@@ -1,5 +1,6 @@
 import { Item, Company, Customer } from '../models/types';
 import { z } from 'zod';
+import { v4 as uuidv4 } from 'uuid';
 
 const itemSchema = z.object({
   id: z.string(),
@@ -75,8 +76,8 @@ export const importInventory = async (file: File): Promise<Item[]> => {
   
   return lines.slice(1).map(line => {
     const values = line.split(',');
-    const item = {
-      id: sanitizeString(values[0]) || Math.random().toString(36).substr(2, 9),
+    const item: Item = {
+      id: sanitizeString(values[0]) || uuidv4(),
       code: sanitizeString(values[1]) || '',
       quantity: sanitizeNumber(values[2]),
       company: sanitizeString(values[3]) || '',
@@ -84,7 +85,7 @@ export const importInventory = async (file: File): Promise<Item[]> => {
       createdAt: new Date(),
       updatedAt: new Date(),
       deleted: false
-    } satisfies Item;
+    };
 
     try {
       return itemSchema.parse(item);
@@ -102,11 +103,11 @@ export const importCompanies = async (file: File): Promise<Company[]> => {
   
   return lines.slice(1).map(line => {
     const [rawId, rawName] = line.split(',');
-    const company = {
-      id: sanitizeString(rawId) || Math.random().toString(36).substr(2, 9),
+    const company: Company = {
+      id: sanitizeString(rawId) || uuidv4(),
       name: sanitizeString(rawName) || '',
       deleted: false
-    } satisfies Company;
+    };
 
     try {
       return companySchema.parse(company);
@@ -124,12 +125,12 @@ export const importCustomers = async (file: File): Promise<Customer[]> => {
   
   return lines.slice(1).map(line => {
     const [rawId, rawName, rawCompanyId] = line.split(',');
-    const customer = {
-      id: sanitizeString(rawId) || Math.random().toString(36).substr(2, 9),
+    const customer: Customer = {
+      id: sanitizeString(rawId) || uuidv4(),
       name: sanitizeString(rawName) || '',
       companyId: sanitizeString(rawCompanyId) || '',
       deleted: false
-    } satisfies Customer;
+    };
 
     try {
       return customerSchema.parse(customer);
