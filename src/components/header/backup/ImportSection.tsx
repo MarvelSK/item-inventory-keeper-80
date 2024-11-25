@@ -49,11 +49,24 @@ export const ImportSection = () => {
             toast.success("Inventár bol úspešne importovaný z HTML");
             break;
           case 'companies':
-            await importCompanies(items);
+            // Convert items to Company type
+            const companies: Company[] = items.map(item => ({
+              id: item.id,
+              name: item.company,
+              deleted: false
+            }));
+            await importCompanies(companies);
             toast.success("Spoločnosti boli úspešne importované z HTML");
             break;
           case 'customers':
-            await importCustomers(items);
+            // Convert items to Customer type
+            const customers: Customer[] = items.map(item => ({
+              id: item.id,
+              name: item.customer,
+              companyId: item.company,
+              deleted: false
+            }));
+            await importCustomers(customers);
             toast.success("Zákazníci boli úspešne importovaní z HTML");
             break;
         }
