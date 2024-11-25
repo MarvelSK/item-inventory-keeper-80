@@ -10,6 +10,7 @@ import { useItems } from "@/hooks/useItems";
 import { Loader2 } from "lucide-react";
 import { MassImportDialog } from "./inventory/MassImportDialog";
 import { InventoryStats } from "./inventory/InventoryStats";
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "./ui/pagination";
 
 export const InventoryList = () => {
   const [search, setSearch] = useState("");
@@ -20,6 +21,8 @@ export const InventoryList = () => {
   const [editingItem, setEditingItem] = useState<Item | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const { items, isLoading, error, updateItem, deleteItem } = useItems();
 
@@ -39,22 +42,26 @@ export const InventoryList = () => {
     );
   }
 
-  const sortedAndFilteredItems = Array.isArray(items) 
-    ? items
-        .filter(
-          (item) =>
-            item.code.toLowerCase().includes(search.toLowerCase()) ||
-            item.company.toLowerCase().includes(search.toLowerCase()) ||
-            item.customer.toLowerCase().includes(search.toLowerCase())
-        )
-        .sort((a, b) => {
-          const aValue = a[sortField];
-          const bValue = b[sortField];
-          return sortDirection === "asc"
-            ? String(aValue).localeCompare(String(bValue))
-            : String(bValue).localeCompare(String(aValue));
-        })
+  const filteredItems = Array.isArray(items) 
+    ? items.filter(
+        (item) =>
+          item.code.toLowerCase().includes(search.toLowerCase()) ||
+          item.company.toLowerCase().includes(search.toLowerCase()) ||
+          item.customer.toLowerCase().includes(search.toLowerCase())
+      )
     : [];
+
+  const sortedAndFilteredItems = [...filteredItems].sort((a, b) => {
+    const aValue = a[sortField];
+    const bValue = b[sortField];
+    return sortDirection === "asc"
+      ? String(aValue).localeCompare(String(bValue))
+      : String(bValue).localeCompare(String(aValue));
+  });
+
+  const totalPages = Math.ceil(sortedAndFilteredItems.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedItems = sortedAndFilteredItems.slice(startIndex, startIndex + itemsPerPage);
 
   const toggleSort = (field: keyof Item) => {
     if (sortField === field) {
@@ -79,6 +86,11 @@ export const InventoryList = () => {
     setIsEditDialogOpen(false);
   };
 
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <div className="space-y-4 px-4 sm:px-0">
       <div className="flex justify-between items-center">
@@ -95,7 +107,7 @@ export const InventoryList = () => {
 
       {viewMode === "list" ? (
         <InventoryTable
-          items={sortedAndFilteredItems}
+          items={paginatedItems}
           sortField={sortField}
           sortDirection={sortDirection}
           toggleSort={toggleSort}
@@ -110,7 +122,7 @@ export const InventoryList = () => {
         />
       ) : (
         <InventoryGrid
-          items={sortedAndFilteredItems}
+          items={paginatedItems}
           onEdit={(item) => {
             setEditingItem(item);
             setIsEditDialogOpen(true);
@@ -120,6 +132,35 @@ export const InventoryList = () => {
             setIsDeleteDialogOpen(true);
           }}
         />
+      )}
+
+      {totalPages > 1 && (
+        <Pagination className="justify-center">
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious 
+                onClick={() => handlePageChange(currentPage - 1)}
+                className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+              />
+            </PaginationItem>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <PaginationItem key={page}>
+                <PaginationLink
+                  onClick={() => handlePageChange(page)}
+                  isActive={currentPage === page}
+                >
+                  {page}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
+            <PaginationItem>
+              <PaginationNext
+                onClick={() => handlePageChange(currentPage + 1)}
+                className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
       )}
 
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
