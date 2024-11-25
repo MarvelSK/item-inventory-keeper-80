@@ -23,7 +23,7 @@ export const InventoryList = () => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [itemsPerPage, setItemsPerPage] = useState(50); // Changed default to 50
 
   const { items, isLoading, error, updateItem, deleteItem } = useItems();
 
@@ -149,12 +149,9 @@ export const InventoryList = () => {
             onValueChange={handleItemsPerPageChange}
           >
             <SelectTrigger className="w-[70px]">
-              <SelectValue placeholder="10" />
+              <SelectValue placeholder="50" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="5">5</SelectItem>
-              <SelectItem value="10">10</SelectItem>
-              <SelectItem value="20">20</SelectItem>
               <SelectItem value="50">50</SelectItem>
               <SelectItem value="100">100</SelectItem>
             </SelectContent>
