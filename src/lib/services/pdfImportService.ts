@@ -3,7 +3,8 @@ import { addItem } from './itemService';
 import { toast } from 'sonner';
 import { Item } from '../types';
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+// Use a fake worker to avoid CORS issues with CDN
+pdfjsLib.GlobalWorkerOptions.workerSrc = false;
 
 interface PDFData {
   orderNumber: string;    // Číslo zakázky

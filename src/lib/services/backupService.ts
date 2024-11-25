@@ -73,21 +73,19 @@ export const importInventory = async (file: File): Promise<Item[]> => {
   
   const items = lines.slice(1).map(line => {
     const values = line.split(',');
-    const item: Item = {
+    return {
       id: sanitizeString(values[0]) || Math.random().toString(36).substr(2, 9),
-      code: sanitizeString(values[1]) || '',
+      code: sanitizeString(values[1]),
       quantity: sanitizeNumber(values[2]),
-      company: sanitizeString(values[3]) || '',
-      customer: sanitizeString(values[4]) || '',
+      company: sanitizeString(values[3]),
+      customer: sanitizeString(values[4]),
       createdAt: new Date(),
       updatedAt: new Date(),
       deleted: false
-    };
-
-    return itemSchema.parse(item);
+    } as Item;
   });
 
-  return items;
+  return items.map(item => itemSchema.parse(item));
 };
 
 export const importCompanies = async (file: File): Promise<Company[]> => {
@@ -96,16 +94,14 @@ export const importCompanies = async (file: File): Promise<Company[]> => {
   
   const companies = lines.slice(1).map(line => {
     const [rawId, rawName] = line.split(',');
-    const company: Company = {
+    return {
       id: sanitizeString(rawId) || Math.random().toString(36).substr(2, 9),
-      name: sanitizeString(rawName) || '',
+      name: sanitizeString(rawName),
       deleted: false
-    };
-
-    return companySchema.parse(company);
+    } as Company;
   });
 
-  return companies;
+  return companies.map(company => companySchema.parse(company));
 };
 
 export const importCustomers = async (file: File): Promise<Customer[]> => {
@@ -114,15 +110,13 @@ export const importCustomers = async (file: File): Promise<Customer[]> => {
   
   const customers = lines.slice(1).map(line => {
     const [rawId, rawName, rawCompanyId] = line.split(',');
-    const customer: Customer = {
+    return {
       id: sanitizeString(rawId) || Math.random().toString(36).substr(2, 9),
-      name: sanitizeString(rawName) || '',
-      companyId: sanitizeString(rawCompanyId) || '',
+      name: sanitizeString(rawName),
+      companyId: sanitizeString(rawCompanyId),
       deleted: false
-    };
-
-    return customerSchema.parse(customer);
+    } as Customer;
   });
 
-  return customers;
+  return customers.map(customer => customerSchema.parse(customer));
 };
