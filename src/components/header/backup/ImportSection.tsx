@@ -81,29 +81,51 @@ export const ImportSection = () => {
 
   const handleHtmlImport = async (file: File) => {
     try {
+      console.log('Starting HTML import process...');
       const text = await file.text();
-      const { rows } = parseHtmlTable(text);
+      console.log('HTML content loaded, starting parsing...');
       
-      const items: Item[] = rows.map((row): Item => ({
-        id: Math.random().toString(36).substr(2, 9),
-        code: row['číslo zakázky'] || row['značka'] || '',
-        quantity: 1,
-        company: row['popis'] || '',
-        customer: `${row['délka (cm)'] || ''}x${row['šířka (cm)'] || ''}x${row['výška (cm)'] || ''} - ${row['č. balení'] || ''}`,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        deleted: false
-      }));
+      const { headers, rows } = parseHtmlTable(text);
+      console.log('Available headers:', headers);
+      
+      console.log('Converting rows to inventory items...');
+      const items: Item[] = rows.map((row): Item => {
+        const code = row['číslo zakázky'] || row['značka'] || '';
+        const company = row['popis'] || '';
+        const dimensions = `${row['délka (cm)'] || ''}x${row['šířka (cm)'] || ''}x${row['výška (cm)'] || ''}`;
+        const packaging = row['č. balení'] || '';
+        
+        console.log('Processing row:', {
+          code,
+          company,
+          dimensions,
+          packaging
+        });
+
+        return {
+          id: Math.random().toString(36).substr(2, 9),
+          code,
+          quantity: 1,
+          company,
+          customer: `${dimensions} - ${packaging}`,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          deleted: false
+        };
+      });
 
       if (items.length === 0) {
+        console.log('No valid items found for import');
         toast.error("Neboli nájdené žiadne dáta na import");
         return;
       }
 
+      console.log('Items prepared for import:', items);
       await importInventory(items);
       toast.success(`Úspešne importovaných ${items.length} položiek z HTML`);
       window.location.reload();
     } catch (error) {
+      console.error('HTML import error:', error);
       toast.error(`Chyba pri importovaní HTML: ${error}`);
     }
   };
