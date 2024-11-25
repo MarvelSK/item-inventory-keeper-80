@@ -51,16 +51,12 @@ export const InventoryListItem = ({ item, onEdit, onDelete }: InventoryListItemP
       <TableRow className="group cursor-pointer" onClick={handleRowClick}>
         <TableCell className="font-medium">{item.code}</TableCell>
         <TableCell>{item.quantity}</TableCell>
+        <TableCell className="hidden sm:table-cell">{customerName}</TableCell>
         <TableCell className="hidden sm:table-cell">
-          <div>
-            {customerName}
-            {customer?.tags && customer.tags.length > 0 && (
-              <div className="flex flex-wrap gap-1 mt-1">
-                {customer.tags.map((tag) => (
-                  <TagBadge key={tag.id} tag={tag} />
-                ))}
-              </div>
-            )}
+          <div className="flex flex-wrap gap-1">
+            {customer?.tags?.map((tag) => (
+              <TagBadge key={tag.id} tag={tag} />
+            ))}
           </div>
         </TableCell>
         <TableCell className="hidden lg:table-cell">{item.description || "-"}</TableCell>
@@ -124,7 +120,7 @@ export const InventoryListItem = ({ item, onEdit, onDelete }: InventoryListItemP
                 <p><strong>Zákazník:</strong> {customerName}</p>
                 {customer?.tags && customer.tags.length > 0 && (
                   <div>
-                    <strong>Štítky:</strong>
+                    <strong>Štítky zákazníka:</strong>
                     <div className="flex flex-wrap gap-1 mt-1">
                       {customer.tags.map((tag) => (
                         <TagBadge key={tag.id} tag={tag} />
