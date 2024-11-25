@@ -3,8 +3,8 @@ import { addItem } from './itemService';
 import { toast } from 'sonner';
 import { Item } from '../types';
 
-// Use a fake worker to avoid CORS issues with CDN
-pdfjsLib.GlobalWorkerOptions.workerSrc = false;
+// Configure worker
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsLib.DefaultWorkerMessageHandler;
 
 interface PDFData {
   orderNumber: string;    // Číslo zakázky
@@ -47,11 +47,15 @@ export const parsePDFData = async (file: File): Promise<void> => {
     }
 
     for (const item of items) {
-      const newItem: Omit<Item, 'id' | 'createdAt' | 'updatedAt' | 'deleted'> = {
+      const newItem: Item = {
+        id: Math.random().toString(36).substr(2, 9),
         code: item.code,
         quantity: 1,
         company: 'default',
-        customer: item.orderNumber
+        customer: item.orderNumber,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        deleted: false
       };
       
       await addItem(newItem);

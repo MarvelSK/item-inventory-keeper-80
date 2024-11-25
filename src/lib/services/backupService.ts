@@ -71,9 +71,9 @@ export const importInventory = async (file: File): Promise<Item[]> => {
   const text = await file.text();
   const lines = text.split('\n').filter(line => line.trim());
   
-  const items = lines.slice(1).map(line => {
+  return lines.slice(1).map(line => {
     const values = line.split(',');
-    return {
+    const item: Item = {
       id: sanitizeString(values[0]) || Math.random().toString(36).substr(2, 9),
       code: sanitizeString(values[1]),
       quantity: sanitizeNumber(values[2]),
@@ -82,41 +82,38 @@ export const importInventory = async (file: File): Promise<Item[]> => {
       createdAt: new Date(),
       updatedAt: new Date(),
       deleted: false
-    } as Item;
+    };
+    return itemSchema.parse(item);
   });
-
-  return items.map(item => itemSchema.parse(item));
 };
 
 export const importCompanies = async (file: File): Promise<Company[]> => {
   const text = await file.text();
   const lines = text.split('\n').filter(line => line.trim());
   
-  const companies = lines.slice(1).map(line => {
+  return lines.slice(1).map(line => {
     const [rawId, rawName] = line.split(',');
-    return {
+    const company: Company = {
       id: sanitizeString(rawId) || Math.random().toString(36).substr(2, 9),
       name: sanitizeString(rawName),
       deleted: false
-    } as Company;
+    };
+    return companySchema.parse(company);
   });
-
-  return companies.map(company => companySchema.parse(company));
 };
 
 export const importCustomers = async (file: File): Promise<Customer[]> => {
   const text = await file.text();
   const lines = text.split('\n').filter(line => line.trim());
   
-  const customers = lines.slice(1).map(line => {
+  return lines.slice(1).map(line => {
     const [rawId, rawName, rawCompanyId] = line.split(',');
-    return {
+    const customer: Customer = {
       id: sanitizeString(rawId) || Math.random().toString(36).substr(2, 9),
       name: sanitizeString(rawName),
       companyId: sanitizeString(rawCompanyId),
       deleted: false
-    } as Customer;
+    };
+    return customerSchema.parse(customer);
   });
-
-  return customers.map(customer => customerSchema.parse(customer));
 };
