@@ -1,23 +1,18 @@
 import { useState } from "react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
-import { Tag } from "@/lib/types";
-import { TagBadge } from "./TagBadge";
-import { ChromePicker } from "react-color";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { toast } from "sonner";
+import { Tag } from "@/lib/types";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { ChromePicker } from "react-color";
 
 interface TagManagerProps {
   tags: Tag[];
   onTagsChange: (tags: Tag[]) => void;
 }
 
-const existingTags: Tag[] = [
-  { id: "1", name: "VIP", color: "#FF0000" },
-  { id: "2", name: "Bežný", color: "#00FF00" },
-  { id: "3", name: "Nový", color: "#0000FF" },
-];
+const existingTags: Tag[] = [];
 
 export const TagManager = ({ tags, onTagsChange }: TagManagerProps) => {
   const [newTagName, setNewTagName] = useState("");
@@ -66,7 +61,7 @@ export const TagManager = ({ tags, onTagsChange }: TagManagerProps) => {
             <SelectContent>
               {existingTags
                 .filter(tag => !tags.some(t => t.id === tag.id))
-                .map(tag => (
+                .map((tag) => (
                   <SelectItem key={tag.id} value={tag.id}>
                     <div className="flex items-center gap-2">
                       <div 
