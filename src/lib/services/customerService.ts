@@ -1,11 +1,7 @@
 import { Customer } from '../models/types';
 import { cache } from '../cache';
 
-export let customers: Customer[] = [
-  { id: '1', name: 'John Smith', labels: [], deleted: false },
-  { id: '2', name: 'Alice Johnson', labels: [], deleted: false },
-  { id: '3', name: 'Bob Williams', labels: [], deleted: false },
-];
+export let customers: Customer[] = [];
 
 export const addCustomer = async (name: string): Promise<Customer> => {
   const newCustomer: Customer = {

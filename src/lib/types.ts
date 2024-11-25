@@ -4,6 +4,9 @@ export interface Item {
   quantity: number;
   company: string;
   customer: string;
+  description?: string;
+  size?: string;
+  labels: Label[];
   createdAt: Date;
   updatedAt: Date;
   deleted: boolean;

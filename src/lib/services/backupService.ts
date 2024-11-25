@@ -1,6 +1,12 @@
-import { Item, Company, Customer } from '../models/types';
+import { Item, Company, Customer, Label } from '../models/types';
 import { z } from 'zod';
 import { v4 as uuidv4 } from 'uuid';
+
+const labelSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  color: z.string(),
+});
 
 const itemSchema = z.object({
   id: z.string(),
@@ -8,6 +14,9 @@ const itemSchema = z.object({
   quantity: z.number(),
   company: z.string(),
   customer: z.string(),
+  description: z.string().optional(),
+  size: z.string().optional(),
+  labels: z.array(labelSchema),
   createdAt: z.date(),
   updatedAt: z.date(),
   deleted: z.boolean(),
@@ -22,6 +31,7 @@ const companySchema = z.object({
 const customerSchema = z.object({
   id: z.string(),
   name: z.string(),
+  labels: z.array(labelSchema),
   deleted: z.boolean(),
 });
 
@@ -38,6 +48,9 @@ export const importInventory = async (file: File): Promise<Item[]> => {
       quantity: sanitizeNumber(values[2]),
       company: sanitizeString(values[3]),
       customer: sanitizeString(values[4]),
+      description: sanitizeString(values[5]) || "",
+      size: sanitizeString(values[6]) || "",
+      labels: [],
       createdAt: new Date(),
       updatedAt: new Date(),
       deleted: false
