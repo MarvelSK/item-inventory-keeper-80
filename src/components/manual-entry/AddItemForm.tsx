@@ -4,16 +4,20 @@ import { Input } from "../ui/input";
 import { CustomerSelect } from "./CustomerSelect";
 import { v4 as uuidv4 } from 'uuid';
 import { useItems } from "@/hooks/useItems";
-import { Textarea } from "../ui/textarea";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+
+const DESCRIPTIONS = ['Příslušenství', 'Plechy', 'Žaluzie', 'Vodící profily'];
 
 export const AddItemForm = () => {
   const [code, setCode] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [selectedCustomer, setSelectedCustomer] = useState("");
   const [description, setDescription] = useState("");
-  const [size, setSize] = useState("");
+  const [length, setLength] = useState<number | undefined>();
+  const [width, setWidth] = useState<number | undefined>();
+  const [height, setHeight] = useState<number | undefined>();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { addItem } = useItems();
 
@@ -32,8 +36,10 @@ export const AddItemForm = () => {
         code,
         quantity,
         description,
-        size,
-        tags: [], // Tags will be inherited from customer
+        length,
+        width,
+        height,
+        tags: [],
         customer: selectedCustomer,
         company: "",
         createdAt: new Date(),
@@ -46,7 +52,9 @@ export const AddItemForm = () => {
       setQuantity(1);
       setSelectedCustomer("");
       setDescription("");
-      setSize("");
+      setLength(undefined);
+      setWidth(undefined);
+      setHeight(undefined);
       toast.success("Položka bola úspešne pridaná");
     } catch (error) {
       if (error instanceof Error) {
@@ -76,17 +84,38 @@ export const AddItemForm = () => {
         onChange={(e) => setQuantity(Number(e.target.value))}
         required
       />
-      <Input
-        placeholder="Veľkosť"
-        value={size}
-        onChange={(e) => setSize(e.target.value)}
-      />
-      <Textarea
-        placeholder="Popis"
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-        className="min-h-[100px]"
-      />
+      <Select value={description} onValueChange={setDescription}>
+        <SelectTrigger>
+          <SelectValue placeholder="Vyberte popis" />
+        </SelectTrigger>
+        <SelectContent>
+          {DESCRIPTIONS.map((desc) => (
+            <SelectItem key={desc} value={desc}>
+              {desc}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <div className="grid grid-cols-3 gap-2">
+        <Input
+          type="number"
+          placeholder="Délka (cm)"
+          value={length ?? ""}
+          onChange={(e) => setLength(e.target.value ? Number(e.target.value) : undefined)}
+        />
+        <Input
+          type="number"
+          placeholder="Šířka (cm)"
+          value={width ?? ""}
+          onChange={(e) => setWidth(e.target.value ? Number(e.target.value) : undefined)}
+        />
+        <Input
+          type="number"
+          placeholder="Výška (cm)"
+          value={height ?? ""}
+          onChange={(e) => setHeight(e.target.value ? Number(e.target.value) : undefined)}
+        />
+      </div>
       <CustomerSelect value={selectedCustomer} onChange={setSelectedCustomer} onAddNew={() => {}} />
       <Button 
         type="submit" 
