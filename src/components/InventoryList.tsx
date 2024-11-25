@@ -166,7 +166,9 @@ export const InventoryList = () => {
               <PaginationPrevious 
                 onClick={() => handlePageChange(currentPage - 1)}
                 className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-              />
+              >
+                Predchádzajúca
+              </PaginationPrevious>
             </PaginationItem>
             {Array.from({ length: Math.max(1, totalPages) }, (_, i) => i + 1).map((page) => (
               <PaginationItem key={page}>
@@ -182,7 +184,9 @@ export const InventoryList = () => {
               <PaginationNext
                 onClick={() => handlePageChange(currentPage + 1)}
                 className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
-              />
+              >
+                Ďalšia
+              </PaginationNext>
             </PaginationItem>
           </PaginationContent>
         </Pagination>

@@ -13,11 +13,10 @@ interface TagManagerProps {
   onTagsChange: (tags: Tag[]) => void;
 }
 
-// This would typically come from a global state or context
 const existingTags: Tag[] = [
   { id: "1", name: "VIP", color: "#FF0000" },
-  { id: "2", name: "Regular", color: "#00FF00" },
-  { id: "3", name: "New", color: "#0000FF" },
+  { id: "2", name: "Bežný", color: "#00FF00" },
+  { id: "3", name: "Nový", color: "#0000FF" },
 ];
 
 export const TagManager = ({ tags, onTagsChange }: TagManagerProps) => {
@@ -29,13 +28,13 @@ export const TagManager = ({ tags, onTagsChange }: TagManagerProps) => {
     const tagToAdd = existingTags.find(t => t.id === tagId);
     if (tagToAdd && !tags.some(t => t.id === tagId)) {
       onTagsChange([...tags, tagToAdd]);
-      toast.success("Tag added successfully");
+      toast.success("Štítok bol úspešne pridaný");
     }
   };
 
   const handleAddNewTag = () => {
     if (!newTagName.trim()) {
-      toast.error("Please enter a tag name");
+      toast.error("Prosím zadajte názov štítku");
       return;
     }
 
@@ -48,12 +47,12 @@ export const TagManager = ({ tags, onTagsChange }: TagManagerProps) => {
     onTagsChange([...tags, newTag]);
     setNewTagName("");
     setIsCreatingNew(false);
-    toast.success("Tag added successfully");
+    toast.success("Štítok bol úspešne pridaný");
   };
 
   const handleRemoveTag = (tagId: string) => {
     onTagsChange(tags.filter((tag) => tag.id !== tagId));
-    toast.success("Tag removed successfully");
+    toast.success("Štítok bol odstránený");
   };
 
   return (
@@ -62,7 +61,7 @@ export const TagManager = ({ tags, onTagsChange }: TagManagerProps) => {
         <div className="flex gap-2">
           <Select onValueChange={handleAddExistingTag}>
             <SelectTrigger className="flex-1">
-              <SelectValue placeholder="Select existing tag" />
+              <SelectValue placeholder="Vyberte existujúci štítok" />
             </SelectTrigger>
             <SelectContent>
               {existingTags
@@ -80,12 +79,12 @@ export const TagManager = ({ tags, onTagsChange }: TagManagerProps) => {
                 ))}
             </SelectContent>
           </Select>
-          <Button onClick={() => setIsCreatingNew(true)}>New Tag</Button>
+          <Button onClick={() => setIsCreatingNew(true)}>Nový štítok</Button>
         </div>
       ) : (
         <div className="flex gap-2">
           <Input
-            placeholder="Tag name"
+            placeholder="Názov štítku"
             value={newTagName}
             onChange={(e) => setNewTagName(e.target.value)}
             className="flex-1"
@@ -98,7 +97,7 @@ export const TagManager = ({ tags, onTagsChange }: TagManagerProps) => {
                 className="w-[100px]"
                 style={{ backgroundColor: selectedColor }}
               >
-                Color
+                Farba
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0">
@@ -108,8 +107,8 @@ export const TagManager = ({ tags, onTagsChange }: TagManagerProps) => {
               />
             </PopoverContent>
           </Popover>
-          <Button onClick={handleAddNewTag}>Add</Button>
-          <Button variant="outline" onClick={() => setIsCreatingNew(false)}>Cancel</Button>
+          <Button onClick={handleAddNewTag}>Pridať</Button>
+          <Button variant="outline" onClick={() => setIsCreatingNew(false)}>Zrušiť</Button>
         </div>
       )}
       <div className="flex flex-wrap gap-1">
