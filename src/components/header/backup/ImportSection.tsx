@@ -131,9 +131,9 @@ export const ImportSection = () => {
       </div>
       
       {pdfContent && (
-        <div className="mt-4 p-4 border rounded-lg bg-white">
-          <h3 className="text-lg font-medium mb-2">PDF Content</h3>
-          <div className="pdf-preview">
+        <div className="mt-4 border rounded-lg bg-gray-50 p-4">
+          <h3 className="text-lg font-medium mb-4">PDF Preview</h3>
+          <div className="pdf-preview max-h-[500px] overflow-y-auto">
             {renderHtmlContent(pdfContent)}
           </div>
         </div>
