@@ -1,112 +1,63 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { addItem } from "@/lib/inventory";
-import { toast } from "sonner";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
 import { CompanySelect } from "./CompanySelect";
 import { CustomerSelect } from "./CustomerSelect";
-import { CompanyDialog } from "../CompanyDialog";
-import { CustomerDialog } from "../CustomerDialog";
+import { v4 as uuidv4 } from 'uuid';
+import { useItems } from "@/hooks/useItems";
 
 export const AddItemForm = () => {
-  const [formData, setFormData] = useState({
-    code: "",
-    quantity: 0,
-    company: "",
-    customer: "",
-  });
-  const [isCompanyDialogOpen, setIsCompanyDialogOpen] = useState(false);
-  const [isCustomerDialogOpen, setIsCustomerDialogOpen] = useState(false);
+  const [code, setCode] = useState("");
+  const [quantity, setQuantity] = useState(1);
+  const [selectedCompany, setSelectedCompany] = useState("");
+  const [selectedCustomer, setSelectedCustomer] = useState("");
+  const { addItem } = useItems();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.code || !formData.company || !formData.customer) {
-      toast.error("Vyplňte všetky povinné polia");
+    
+    if (!code || !selectedCompany || !selectedCustomer) {
       return;
     }
 
-    // Validate that code contains only numbers
-    if (!/^\d+$/.test(formData.code)) {
-      toast.error("Kód môže obsahovať iba čísla");
-      return;
-    }
+    const newItem = {
+      id: uuidv4(),
+      code,
+      quantity,
+      company: selectedCompany,
+      customer: selectedCustomer,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      deleted: false
+    };
 
-    addItem(formData);
-    toast.success("Položka bola pridaná");
-    setFormData({ code: "", quantity: 0, company: "", customer: "" });
+    await addItem(newItem); // Adding the new item
+    setCode("");
+    setQuantity(1);
+    setSelectedCompany("");
+    setSelectedCustomer("");
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Kód položky
-        </label>
-        <Input
-          value={formData.code}
-          onChange={(e) =>
-            setFormData({ ...formData, code: e.target.value })
-          }
-          placeholder="Zadajte kód položky"
-          required
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Množstvo
-        </label>
-        <Input
-          type="number"
-          value={formData.quantity}
-          onChange={(e) =>
-            setFormData({ ...formData, quantity: parseInt(e.target.value) || 0 })
-          }
-          placeholder="Zadajte množstvo"
-          required
-          min="0"
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Spoločnosť
-        </label>
-        <CompanySelect
-          value={formData.company}
-          onChange={(value) => setFormData({ ...formData, company: value })}
-          onAddNew={() => setIsCompanyDialogOpen(true)}
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Zákazník
-        </label>
-        <CustomerSelect
-          value={formData.customer}
-          companyId={formData.company}
-          onChange={(value) => setFormData({ ...formData, customer: value })}
-          onAddNew={() => setIsCustomerDialogOpen(true)}
-        />
-      </div>
-
-      <Button
-        type="submit"
-        className="w-full bg-[#212490] hover:bg-[#47acc9] text-white"
-      >
+      <Input
+        placeholder="Kód položky"
+        value={code}
+        onChange={(e) => setCode(e.target.value)}
+        required
+      />
+      <Input
+        type="number"
+        placeholder="Množstvo"
+        value={quantity}
+        onChange={(e) => setQuantity(Number(e.target.value))}
+        required
+      />
+      <CompanySelect value={selectedCompany} onChange={setSelectedCompany} onAddNew={() => {}} />
+      <CustomerSelect value={selectedCustomer} companyId={selectedCompany} onChange={setSelectedCustomer} onAddNew={() => {}} />
+      <Button type="submit" className="w-full bg-[#212490] hover:bg-[#47acc9]">
         Pridať položku
       </Button>
-
-      <CompanyDialog 
-        open={isCompanyDialogOpen} 
-        onOpenChange={setIsCompanyDialogOpen}
-      />
-      
-      <CustomerDialog 
-        open={isCustomerDialogOpen} 
-        onOpenChange={setIsCustomerDialogOpen}
-      />
     </form>
   );
 };

@@ -1,5 +1,5 @@
-import { addCustomer, addItem } from './index';
 import { v4 as uuidv4 } from 'uuid';
+import { addCustomer, addItem } from './index';
 
 interface ParsedItem {
   orderNumber: string;
@@ -17,40 +17,67 @@ const parseItems = (data: string): ParsedItem[] => {
   const items: ParsedItem[] = [];
   let currentOrder = '';
   let currentBrand = '';
+  let currentDescription = '';
+  let currentDimensions = { length: 0, width: 0, height: 0 };
+  let currentPackage = '';
 
   for (const line of lines) {
-    // Skip empty lines and header lines
-    if (!line.trim() || line.includes('Číslo zakázky') || line.includes('Počet balíků')) {
+    const trimmedLine = line.trim();
+    
+    // Skip empty lines and headers
+    if (!trimmedLine || trimmedLine.includes('Číslo zakázky') || trimmedLine.includes('Počet balíků')) {
       continue;
     }
 
-    // Check if this is an order number line
-    if (line.includes('24ZA')) {
-      const [orderWithBrand] = line.split(' - ');
-      const brand = line.split(' - ')[1]?.trim() || '';
-      currentOrder = orderWithBrand.trim();
-      currentBrand = brand;
-      console.log('Found new order:', { currentOrder, currentBrand });
+    // Check if this is an order number line (24ZA...)
+    if (trimmedLine.includes('24ZA')) {
+      currentOrder = trimmedLine;
+      console.log('Found order:', currentOrder);
       continue;
     }
 
-    // Parse item data
-    const parts = line.trim().split(/\s+/);
-    if (parts.length >= 6) {
-      const [description, length, width, height, , packageNumber] = parts;
+    // Description line
+    if (currentOrder && !currentDescription && !trimmedLine.startsWith('24P')) {
+      currentDescription = trimmedLine;
+      console.log('Found description:', currentDescription);
+      continue;
+    }
+
+    // Parse dimensions
+    const numbers = trimmedLine.match(/\d+/g);
+    if (numbers && numbers.length >= 3 && currentDescription) {
+      currentDimensions = {
+        length: parseInt(numbers[0]),
+        width: parseInt(numbers[1]),
+        height: parseInt(numbers[2])
+      };
+      console.log('Found dimensions:', currentDimensions);
+      continue;
+    }
+
+    // Package number (24P...)
+    if (trimmedLine.startsWith('24P')) {
+      currentPackage = trimmedLine;
+      console.log('Found package number:', currentPackage);
       
-      if (packageNumber && packageNumber.startsWith('24P')) {
+      // When we have all the data, create an item
+      if (currentOrder && currentDescription && currentPackage) {
         const parsedItem = {
           orderNumber: currentOrder,
-          brand: currentBrand,
-          description,
-          length: Number(length),
-          width: Number(width),
-          height: Number(height),
-          packageNumber
+          brand: currentOrder, // Using the full order number as brand/customer name
+          description: currentDescription,
+          length: currentDimensions.length,
+          width: currentDimensions.width,
+          height: currentDimensions.height,
+          packageNumber: currentPackage
         };
-        console.log('Parsed item:', parsedItem);
+        console.log('Created parsed item:', parsedItem);
         items.push(parsedItem);
+        
+        // Reset for next item
+        currentDescription = '';
+        currentDimensions = { length: 0, width: 0, height: 0 };
+        currentPackage = '';
       }
     }
   }
@@ -63,23 +90,18 @@ export const importMassItems = async (data: string) => {
   console.log('Starting mass import of items');
   const parsedItems = parseItems(data);
   
-  // Get unique brands to create customers
-  const uniqueBrands = [...new Set(parsedItems.map(item => item.brand))];
-  console.log('Unique brands found:', uniqueBrands);
+  // Get unique order numbers to create customers
+  const uniqueOrders = [...new Set(parsedItems.map(item => item.orderNumber))];
+  console.log('Unique orders found:', uniqueOrders);
   
-  // Create customers for each brand
+  // Create customers for each order
   const customerMap = new Map();
-  for (const brand of uniqueBrands) {
-    if (brand) {
-      console.log(`Creating customer for brand: ${brand}`);
-      const customer = await addCustomer({
-        id: uuidv4(),
-        name: brand,
-        companyId: "1", // Using default company ID
-        deleted: false
-      });
+  for (const order of uniqueOrders) {
+    if (order) {
+      console.log(`Creating customer for order: ${order}`);
+      const customer = await addCustomer(order, "1"); // Using default company ID
       console.log('Created customer:', customer);
-      customerMap.set(brand, customer.id);
+      customerMap.set(order, customer.id);
     }
   }
 
@@ -87,7 +109,7 @@ export const importMassItems = async (data: string) => {
   const createdItems = [];
   for (const item of parsedItems) {
     console.log(`Creating item for package: ${item.packageNumber}`);
-    const customerId = customerMap.get(item.brand);
+    const customerId = customerMap.get(item.orderNumber);
     
     if (customerId) {
       const newItem = await addItem({
