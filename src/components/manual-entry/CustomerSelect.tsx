@@ -13,12 +13,11 @@ import { Customer } from "@/lib/types";
 
 interface CustomerSelectProps {
   value: string;
-  companyId: string;
   onChange: (value: string) => void;
   onAddNew: () => void;
 }
 
-export const CustomerSelect = ({ value, companyId, onChange, onAddNew }: CustomerSelectProps) => {
+export const CustomerSelect = ({ value, onChange, onAddNew }: CustomerSelectProps) => {
   const [customers, setCustomers] = useState<Customer[]>([]);
 
   useEffect(() => {
@@ -29,10 +28,6 @@ export const CustomerSelect = ({ value, companyId, onChange, onAddNew }: Custome
     fetchCustomers();
   }, []);
 
-  const filteredCustomers = customers.filter(
-    (customer) => !companyId || customer.companyId === companyId
-  );
-
   return (
     <div className="flex items-center space-x-2">
       <div className="flex-1">
@@ -41,7 +36,7 @@ export const CustomerSelect = ({ value, companyId, onChange, onAddNew }: Custome
             <SelectValue placeholder="Vyberte zákazníka" />
           </SelectTrigger>
           <SelectContent className="bg-white z-50">
-            {filteredCustomers.map((customer) => (
+            {customers.map((customer) => (
               <SelectItem key={customer.id} value={customer.id}>
                 {customer.name}
               </SelectItem>

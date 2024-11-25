@@ -122,7 +122,7 @@ export const importMassItems = async (data: string) => {
   for (const order of uniqueOrders) {
     if (order) {
       console.log(`Creating customer for order: ${order}`);
-      const customer = await addCustomer(order, "1"); // Using default company ID
+      const customer = await addCustomer(order);
       console.log('Created customer:', customer);
       customerMap.set(order, customer.id);
     }
@@ -139,7 +139,7 @@ export const importMassItems = async (data: string) => {
         id: uuidv4(),
         code: item.packageNumber,
         quantity: 1,
-        company: "1", // Using default company ID
+        company: "1",
         customer: customerId,
         createdAt: new Date(),
         updatedAt: new Date(),

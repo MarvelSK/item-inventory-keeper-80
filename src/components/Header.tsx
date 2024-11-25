@@ -1,4 +1,3 @@
-import { CompanyDialog } from "./CompanyDialog";
 import { CustomerDialog } from "./CustomerDialog";
 import { DatabaseBackup } from "lucide-react";
 import { MobileMenu } from "./header/MobileMenu";
@@ -27,7 +26,6 @@ export const Header = () => {
 
           {/* Desktop Menu */}
           <nav className="hidden md:flex items-center space-x-4">
-            <CompanyDialog />
             <CustomerDialog />
             <BackupDialog />
           </nav>

@@ -11,8 +11,7 @@ export const useCustomers = () => {
   });
 
   const addMutation = useMutation({
-    mutationFn: ({ name, companyId }: { name: string; companyId: string }) => 
-      addCustomer(name, companyId),
+    mutationFn: (name: string) => addCustomer(name),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['customers'] });
       toast.success('Zákazník bol pridaný');

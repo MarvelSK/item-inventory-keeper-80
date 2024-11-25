@@ -6,14 +6,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { CompanyDialog } from "../CompanyDialog";
 import { CustomerDialog } from "../CustomerDialog";
 import { BackupDialog } from "./BackupDialog";
 import { useState } from "react";
 
 export const MobileMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [isCompanyDialogOpen, setIsCompanyDialogOpen] = useState(false);
   const [isCustomerDialogOpen, setIsCustomerDialogOpen] = useState(false);
   const [isBackupDialogOpen, setIsBackupDialogOpen] = useState(false);
 
@@ -39,15 +37,6 @@ export const MobileMenu = () => {
             className="p-3 focus:bg-transparent hover:bg-slate-50 cursor-pointer"
             onSelect={(e) => {
               e.preventDefault();
-              handleMenuItemClick(setIsCompanyDialogOpen);
-            }}
-          >
-            Správa spoločností
-          </DropdownMenuItem>
-          <DropdownMenuItem 
-            className="p-3 focus:bg-transparent hover:bg-slate-50 cursor-pointer"
-            onSelect={(e) => {
-              e.preventDefault();
               handleMenuItemClick(setIsCustomerDialogOpen);
             }}
           >
@@ -65,7 +54,6 @@ export const MobileMenu = () => {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <CompanyDialog open={isCompanyDialogOpen} onOpenChange={setIsCompanyDialogOpen} />
       <CustomerDialog open={isCustomerDialogOpen} onOpenChange={setIsCustomerDialogOpen} />
       <BackupDialog open={isBackupDialogOpen} onOpenChange={setIsBackupDialogOpen} />
     </>
