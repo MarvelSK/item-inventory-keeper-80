@@ -11,6 +11,7 @@ export const ImportSection = () => {
   const inventoryFileRef = useRef<HTMLInputElement>(null);
   const companiesFileRef = useRef<HTMLInputElement>(null);
   const customersFileRef = useRef<HTMLInputElement>(null);
+  const htmlFileRef = useRef<HTMLInputElement>(null);
 
   const handleImport = async (type: 'inventory' | 'companies' | 'customers', file: File) => {
     try {
@@ -78,6 +79,30 @@ export const ImportSection = () => {
     }
   };
 
+  const handleHtmlImport = async (file: File) => {
+    try {
+      const text = await file.text();
+      const { rows } = parseHtmlTable(text);
+      
+      const items: Item[] = rows.map((row): Item => ({
+        id: Math.random().toString(36).substr(2, 9),
+        code: row.code || row.kód || '',
+        quantity: parseInt(row.quantity || row.množstvo || '0'),
+        company: row.company || row.spoločnosť || '',
+        customer: row.customer || row.zákazník || '',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        deleted: false
+      }));
+
+      await importInventory(items);
+      toast.success("Dáta boli úspešne importované z HTML");
+      window.location.reload();
+    } catch (error) {
+      toast.error(`Chyba pri importovaní HTML: ${error}`);
+    }
+  };
+
   return (
     <div className="flex gap-2">
       <div className="flex-1">
@@ -137,6 +162,26 @@ export const ImportSection = () => {
           onChange={(e) => {
             const file = e.target.files?.[0];
             if (file) handleImport('customers', file);
+          }}
+        />
+      </div>
+      <div className="flex-1">
+        <Button
+          variant="outline"
+          className="w-full hover:text-[#47acc9]"
+          onClick={() => htmlFileRef.current?.click()}
+        >
+          <Upload className="mr-2 h-4 w-4" />
+          Import HTML
+        </Button>
+        <Input
+          type="file"
+          ref={htmlFileRef}
+          className="hidden"
+          accept=".html"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) handleHtmlImport(file);
           }}
         />
       </div>
