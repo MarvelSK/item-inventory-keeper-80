@@ -2,6 +2,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { addCustomer } from './customerService';
 import { addItem } from './itemService';
 
+const VALID_DESCRIPTIONS = ['Příslušenství', 'Plechy', 'Žaluzie', 'Vodící profily'];
+
 interface ParsedItem {
   orderNumber: string;
   brand: string;
@@ -38,10 +40,11 @@ const parseItems = (data: string): ParsedItem[] => {
         currentBrand = brand;
         
         // Extract item details from the same line
-        const description = parts.slice(parts.findIndex(p => p === brand) + 1, -4).join(' ');
-        const dimensions = parts.slice(-4);
-        const packageNumber = dimensions.pop() || '';
-        const [length, width, height] = dimensions.map(Number);
+        const description = parts.slice(parts.findIndex(p => p === brand) + 1)
+          .find(part => VALID_DESCRIPTIONS.includes(part)) || '';
+        const remainingParts = parts.slice(parts.indexOf(description) + 1);
+        const [length, width, height] = remainingParts.slice(0, 3).map(Number);
+        const packageNumber = remainingParts[3] || '';
         
         console.log('Parsed order line:', {
           orderNumber: currentOrder,
@@ -51,6 +54,35 @@ const parseItems = (data: string): ParsedItem[] => {
           packageNumber
         });
         
+        if (packageNumber) {
+          items.push({
+            orderNumber: `${currentOrder} - ${currentBrand}`,
+            brand: currentBrand,
+            description,
+            length,
+            width,
+            height,
+            packageNumber
+          });
+        }
+      }
+    } else if (currentOrder && !line.includes('Počet')) {
+      // This is a continuation line with additional items
+      const parts = line.split(' ');
+      const packageNumber = parts.pop() || '';
+      const [height, width, length] = parts.slice(-3).map(Number);
+      const description = parts.slice(0, -3)
+        .find(part => VALID_DESCRIPTIONS.includes(part)) || '';
+      
+      console.log('Parsed continuation line:', {
+        orderNumber: currentOrder,
+        brand: currentBrand,
+        description,
+        dimensions: { length, width, height },
+        packageNumber
+      });
+      
+      if (packageNumber) {
         items.push({
           orderNumber: `${currentOrder} - ${currentBrand}`,
           brand: currentBrand,
@@ -61,30 +93,6 @@ const parseItems = (data: string): ParsedItem[] => {
           packageNumber
         });
       }
-    } else if (currentOrder && !line.includes('Počet')) {
-      // This is a continuation line with additional items
-      const parts = line.split(' ');
-      const packageNumber = parts.pop() || '';
-      const [height, width, length] = parts.slice(-3).map(Number);
-      const description = parts.slice(0, -3).join(' ');
-      
-      console.log('Parsed continuation line:', {
-        orderNumber: currentOrder,
-        brand: currentBrand,
-        description,
-        dimensions: { length, width, height },
-        packageNumber
-      });
-      
-      items.push({
-        orderNumber: `${currentOrder} - ${currentBrand}`,
-        brand: currentBrand,
-        description,
-        length,
-        width,
-        height,
-        packageNumber
-      });
     }
   }
 
@@ -122,7 +130,7 @@ export const importMassItems = async (data: string) => {
         id: uuidv4(),
         code: item.packageNumber,
         quantity: 1,
-        company: "1", // Using default company ID "Nezaradené"
+        company: "1", // Using default company ID
         customer: customerId,
         createdAt: new Date(),
         updatedAt: new Date(),
