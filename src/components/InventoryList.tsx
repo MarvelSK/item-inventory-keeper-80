@@ -8,6 +8,7 @@ import { InventoryTable } from "./inventory/InventoryTable";
 import { InventoryGrid } from "./inventory/InventoryGrid";
 import { useItems } from "@/hooks/useItems";
 import { Loader2 } from "lucide-react";
+import { MassImportDialog } from "./inventory/MassImportDialog";
 
 export const InventoryList = () => {
   const [search, setSearch] = useState("");
@@ -79,12 +80,15 @@ export const InventoryList = () => {
 
   return (
     <div className="space-y-4 px-4 sm:px-0">
-      <InventorySearch
-        search={search}
-        setSearch={setSearch}
-        viewMode={viewMode}
-        setViewMode={setViewMode}
-      />
+      <div className="flex justify-between items-center">
+        <InventorySearch
+          search={search}
+          setSearch={setSearch}
+          viewMode={viewMode}
+          setViewMode={setViewMode}
+        />
+        <MassImportDialog />
+      </div>
 
       {viewMode === "list" ? (
         <InventoryTable
