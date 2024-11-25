@@ -9,7 +9,6 @@ import { InventoryGrid } from "./inventory/InventoryGrid";
 import { useItems } from "@/hooks/useItems";
 import { Loader2 } from "lucide-react";
 import { MassImportDialog } from "./inventory/MassImportDialog";
-import { InventoryStats } from "./inventory/InventoryStats";
 
 export const InventoryList = () => {
   const [search, setSearch] = useState("");
@@ -90,8 +89,6 @@ export const InventoryList = () => {
         />
         <MassImportDialog />
       </div>
-
-      <InventoryStats items={items || []} />
 
       {viewMode === "list" ? (
         <InventoryTable
