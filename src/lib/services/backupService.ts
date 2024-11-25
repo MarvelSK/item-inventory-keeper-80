@@ -65,9 +65,13 @@ export const importAll = async (file: File) => {
     const parsedItems = data.items.map((item: any) => ({
       ...item,
       id: item.id || uuidv4(),
-      createdAt: new Date(item.createdAt),
-      updatedAt: new Date(item.updatedAt),
+      code: item.code || '',
+      quantity: item.quantity || 0,
+      company: item.company || '',
+      customer: item.customer || '',
       tags: item.tags || [],
+      createdAt: new Date(item.createdAt || Date.now()),
+      updatedAt: new Date(item.updatedAt || Date.now()),
       deleted: false
     }));
     const validatedItems = itemSchema.array().parse(parsedItems);
@@ -78,6 +82,7 @@ export const importAll = async (file: File) => {
     const parsedCompanies = data.companies.map((company: any) => ({
       ...company,
       id: company.id || uuidv4(),
+      name: company.name || '',
       deleted: false
     }));
     const validatedCompanies = companySchema.array().parse(parsedCompanies);
@@ -88,6 +93,7 @@ export const importAll = async (file: File) => {
     const parsedCustomers = data.customers.map((customer: any) => ({
       ...customer,
       id: customer.id || uuidv4(),
+      name: customer.name || '',
       tags: customer.tags || [],
       deleted: false
     }));
@@ -130,4 +136,43 @@ export const backupCustomers = async (customers: Customer[]) => {
   link.download = `customers_${new Date().toISOString()}.csv`;
   link.click();
   URL.revokeObjectURL(link.href);
+};
+
+export const importInventory = async (file: File) => {
+  const text = await file.text();
+  const data = JSON.parse(text);
+  const parsedItems = data.map((item: any) => ({
+    ...item,
+    id: item.id || uuidv4(),
+    createdAt: new Date(item.createdAt || Date.now()),
+    updatedAt: new Date(item.updatedAt || Date.now()),
+    deleted: false
+  }));
+  const validatedItems = itemSchema.array().parse(parsedItems);
+  items.push(...validatedItems);
+};
+
+export const importCompanies = async (file: File) => {
+  const text = await file.text();
+  const data = JSON.parse(text);
+  const parsedCompanies = data.map((company: any) => ({
+    ...company,
+    id: company.id || uuidv4(),
+    deleted: false
+  }));
+  const validatedCompanies = companySchema.array().parse(parsedCompanies);
+  companies.push(...validatedCompanies);
+};
+
+export const importCustomers = async (file: File) => {
+  const text = await file.text();
+  const data = JSON.parse(text);
+  const parsedCustomers = data.map((customer: any) => ({
+    ...customer,
+    id: customer.id || uuidv4(),
+    tags: customer.tags || [],
+    deleted: false
+  }));
+  const validatedCustomers = customerSchema.array().parse(parsedCustomers);
+  customers.push(...validatedCustomers);
 };
