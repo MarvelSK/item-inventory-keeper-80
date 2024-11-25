@@ -18,6 +18,12 @@ export interface Company {
 export interface Customer {
   id: string;
   name: string;
-  companyId: string;
+  labels: Label[];
   deleted: boolean;
+}
+
+export interface Label {
+  id: string;
+  name: string;
+  color: string;
 }

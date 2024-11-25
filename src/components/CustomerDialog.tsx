@@ -25,6 +25,8 @@ import { Trash2, Edit2 } from "lucide-react";
 import { EditCustomerForm } from "./EditCustomerForm";
 import { toast } from "sonner";
 import { ScrollArea } from "./ui/scroll-area";
+import { Customer } from "@/lib/types";
+import { LabelBadge } from "./labels/LabelBadge";
 
 interface CustomerDialogProps {
   open?: boolean;

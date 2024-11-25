@@ -25,49 +25,6 @@ const customerSchema = z.object({
   deleted: z.boolean(),
 });
 
-// Data sanitization functions
-const sanitizeString = (str: string): string => {
-  return (str || '').trim().replace(/[<>]/g, '');
-};
-
-const sanitizeNumber = (num: string): number => {
-  const parsed = parseInt(num, 10);
-  return isNaN(parsed) ? 0 : parsed;
-};
-
-export const backupInventory = async (items: Item[]) => {
-  const csvContent = items.map(item => 
-    `${item.code},${item.quantity},${item.company},${item.customer},${item.createdAt.toISOString()},${item.updatedAt.toISOString()}`
-  ).join('\n');
-  
-  downloadCsv(csvContent, 'inventory');
-};
-
-export const backupCompanies = async (companies: Company[]) => {
-  const csvContent = companies.map(company => 
-    `${company.id},${company.name}`
-  ).join('\n');
-  
-  downloadCsv(csvContent, 'companies');
-};
-
-export const backupCustomers = async (customers: Customer[]) => {
-  const csvContent = customers.map(customer => 
-    `${customer.id},${customer.name}`
-  ).join('\n');
-  
-  downloadCsv(csvContent, 'customers');
-};
-
-const downloadCsv = (content: string, type: string) => {
-  const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = `${type}_backup_${new Date().toISOString()}.csv`;
-  link.click();
-  URL.revokeObjectURL(link.href);
-};
-
 export const importInventory = async (file: File): Promise<Item[]> => {
   console.log('Starting inventory import');
   const text = await file.text();
@@ -131,6 +88,7 @@ export const importCustomers = async (file: File): Promise<Customer[]> => {
     const customer: Customer = {
       id: sanitizeString(rawId) || uuidv4(),
       name: sanitizeString(rawName),
+      labels: [],
       deleted: false
     };
 
@@ -143,4 +101,47 @@ export const importCustomers = async (file: File): Promise<Customer[]> => {
   });
 
   return customers;
+};
+
+// Data sanitization functions
+const sanitizeString = (str: string): string => {
+  return (str || '').trim().replace(/[<>]/g, '');
+};
+
+const sanitizeNumber = (num: string): number => {
+  const parsed = parseInt(num, 10);
+  return isNaN(parsed) ? 0 : parsed;
+};
+
+export const backupInventory = async (items: Item[]) => {
+  const csvContent = items.map(item => 
+    `${item.code},${item.quantity},${item.company},${item.customer},${item.createdAt.toISOString()},${item.updatedAt.toISOString()}`
+  ).join('\n');
+  
+  downloadCsv(csvContent, 'inventory');
+};
+
+export const backupCompanies = async (companies: Company[]) => {
+  const csvContent = companies.map(company => 
+    `${company.id},${company.name}`
+  ).join('\n');
+  
+  downloadCsv(csvContent, 'companies');
+};
+
+export const backupCustomers = async (customers: Customer[]) => {
+  const csvContent = customers.map(customer => 
+    `${customer.id},${customer.name}`
+  ).join('\n');
+  
+  downloadCsv(csvContent, 'customers');
+};
+
+const downloadCsv = (content: string, type: string) => {
+  const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `${type}_backup_${new Date().toISOString()}.csv`;
+  link.click();
+  URL.revokeObjectURL(link.href);
 };

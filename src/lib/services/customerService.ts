@@ -2,15 +2,16 @@ import { Customer } from '../models/types';
 import { cache } from '../cache';
 
 export let customers: Customer[] = [
-  { id: '1', name: 'John Smith', deleted: false },
-  { id: '2', name: 'Alice Johnson', deleted: false },
-  { id: '3', name: 'Bob Williams', deleted: false },
+  { id: '1', name: 'John Smith', labels: [], deleted: false },
+  { id: '2', name: 'Alice Johnson', labels: [], deleted: false },
+  { id: '3', name: 'Bob Williams', labels: [], deleted: false },
 ];
 
 export const addCustomer = async (name: string): Promise<Customer> => {
   const newCustomer: Customer = {
     id: Math.random().toString(36).substr(2, 9),
     name,
+    labels: [],
     deleted: false,
   };
   customers.push(newCustomer);
