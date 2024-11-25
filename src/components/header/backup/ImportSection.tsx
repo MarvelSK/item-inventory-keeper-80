@@ -4,6 +4,8 @@ import { Input } from "../../ui/input";
 import { useRef } from "react";
 import { importInventory, importCompanies, importCustomers } from "@/lib/inventory";
 import { toast } from "sonner";
+import { parseHtmlTable } from "@/lib/services/htmlParserService";
+import { Item } from "@/lib/types";
 
 export const ImportSection = () => {
   const inventoryFileRef = useRef<HTMLInputElement>(null);
@@ -12,21 +14,56 @@ export const ImportSection = () => {
 
   const handleImport = async (type: 'inventory' | 'companies' | 'customers', file: File) => {
     try {
-      switch (type) {
-        case 'inventory':
-          await importInventory(file);
-          toast.success("Inventár bol úspešne importovaný");
-          break;
-        case 'companies':
-          await importCompanies(file);
-          toast.success("Spoločnosti boli úspešne importované");
-          break;
-        case 'customers':
-          await importCustomers(file);
-          toast.success("Zákazníci boli úspešne importovaní");
-          break;
+      if (file.type === 'text/html') {
+        const text = await file.text();
+        const { rows } = parseHtmlTable(text);
+        
+        // Map HTML table data to inventory items
+        const items = rows.map((row): Item => ({
+          id: Math.random().toString(36).substr(2, 9),
+          code: row.code || row.kód || '',
+          quantity: parseInt(row.quantity || row.množstvo || '0'),
+          company: row.company || row.spoločnosť || '',
+          customer: row.customer || row.zákazník || '',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          deleted: false
+        }));
+
+        switch (type) {
+          case 'inventory':
+            await importInventory(items);
+            toast.success("Inventár bol úspešne importovaný z HTML");
+            break;
+          case 'companies':
+            await importCompanies(items);
+            toast.success("Spoločnosti boli úspešne importované z HTML");
+            break;
+          case 'customers':
+            await importCustomers(items);
+            toast.success("Zákazníci boli úspešne importovaní z HTML");
+            break;
+        }
+      } else if (file.type === 'text/csv') {
+        switch (type) {
+          case 'inventory':
+            await importInventory(file);
+            toast.success("Inventár bol úspešne importovaný");
+            break;
+          case 'companies':
+            await importCompanies(file);
+            toast.success("Spoločnosti boli úspešne importované");
+            break;
+          case 'customers':
+            await importCustomers(file);
+            toast.success("Zákazníci boli úspešne importovaní");
+            break;
+        }
+      } else {
+        throw new Error('Unsupported file type. Please use HTML or CSV files.');
       }
-      window.location.reload(); // Refresh the page to show imported data
+      
+      window.location.reload();
     } catch (error) {
       toast.error(`Chyba pri importovaní: ${error}`);
     }
@@ -47,7 +84,7 @@ export const ImportSection = () => {
           type="file"
           ref={inventoryFileRef}
           className="hidden"
-          accept=".csv"
+          accept=".csv,.html"
           onChange={(e) => {
             const file = e.target.files?.[0];
             if (file) handleImport('inventory', file);
@@ -67,7 +104,7 @@ export const ImportSection = () => {
           type="file"
           ref={companiesFileRef}
           className="hidden"
-          accept=".csv"
+          accept=".csv,.html"
           onChange={(e) => {
             const file = e.target.files?.[0];
             if (file) handleImport('companies', file);
@@ -87,7 +124,7 @@ export const ImportSection = () => {
           type="file"
           ref={customersFileRef}
           className="hidden"
-          accept=".csv"
+          accept=".csv,.html"
           onChange={(e) => {
             const file = e.target.files?.[0];
             if (file) handleImport('customers', file);
