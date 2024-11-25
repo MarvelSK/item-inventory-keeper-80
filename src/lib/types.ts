@@ -4,6 +4,12 @@ export interface Item {
   quantity: number;
   company: string;
   customer: string;
+  description?: string;
+  dimensions?: {
+    length: number;
+    width: number;
+    height: number;
+  };
   createdAt: Date;
   updatedAt: Date;
   deleted: boolean;
