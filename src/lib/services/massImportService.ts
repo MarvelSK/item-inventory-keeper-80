@@ -141,6 +141,11 @@ export const importMassItems = async (data: string) => {
         quantity: 1,
         company: "1",
         customer: customerId,
+        description: item.description,
+        length: item.length,
+        width: item.width,
+        height: item.height,
+        tags: [],
         createdAt: new Date(),
         updatedAt: new Date(),
         deleted: false
