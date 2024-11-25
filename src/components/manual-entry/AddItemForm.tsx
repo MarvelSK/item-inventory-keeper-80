@@ -5,8 +5,6 @@ import { CustomerSelect } from "./CustomerSelect";
 import { v4 as uuidv4 } from 'uuid';
 import { useItems } from "@/hooks/useItems";
 import { Textarea } from "../ui/textarea";
-import { LabelManager } from "../labels/LabelManager";
-import { Label } from "@/lib/types";
 
 export const AddItemForm = () => {
   const [code, setCode] = useState("");
@@ -14,7 +12,6 @@ export const AddItemForm = () => {
   const [selectedCustomer, setSelectedCustomer] = useState("");
   const [description, setDescription] = useState("");
   const [size, setSize] = useState("");
-  const [labels, setLabels] = useState<Label[]>([]);
   const { addItem } = useItems();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -30,9 +27,9 @@ export const AddItemForm = () => {
       quantity,
       description,
       size,
-      labels,
+      tags: [], // Tags will be inherited from customer
       customer: selectedCustomer,
-      company: "", // Empty string as we removed company selector
+      company: "",
       createdAt: new Date(),
       updatedAt: new Date(),
       deleted: false
@@ -44,7 +41,6 @@ export const AddItemForm = () => {
     setSelectedCustomer("");
     setDescription("");
     setSize("");
-    setLabels([]);
   };
 
   return (
@@ -73,7 +69,6 @@ export const AddItemForm = () => {
         onChange={(e) => setDescription(e.target.value)}
         className="min-h-[100px]"
       />
-      <LabelManager labels={labels} onLabelsChange={setLabels} />
       <CustomerSelect value={selectedCustomer} onChange={setSelectedCustomer} onAddNew={() => {}} />
       <Button type="submit" className="w-full bg-[#212490] hover:bg-[#47acc9]">
         Pridať položku

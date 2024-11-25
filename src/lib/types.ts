@@ -6,7 +6,7 @@ export interface Item {
   customer: string;
   description?: string;
   size?: string;
-  labels: Label[];
+  tags: Tag[];
   createdAt: Date;
   updatedAt: Date;
   deleted: boolean;
@@ -18,7 +18,7 @@ export interface Company {
   deleted: boolean;
 }
 
-export interface Label {
+export interface Tag {
   id: string;
   name: string;
   color: string;
@@ -27,6 +27,6 @@ export interface Label {
 export interface Customer {
   id: string;
   name: string;
-  labels: Label[];
+  tags: Tag[];
   deleted: boolean;
 }
