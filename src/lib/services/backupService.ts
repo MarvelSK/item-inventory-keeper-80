@@ -71,7 +71,7 @@ export const importInventory = async (file: File): Promise<Item[]> => {
   const text = await file.text();
   const lines = text.split('\n').filter(line => line.trim());
   
-  return lines.slice(1).map(line => {
+  const items = lines.slice(1).map(line => {
     const values = line.split(',');
     const item: Item = {
       id: sanitizeString(values[0]) || Math.random().toString(36).substr(2, 9),
@@ -86,13 +86,15 @@ export const importInventory = async (file: File): Promise<Item[]> => {
 
     return itemSchema.parse(item);
   });
+
+  return items;
 };
 
 export const importCompanies = async (file: File): Promise<Company[]> => {
   const text = await file.text();
   const lines = text.split('\n').filter(line => line.trim());
   
-  return lines.slice(1).map(line => {
+  const companies = lines.slice(1).map(line => {
     const [rawId, rawName] = line.split(',');
     const company: Company = {
       id: sanitizeString(rawId) || Math.random().toString(36).substr(2, 9),
@@ -102,13 +104,15 @@ export const importCompanies = async (file: File): Promise<Company[]> => {
 
     return companySchema.parse(company);
   });
+
+  return companies;
 };
 
 export const importCustomers = async (file: File): Promise<Customer[]> => {
   const text = await file.text();
   const lines = text.split('\n').filter(line => line.trim());
   
-  return lines.slice(1).map(line => {
+  const customers = lines.slice(1).map(line => {
     const [rawId, rawName, rawCompanyId] = line.split(',');
     const customer: Customer = {
       id: sanitizeString(rawId) || Math.random().toString(36).substr(2, 9),
@@ -119,4 +123,6 @@ export const importCustomers = async (file: File): Promise<Customer[]> => {
 
     return customerSchema.parse(customer);
   });
+
+  return customers;
 };

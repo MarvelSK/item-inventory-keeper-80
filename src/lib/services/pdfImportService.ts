@@ -1,7 +1,9 @@
-import PDFParser from 'pdf-parse';
+import * as pdfjsLib from 'pdfjs-dist';
 import { addItem } from './itemService';
 import { toast } from 'sonner';
 import { Item } from '../types';
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
 interface PDFData {
   orderNumber: string;    // Číslo zakázky
@@ -14,38 +16,41 @@ interface PDFData {
 
 export const parsePDFData = async (file: File): Promise<void> => {
   try {
-    const buffer = await file.arrayBuffer();
-    const data = await PDFParser(buffer);
-    const text = data.text;
-    
-    const lines = text.split('\n').filter(line => line.trim());
-    
-    const items = lines.map(line => {
-      const parts = line.split(/\s+/);
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    const items: PDFData[] = [];
+
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const textContent = await page.getTextContent();
+      const text = textContent.items.map((item: any) => item.str).join(' ');
       
-      const item: PDFData = {
-        orderNumber: parts[0] || '',
-        description: parts[1] || '',
-        length: parseFloat(parts[2]) || 0,
-        width: parseFloat(parts[3]) || 0,
-        height: parseFloat(parts[4]) || 0,
-        code: parts[5] || '',
-      };
+      const lines = text.split('\n').filter(line => line.trim());
       
-      return item;
-    }).filter(item => item.code && item.orderNumber);
+      lines.forEach(line => {
+        const parts = line.split(/\s+/);
+        
+        const item: PDFData = {
+          orderNumber: parts[0] || '',
+          description: parts[1] || '',
+          length: parseFloat(parts[2]) || 0,
+          width: parseFloat(parts[3]) || 0,
+          height: parseFloat(parts[4]) || 0,
+          code: parts[5] || '',
+        };
+        
+        if (item.code && item.orderNumber) {
+          items.push(item);
+        }
+      });
+    }
 
     for (const item of items) {
       const newItem: Omit<Item, 'id' | 'createdAt' | 'updatedAt' | 'deleted'> = {
         code: item.code,
         quantity: 1,
         company: 'default',
-        customer: item.orderNumber,
-        dimensions: {
-          length: item.length,
-          width: item.width,
-          height: item.height
-        }
+        customer: item.orderNumber
       };
       
       await addItem(newItem);
