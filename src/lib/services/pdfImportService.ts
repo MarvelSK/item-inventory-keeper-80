@@ -1,36 +1,27 @@
-import * as pdfjsLib from 'pdfjs-dist';
+import pdfParse from 'pdf-parse';
 import { addItem } from './itemService';
 import { toast } from 'sonner';
 import { Item } from '../types';
 
-// Configure worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`;
-
 interface PDFData {
-  orderNumber: string;    // Číslo zakázky
-  description: string;    // Popis
-  length: number;        // Délka
-  width: number;         // Šířka
-  height: number;        // Výška
-  code: string;          // Č. balení
+  orderNumber: string;
+  description: string;
+  length: number;
+  width: number;
+  height: number;
+  code: string;
 }
 
 export const parsePDFData = async (file: File): Promise<void> => {
   try {
-    const arrayBuffer = await file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    const buffer = await file.arrayBuffer();
+    const data = await pdfParse(buffer);
+    const lines = data.text.split('\n').filter(line => line.trim());
     const items: PDFData[] = [];
 
-    for (let i = 1; i <= pdf.numPages; i++) {
-      const page = await pdf.getPage(i);
-      const textContent = await page.getTextContent();
-      const text = textContent.items.map((item: any) => item.str).join(' ');
-      
-      const lines = text.split('\n').filter(line => line.trim());
-      
-      lines.forEach(line => {
-        const parts = line.split(/\s+/);
-        
+    lines.forEach(line => {
+      const parts = line.split(/\s+/);
+      if (parts.length >= 6) {
         const item: PDFData = {
           orderNumber: parts[0] || '',
           description: parts[1] || '',
@@ -43,8 +34,8 @@ export const parsePDFData = async (file: File): Promise<void> => {
         if (item.code && item.orderNumber) {
           items.push(item);
         }
-      });
-    }
+      }
+    });
 
     for (const item of items) {
       const newItem: Item = {

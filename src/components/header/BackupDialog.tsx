@@ -7,9 +7,7 @@ import {
   DialogTrigger,
 } from "../ui/dialog";
 import { DatabaseBackup } from "lucide-react";
-import { BackupSection } from "./backup/BackupSection";
 import { ImportSection } from "./backup/ImportSection";
-import { WipeSection } from "./backup/WipeSection";
 
 interface BackupDialogProps {
   open?: boolean;
@@ -23,28 +21,18 @@ export const BackupDialog = ({ open, onOpenChange }: BackupDialogProps) => {
         <DialogTrigger asChild>
           <Button variant="outline" className="hover:text-[#47acc9] w-full md:w-auto">
             <DatabaseBackup className="mr-2 h-4 w-4" />
-            Zálohovanie
+            Import Data
           </Button>
         </DialogTrigger>
       )}
       <DialogContent className="w-[95vw] max-w-[800px] rounded-lg">
         <DialogHeader>
-          <DialogTitle>Zálohovanie a správa dát</DialogTitle>
+          <DialogTitle>Import Data</DialogTitle>
         </DialogHeader>
         <div className="space-y-6">
           <div className="space-y-2">
-            <h3 className="font-medium">Zálohovanie dát</h3>
-            <BackupSection />
-          </div>
-          
-          <div className="space-y-2">
-            <h3 className="font-medium">Import dát</h3>
+            <h3 className="font-medium">Import PDF Data</h3>
             <ImportSection />
-          </div>
-          
-          <div className="space-y-2">
-            <h3 className="font-medium">Vymazanie dát</h3>
-            <WipeSection />
           </div>
         </div>
       </DialogContent>
