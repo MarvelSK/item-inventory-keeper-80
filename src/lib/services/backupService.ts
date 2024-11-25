@@ -44,12 +44,12 @@ export const importInventory = async (file: File): Promise<Item[]> => {
     const values = line.split(',');
     const item: Item = {
       id: sanitizeString(values[0]) || uuidv4(),
-      code: sanitizeString(values[1]),
+      code: sanitizeString(values[1]) || "",
       quantity: sanitizeNumber(values[2]),
-      company: sanitizeString(values[3]),
-      customer: sanitizeString(values[4]),
-      description: sanitizeString(values[5]) || "",
-      size: sanitizeString(values[6]) || "",
+      company: sanitizeString(values[3]) || "",
+      customer: sanitizeString(values[4]) || "",
+      description: sanitizeString(values[5]),
+      size: sanitizeString(values[6]),
       labels: [],
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -76,7 +76,7 @@ export const importCompanies = async (file: File): Promise<Company[]> => {
     const [rawId, rawName] = line.split(',');
     const company: Company = {
       id: sanitizeString(rawId) || uuidv4(),
-      name: sanitizeString(rawName),
+      name: sanitizeString(rawName) || "",
       deleted: false
     };
 
@@ -100,7 +100,7 @@ export const importCustomers = async (file: File): Promise<Customer[]> => {
     const [rawId, rawName] = line.split(',');
     const customer: Customer = {
       id: sanitizeString(rawId) || uuidv4(),
-      name: sanitizeString(rawName),
+      name: sanitizeString(rawName) || "",
       labels: [],
       deleted: false
     };
