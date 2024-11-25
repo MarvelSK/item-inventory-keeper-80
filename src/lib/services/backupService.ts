@@ -1,4 +1,4 @@
-import { Item, Company, Customer, Tag } from '../models/types';
+import { Item, Company, Customer, Tag } from '../types';
 import { z } from 'zod';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -60,12 +60,7 @@ export const importInventory = async (file: File): Promise<Item[]> => {
       deleted: false
     };
 
-    try {
-      return itemSchema.parse(item);
-    } catch (error) {
-      console.error('Invalid item data:', error);
-      throw new Error(`Invalid item data in CSV: ${error.message}`);
-    }
+    return itemSchema.parse(item);
   });
 
   return items;
@@ -84,12 +79,7 @@ export const importCompanies = async (file: File): Promise<Company[]> => {
       deleted: false
     };
 
-    try {
-      return companySchema.parse(company);
-    } catch (error) {
-      console.error('Invalid company data:', error);
-      throw new Error(`Invalid company data in CSV: ${error.message}`);
-    }
+    return companySchema.parse(company);
   });
 
   return companies;
@@ -109,12 +99,7 @@ export const importCustomers = async (file: File): Promise<Customer[]> => {
       deleted: false
     };
 
-    try {
-      return customerSchema.parse(customer);
-    } catch (error) {
-      console.error('Invalid customer data:', error);
-      throw new Error(`Invalid customer data in CSV: ${error.message}`);
-    }
+    return customerSchema.parse(customer);
   });
 
   return customers;
