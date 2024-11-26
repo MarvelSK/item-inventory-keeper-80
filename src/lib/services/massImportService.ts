@@ -68,14 +68,24 @@ const parseItems = (data: string): ParsedData => {
         tags.push({ tag, orderInfo: orderInfos.find(o => o.includes('pitmart'))! });
       } else if (tag === 'auto 1-valzam' && orderInfos.find(o => o.includes('241003'))) {
         tags.push({ tag, orderInfo: orderInfos.find(o => o.includes('241003'))! });
-      } else if (tag === 'auto 1-zatienime' && orderInfos.find(o => o.includes('Suchý Z-90 WT PRIPRAVA'))) {
-        tags.push({ tag, orderInfo: orderInfos.find(o => o.includes('Suchý Z-90 WT PRIPRAVA'))! });
+      } else if (tag === 'auto 1-zatienime') {
+        // Handle multiple orders for auto 1-zatienime tag
+        const suchyOrder = orderInfos.find(o => o.includes('Suchý Z-90 WT PRIPRAVA'));
+        const lassoOrder = orderInfos.find(o => o.includes('Lasso Neporadza'));
+        
+        if (suchyOrder && !tags.some(t => t.orderInfo === suchyOrder)) {
+          tags.push({ tag, orderInfo: suchyOrder });
+        }
+        if (lassoOrder && !tags.some(t => t.orderInfo === lassoOrder)) {
+          tags.push({ tag, orderInfo: lassoOrder });
+        }
       } else if (tag === 'auto 1- mm mont' && orderInfos.find(o => o.includes('PECHÁČ'))) {
-        tags.push({ tag, orderInfo: orderInfos.find(o => o.includes('PECHÁČ'))! });
+        const pechacOrder = orderInfos.find(o => o.includes('PECHÁČ'));
+        if (pechacOrder && !tags.some(t => t.orderInfo === pechacOrder)) {
+          tags.push({ tag, orderInfo: pechacOrder });
+        }
       } else if (tag === 'sklad-madmont' && orderInfos.find(o => o.includes('140 H-L'))) {
         tags.push({ tag, orderInfo: orderInfos.find(o => o.includes('140 H-L'))! });
-      } else if (tag === 'auto 1-zatienime' && orderInfos.find(o => o.includes('Lasso Neporadza'))) {
-        tags.push({ tag, orderInfo: orderInfos.find(o => o.includes('Lasso Neporadza'))! });
       }
       continue;
     }
