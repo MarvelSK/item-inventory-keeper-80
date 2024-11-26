@@ -25,27 +25,31 @@ export const InventoryStats = ({ items }: InventoryStatsProps) => {
   }, {} as Record<string, number>);
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
       <Card className="col-span-1">
-        <CardContent className="p-2 flex items-center justify-between">
-          <Badge variant="secondary" className="text-xs">
-            Celkom
-          </Badge>
-          <span className="text-xl font-bold text-gray-900">
-            {totalItems}
-          </span>
+        <CardContent className="p-2 w-full flex flex-col gap-2">
+          <div className="flex items-center justify-between w-full">
+            <Badge variant="secondary" className="text-xs">
+              Celkom
+            </Badge>
+            <span className="text-xl font-bold text-gray-900">
+              {totalItems}
+            </span>
+          </div>
         </CardContent>
       </Card>
       
       {Object.entries(STATUS_MAP).map(([status, info]) => (
         <Card key={status} className="col-span-1">
-          <CardContent className="p-2 flex items-center justify-between">
-            <Badge variant={info.variant as any} className="text-xs">
-              {info.label}
-            </Badge>
-            <span className="text-xl font-bold text-gray-900">
-              {statusCounts[status] || 0}
-            </span>
+          <CardContent className="p-2 w-full flex flex-col gap-2">
+            <div className="flex items-center justify-between w-full">
+              <Badge variant={info.variant as any} className="text-xs">
+                {info.label}
+              </Badge>
+              <span className="text-xl font-bold text-gray-900">
+                {statusCounts[status] || 0}
+              </span>
+            </div>
           </CardContent>
         </Card>
       ))}
