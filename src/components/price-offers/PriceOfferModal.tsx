@@ -13,6 +13,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface PriceOfferModalProps {
   offer: any;
@@ -27,12 +31,14 @@ const VENDORS = [
 ];
 
 export const PriceOfferModal = ({ offer, open, onOpenChange }: PriceOfferModalProps) => {
+  const [notes, setNotes] = useState(offer?.notices || "");
+  
   if (!offer) return null;
 
   const DetailRow = ({ label, value }: { label: string; value: string | number }) => (
     <div className="grid grid-cols-2 py-2 border-b border-gray-100">
-      <span className="text-gray-600 text-sm">{label}</span>
-      <span className="text-sm">{value || '-'}</span>
+      <span className="text-gray-600 text-[14px]">{label}</span>
+      <span className="text-[14px]">{value || '-'}</span>
     </div>
   );
 
@@ -41,9 +47,23 @@ export const PriceOfferModal = ({ offer, open, onOpenChange }: PriceOfferModalPr
     console.log("Sending satisfaction email...");
   };
 
+  const handleSaveNotes = async () => {
+    try {
+      const { error } = await supabase
+        .from('price_offers')
+        .update({ notices: notes })
+        .eq('id', offer.id);
+
+      if (error) throw error;
+      toast.success("Poznámky boli úspešne uložené");
+    } catch (error) {
+      toast.error("Nepodarilo sa uložiť poznámky");
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold mb-4 text-[#212490]">
             Detail objednávky #{offer.id}
@@ -52,7 +72,7 @@ export const PriceOfferModal = ({ offer, open, onOpenChange }: PriceOfferModalPr
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="space-y-1">
-            <h3 className="font-medium mb-3 text-[#212490]">Produkt</h3>
+            <h3 className="font-medium mb-3 text-[#212490] text-[14px]">Produkt</h3>
             <DetailRow label="Produkt" value={offer.product} />
             <DetailRow label="Ovládanie" value={offer.control} />
             <DetailRow label="Ovládanie motora" value={offer.motor} />
@@ -68,7 +88,7 @@ export const PriceOfferModal = ({ offer, open, onOpenChange }: PriceOfferModalPr
 
           <div className="space-y-4">
             <div>
-              <h3 className="font-medium mb-3 text-[#212490]">Zákazník</h3>
+              <h3 className="font-medium mb-3 text-[#212490] text-[14px]">Zákazník</h3>
               <DetailRow label="Meno zákazníka" value={offer.name} />
               <DetailRow label="Adresa" value={offer.address} />
               <DetailRow label="Tel. č." value={offer.phone_number} />
@@ -77,9 +97,9 @@ export const PriceOfferModal = ({ offer, open, onOpenChange }: PriceOfferModalPr
             </div>
             
             <div>
-              <h3 className="font-medium mb-3 text-[#212490]">Dodávateľ</h3>
+              <h3 className="font-medium mb-3 text-[#212490] text-[14px]">Dodávateľ</h3>
               <Select defaultValue={offer.vendor_id?.toString()}>
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="w-full text-[14px]">
                   <SelectValue placeholder="Vybrať dodávateľa" />
                 </SelectTrigger>
                 <SelectContent>
@@ -93,34 +113,36 @@ export const PriceOfferModal = ({ offer, open, onOpenChange }: PriceOfferModalPr
             </div>
 
             <div>
-              <h3 className="font-medium mb-3 text-[#212490]">Správa</h3>
-              <textarea
-                className="w-full min-h-[100px] p-3 border rounded-md bg-gray-50 text-sm"
-                defaultValue={offer.message}
-                readOnly
-              />
+              <h3 className="font-medium mb-3 text-[#212490] text-[14px]">Správa</h3>
+              <div className="w-full p-3 border rounded-md bg-gray-50 text-[14px] min-h-[100px] whitespace-pre-wrap">
+                {offer.message}
+              </div>
             </div>
 
             <div>
-              <h3 className="font-medium mb-3 text-[#212490]">Poznámky</h3>
-              <textarea
-                className="w-full min-h-[100px] p-3 border rounded-md bg-gray-50 text-sm"
-                defaultValue={offer.notices}
-                readOnly
+              <h3 className="font-medium mb-3 text-[#212490] text-[14px]">Poznámky</h3>
+              <Textarea
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                className="min-h-[100px] text-[14px]"
+                placeholder="Zadajte poznámky..."
               />
             </div>
 
             <div className="flex gap-2 mt-4">
               <Button 
-                className="w-full bg-[#212490] hover:bg-[#47acc9]"
+                className="w-full bg-[#212490] hover:bg-[#47acc9] text-[14px]"
                 onClick={handleSendSatisfactionEmail}
               >
                 <Mail className="mr-2 h-4 w-4" />
                 Poslať mail o spokojnosti
               </Button>
-              <Button className="w-full">
+              <Button 
+                className="w-full text-[14px]"
+                onClick={handleSaveNotes}
+              >
                 <Send className="mr-2 h-4 w-4" />
-                Nastaviť
+                Uložiť poznámky
               </Button>
             </div>
           </div>
