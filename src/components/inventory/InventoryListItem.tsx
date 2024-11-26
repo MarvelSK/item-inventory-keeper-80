@@ -23,7 +23,7 @@ interface InventoryListItemProps {
   item: Item;
   onEdit: (item: Item) => void;
   onDelete: (id: string) => void;
-  onPostpone: (item: Item) => void;
+  onPostpone: (item: Item) => Promise<void>;
 }
 
 const STATUS_MAP = {
@@ -135,6 +135,8 @@ export const InventoryListItem = ({ item, onEdit, onDelete, onPostpone }: Invent
                 <p><strong>Popis:</strong> {item.description || "-"}</p>
                 <p><strong>Rozmery:</strong> {formatDimensions(item)} cm</p>
                 <p><strong>Vytvorené:</strong> {format(item.createdAt, "dd.MM.yyyy HH:mm")}</p>
+                <p><strong>Vytvoril:</strong> {item.created_by || "-"}</p>
+                <p><strong>Naposledy upravil:</strong> {item.updated_by || "-"}</p>
               </div>
               <div className="flex space-x-2">
                 <ItemActionsDropdown

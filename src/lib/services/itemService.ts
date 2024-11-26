@@ -1,5 +1,6 @@
 import { Item } from '../types';
 import { cache } from '../cache';
+import { supabase } from '@/integrations/supabase/client';
 
 export let items: Item[] = [];
 
@@ -18,7 +19,6 @@ const areItemsEqual = (item1: Item, item2: Item) => {
 
 export const findItemByCode = async (code: string) => {
   console.log('Finding item by code:', code);
-  // Trim the code and ensure case-insensitive comparison
   const normalizedCode = code.trim().toLowerCase();
   const item = items.find((i) => i.code.toLowerCase() === normalizedCode && !i.deleted);
   console.log('Found item:', item);
@@ -28,7 +28,9 @@ export const findItemByCode = async (code: string) => {
 export const addItem = async (item: Item) => {
   console.log('Adding new item:', item);
   
-  // Check for existing item with same code
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('User not authenticated');
+  
   const existingItem = items.find(i => !i.deleted && i.code === item.code);
   
   if (existingItem) {
@@ -36,19 +38,30 @@ export const addItem = async (item: Item) => {
     throw new Error('Item with this code already exists');
   }
 
-  items.push(item);
+  const itemWithUser = {
+    ...item,
+    created_by: user.id,
+    updated_by: user.id
+  };
+
+  items.push(itemWithUser);
   cache.set('items', items);
   console.log('Current items count after adding:', items.length);
-  console.log('Item added successfully:', item);
-  return item;
+  console.log('Item added successfully:', itemWithUser);
+  return itemWithUser;
 };
 
 export const updateItem = async (updatedItem: Item) => {
   console.log('Updating item:', updatedItem);
+  
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('User not authenticated');
+
   const index = items.findIndex((item) => item.id === updatedItem.id);
   if (index !== -1) {
     items[index] = {
       ...updatedItem,
+      updated_by: user.id,
       updatedAt: new Date(),
     };
     cache.set('items', items);

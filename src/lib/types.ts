@@ -14,6 +14,8 @@ export interface Item {
   deleted: boolean;
   postponed?: boolean;
   postponeReason?: string;
+  created_by?: string;
+  updated_by?: string;
 }
 
 export interface Company {

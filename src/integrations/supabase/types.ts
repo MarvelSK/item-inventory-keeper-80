@@ -9,6 +9,81 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      items: {
+        Row: {
+          code: string
+          company: string
+          created_at: string
+          created_by: string | null
+          customer: string
+          deleted: boolean
+          description: string | null
+          height: number | null
+          id: string
+          length: number | null
+          postpone_reason: string | null
+          postponed: boolean | null
+          status: string
+          tags: Json | null
+          updated_at: string
+          updated_by: string | null
+          width: number | null
+        }
+        Insert: {
+          code: string
+          company: string
+          created_at?: string
+          created_by?: string | null
+          customer: string
+          deleted?: boolean
+          description?: string | null
+          height?: number | null
+          id?: string
+          length?: number | null
+          postpone_reason?: string | null
+          postponed?: boolean | null
+          status: string
+          tags?: Json | null
+          updated_at?: string
+          updated_by?: string | null
+          width?: number | null
+        }
+        Update: {
+          code?: string
+          company?: string
+          created_at?: string
+          created_by?: string | null
+          customer?: string
+          deleted?: boolean
+          description?: string | null
+          height?: number | null
+          id?: string
+          length?: number | null
+          postpone_reason?: string | null
+          postponed?: boolean | null
+          status?: string
+          tags?: Json | null
+          updated_at?: string
+          updated_by?: string | null
+          width?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "items_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "items_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
