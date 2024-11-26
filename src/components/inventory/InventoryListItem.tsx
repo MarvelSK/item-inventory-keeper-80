@@ -12,6 +12,12 @@ import { useState, useEffect } from "react";
 import { TagBadge } from "../tags/TagBadge";
 import { Badge } from "../ui/badge";
 import { ItemActionsDropdown } from "./ItemActionsDropdown";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../ui/tooltip";
 
 interface InventoryListItemProps {
   item: Item;
@@ -57,42 +63,53 @@ export const InventoryListItem = ({ item, onEdit, onDelete, onPostpone }: Invent
 
   return (
     <>
-      <TableRow 
-        className={`group cursor-pointer ${
-          item.postponed ? 'bg-yellow-100 hover:bg-yellow-200' : 'hover:bg-gray-50'
-        }`} 
-        onClick={handleRowClick}
-      >
-        <TableCell className="font-medium">{item.code}</TableCell>
-        <TableCell>
-          <Badge variant={statusInfo.variant as any}>{statusInfo.label}</Badge>
-        </TableCell>
-        <TableCell className="hidden sm:table-cell">{customerName}</TableCell>
-        <TableCell className="hidden sm:table-cell">
-          <div className="flex flex-wrap gap-1">
-            {customer?.tags?.map((tag) => (
-              <TagBadge key={tag.id} tag={tag} />
-            ))}
-          </div>
-        </TableCell>
-        <TableCell className="hidden lg:table-cell">{item.description || "-"}</TableCell>
-        <TableCell className="hidden lg:table-cell">
-          {formatDimensions(item)}
-        </TableCell>
-        <TableCell className="hidden sm:table-cell">
-          {format(item.createdAt, "dd.MM.yyyy HH:mm")}
-        </TableCell>
-        <TableCell>
-          <div className="flex justify-end sm:justify-start">
-            <ItemActionsDropdown
-              item={item}
-              onEdit={onEdit}
-              onDelete={onDelete}
-              onPostpone={onPostpone}
-            />
-          </div>
-        </TableCell>
-      </TableRow>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <TableRow 
+              className={`group cursor-pointer ${
+                item.postponed ? 'bg-yellow-100 hover:bg-yellow-200' : 'hover:bg-gray-50'
+              }`} 
+              onClick={handleRowClick}
+            >
+              <TableCell className="font-medium">{item.code}</TableCell>
+              <TableCell>
+                <Badge variant={statusInfo.variant as any}>{statusInfo.label}</Badge>
+              </TableCell>
+              <TableCell className="hidden sm:table-cell">{customerName}</TableCell>
+              <TableCell className="hidden sm:table-cell">
+                <div className="flex flex-wrap gap-1">
+                  {customer?.tags?.map((tag) => (
+                    <TagBadge key={tag.id} tag={tag} />
+                  ))}
+                </div>
+              </TableCell>
+              <TableCell className="hidden lg:table-cell">{item.description || "-"}</TableCell>
+              <TableCell className="hidden lg:table-cell">
+                {formatDimensions(item)}
+              </TableCell>
+              <TableCell className="hidden sm:table-cell">
+                {format(item.createdAt, "dd.MM.yyyy HH:mm")}
+              </TableCell>
+              <TableCell>
+                <div className="flex justify-end sm:justify-start">
+                  <ItemActionsDropdown
+                    item={item}
+                    onEdit={onEdit}
+                    onDelete={onDelete}
+                    onPostpone={onPostpone}
+                  />
+                </div>
+              </TableCell>
+            </TableRow>
+          </TooltipTrigger>
+          {item.postponed && item.postponeReason && (
+            <TooltipContent>
+              <p>Dôvod odloženia: {item.postponeReason}</p>
+            </TooltipContent>
+          )}
+        </Tooltip>
+      </TooltipProvider>
 
       {isMobile && (
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>

@@ -3,6 +3,12 @@ import { companies, customers } from "@/lib/inventory";
 import { format } from "date-fns";
 import { Badge } from "../ui/badge";
 import { ItemActionsDropdown } from "./ItemActionsDropdown";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../ui/tooltip";
 
 interface InventoryGridItemProps {
   item: Item;
@@ -24,30 +30,41 @@ export const InventoryGridItem = ({ item, onEdit, onDelete, onPostpone }: Invent
   const statusInfo = STATUS_MAP[item.status];
 
   return (
-    <div className={`p-4 border rounded-lg space-y-2 ${
-      item.postponed ? 'bg-yellow-100 hover:bg-yellow-200' : 'hover:bg-gray-50'
-    }`}>
-      <div className="font-medium">{item.code}</div>
-      <div className="text-sm text-gray-500">
-        <div>Spoločnosť: {company}</div>
-        <div>Zákazník: {customer}</div>
-        <div>Popis: {item.description || "-"}</div>
-        <div>Rozmery: {item.length && item.width && item.height
-          ? `${item.length}×${item.width}×${item.height} cm`
-          : "-"}
-        </div>
-        <div>Stav: <Badge variant={statusInfo.variant as any}>{statusInfo.label}</Badge></div>
-        <div>Vytvorené: {format(item.createdAt, "dd.MM.yyyy HH:mm")}</div>
-        <div>Upravené: {format(item.updatedAt, "dd.MM.yyyy HH:mm")}</div>
-      </div>
-      <div className="flex justify-end">
-        <ItemActionsDropdown
-          item={item}
-          onEdit={onEdit}
-          onDelete={onDelete}
-          onPostpone={onPostpone}
-        />
-      </div>
-    </div>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div className={`p-4 border rounded-lg space-y-2 ${
+            item.postponed ? 'bg-yellow-100 hover:bg-yellow-200' : 'hover:bg-gray-50'
+          }`}>
+            <div className="font-medium">{item.code}</div>
+            <div className="text-sm text-gray-500">
+              <div>Spoločnosť: {company}</div>
+              <div>Zákazník: {customer}</div>
+              <div>Popis: {item.description || "-"}</div>
+              <div>Rozmery: {item.length && item.width && item.height
+                ? `${item.length}×${item.width}×${item.height} cm`
+                : "-"}
+              </div>
+              <div>Stav: <Badge variant={statusInfo.variant as any}>{statusInfo.label}</Badge></div>
+              <div>Vytvorené: {format(item.createdAt, "dd.MM.yyyy HH:mm")}</div>
+              <div>Upravené: {format(item.updatedAt, "dd.MM.yyyy HH:mm")}</div>
+            </div>
+            <div className="flex justify-end">
+              <ItemActionsDropdown
+                item={item}
+                onEdit={onEdit}
+                onDelete={onDelete}
+                onPostpone={onPostpone}
+              />
+            </div>
+          </div>
+        </TooltipTrigger>
+        {item.postponed && item.postponeReason && (
+          <TooltipContent>
+            <p>Dôvod odloženia: {item.postponeReason}</p>
+          </TooltipContent>
+        )}
+      </Tooltip>
+    </TooltipProvider>
   );
 };

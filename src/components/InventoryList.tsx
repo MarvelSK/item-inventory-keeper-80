@@ -92,13 +92,28 @@ export const InventoryList = () => {
   };
 
   const handlePostpone = async (item: Item) => {
-    const updatedItem = {
-      ...item,
-      postponed: !item.postponed,
-      updatedAt: new Date()
-    };
-    await updateItem(updatedItem);
-    toast.success(item.postponed ? "Položka už nie je označená ako odložená" : "Položka bola označená ako odložená");
+    if (!item.postponed) {
+      const reason = prompt("Zadajte dôvod odloženia položky:");
+      if (!reason) return; // Cancel if no reason provided
+      
+      const updatedItem = {
+        ...item,
+        postponed: true,
+        postponeReason: reason,
+        updatedAt: new Date()
+      };
+      await updateItem(updatedItem);
+      toast.success("Položka bola označená ako odložená");
+    } else {
+      const updatedItem = {
+        ...item,
+        postponed: false,
+        postponeReason: undefined,
+        updatedAt: new Date()
+      };
+      await updateItem(updatedItem);
+      toast.success("Položka už nie je označená ako odložená");
+    }
   };
 
   const handlePageChange = (page: number) => {
