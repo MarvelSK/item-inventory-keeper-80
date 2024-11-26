@@ -16,17 +16,22 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 
-export const PriceOffersList = () => {
+interface PriceOffersListProps {
+  region: 'slovakia' | 'hungary' | 'romania';
+}
+
+export const PriceOffersList = ({ region }: PriceOffersListProps) => {
   const [selectedOffer, setSelectedOffer] = useState<any>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(50);
 
   const { data: offers, isLoading } = useQuery({
-    queryKey: ["price-offers"],
+    queryKey: ["price-offers", region],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("price_offers")
         .select("*")
+        .eq('deleted', false)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -88,7 +93,7 @@ export const PriceOffersList = () => {
                   </div>
                 </TableCell>
                 <TableCell className="text-xs py-1">
-                  <Badge variant={offer.notification ? "success" : "secondary"} className="text-xs">
+                  <Badge variant={offer.notification ? "default" : "secondary"} className="text-xs">
                     {offer.notification ? "Áno" : "Nie"}
                   </Badge>
                 </TableCell>
