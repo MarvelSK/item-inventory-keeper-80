@@ -1,7 +1,6 @@
-import { useState, useEffect } from "react";
-import { Html5QrcodeScanner } from "html5-qrcode";
+import { useState, useEffect, useRef } from "react";
+import { BrowserMultiFormatReader, Result, DecodeHintType } from "@zxing/browser";
 import { findItemByCode } from "@/lib/inventory";
-import { toast } from "sonner";
 import { Button } from "./ui/button";
 import { Item } from "@/lib/types";
 import { useItems } from "@/hooks/useItems";
@@ -12,113 +11,111 @@ const STATUS_TRANSITIONS = {
   naskladnenie: {
     from: "waiting",
     to: "in_stock",
-    message: "Položka naskladnená"
   },
   nalozenie: {
     from: "in_stock",
     to: "in_transit",
-    message: "Položka naložená"
   },
   dorucenie: {
     from: "in_transit",
     to: "delivered",
-    message: "Položka doručená"
   }
 } as const;
 
 export const Scanner = () => {
   const [scanning, setScanning] = useState(false);
-  const [scannedCode, setScannedCode] = useState<string | null>(null);
-  const [scanner, setScanner] = useState<Html5QrcodeScanner | null>(null);
-  const [scannedItem, setScannedItem] = useState<Item | null>(null);
   const [scanMode, setScanMode] = useState<ScanMode>("naskladnenie");
   const { updateItem } = useItems();
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const readerRef = useRef<BrowserMultiFormatReader | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const lastScanRef = useRef<string>("");
+  const scanTimeoutRef = useRef<NodeJS.Timeout>();
 
   useEffect(() => {
-    if (!scanning) {
-      const newScanner = new Html5QrcodeScanner(
-        "reader",
-        { 
-          fps: 10, 
-          qrbox: { width: 250, height: 250 },
-          videoConstraints: {
-            facingMode: { exact: "environment" }
-          }
-        },
-        false
-      );
-      setScanner(newScanner);
-      newScanner.render(onScanSuccess, onScanFailure);
-    }
+    const hints = new Map();
+    hints.set(DecodeHintType.TRY_HARDER, true);
+    hints.set(DecodeHintType.ASSUME_GS1, true);
+    
+    readerRef.current = new BrowserMultiFormatReader(hints);
 
     return () => {
-      if (scanner) {
-        scanner.clear();
+      if (readerRef.current) {
+        readerRef.current.reset();
       }
     };
-  }, [scanning]);
+  }, []);
 
-  const onScanSuccess = async (decodedText: string) => {
-    console.log("Scanned code:", decodedText);
-    setScanning(true);
-    setScannedCode(decodedText);
+  useEffect(() => {
+    if (scanning && videoRef.current && containerRef.current) {
+      readerRef.current?.decodeFromConstraints(
+        {
+          video: { facingMode: "environment" }
+        },
+        videoRef.current,
+        async (result: Result | null, error?: any) => {
+          if (result) {
+            const code = result.getText();
+            
+            // Prevent multiple scans of the same code within 1 second
+            if (code === lastScanRef.current) {
+              return;
+            }
+            
+            lastScanRef.current = code;
+            if (scanTimeoutRef.current) {
+              clearTimeout(scanTimeoutRef.current);
+            }
+            
+            scanTimeoutRef.current = setTimeout(() => {
+              lastScanRef.current = "";
+              if (containerRef.current) {
+                containerRef.current.style.border = "none";
+              }
+            }, 1000);
 
-    // Trim the code to remove any whitespace
-    const trimmedCode = decodedText.trim();
-    console.log("Looking for item with code:", trimmedCode);
-    
-    const item = await findItemByCode(trimmedCode);
-    console.log("Found item:", item);
-    
-    if (!item) {
-      toast.error("Položka nebola nájdená v systéme");
-      setTimeout(() => {
-        setScanning(false);
-        setScannedCode(null);
-        setScannedItem(null);
-      }, 2000);
-      return;
+            const item = await findItemByCode(code.trim());
+            
+            if (!item) {
+              if (containerRef.current) {
+                containerRef.current.style.border = "4px solid red";
+              }
+              return;
+            }
+
+            const transition = STATUS_TRANSITIONS[scanMode];
+            if (item.status !== transition.from) {
+              if (containerRef.current) {
+                containerRef.current.style.border = "4px solid red";
+              }
+              return;
+            }
+
+            try {
+              const updatedItem = {
+                ...item,
+                status: transition.to,
+                updatedAt: new Date()
+              };
+              await updateItem(updatedItem);
+              if (containerRef.current) {
+                containerRef.current.style.border = "4px solid green";
+              }
+            } catch (error) {
+              if (containerRef.current) {
+                containerRef.current.style.border = "4px solid red";
+              }
+            }
+          }
+        }
+      );
+    } else if (!scanning && readerRef.current) {
+      readerRef.current.reset();
+      if (containerRef.current) {
+        containerRef.current.style.border = "none";
+      }
     }
-
-    const transition = STATUS_TRANSITIONS[scanMode];
-    if (item.status !== transition.from) {
-      toast.error(`Položka musí byť v stave "${transition.from}" pre ${scanMode}`);
-      setTimeout(() => {
-        setScanning(false);
-        setScannedCode(null);
-        setScannedItem(null);
-      }, 2000);
-      return;
-    }
-
-    try {
-      const updatedItem = {
-        ...item,
-        status: transition.to,
-        updatedAt: new Date()
-      };
-      await updateItem(updatedItem);
-      setScannedItem(updatedItem);
-      toast.success(transition.message);
-    } catch (error) {
-      toast.error("Chyba pri aktualizácii položky");
-      setTimeout(() => {
-        setScanning(false);
-        setScannedCode(null);
-        setScannedItem(null);
-      }, 2000);
-    }
-  };
-
-  const onScanFailure = (error: any) => {
-    console.warn(`Code scan error = ${error}`);
-  };
-
-  const resetScanner = () => {
-    setScanning(false);
-    setScannedCode(null);
-    setScannedItem(null);
-  };
+  }, [scanning, scanMode, updateItem]);
 
   return (
     <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm w-full max-w-lg mx-auto">
@@ -148,27 +145,22 @@ export const Scanner = () => {
         </Button>
       </div>
 
-      <div id="reader" className="w-full max-w-sm mx-auto"></div>
-      
-      {scannedCode && scannedItem && (
-        <div className="mt-4 space-y-4">
-          <div className="text-center">
-            <p className="font-medium text-sm sm:text-base">Kód: {scannedCode}</p>
-            <p className="text-base sm:text-lg font-semibold mt-2">
-              Status: {scannedItem.status}
-            </p>
-          </div>
-          <div className="text-center mt-4">
-            <Button
-              variant="outline"
-              onClick={resetScanner}
-              className="text-gray-600 hover:text-gray-800 text-sm sm:text-base w-full sm:w-auto"
-            >
-              Skenovať ďalší kód
-            </Button>
-          </div>
-        </div>
-      )}
+      <div 
+        ref={containerRef}
+        className="relative w-full max-w-sm mx-auto transition-all duration-200"
+      >
+        <Button
+          onClick={() => setScanning(!scanning)}
+          variant="outline"
+          className="mb-4 w-full"
+        >
+          {scanning ? "Zastaviť skenovanie" : "Spustiť skenovanie"}
+        </Button>
+        <video
+          ref={videoRef}
+          className="w-full aspect-square object-cover rounded-lg"
+        />
+      </div>
     </div>
   );
 };
