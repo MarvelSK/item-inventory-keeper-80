@@ -90,15 +90,26 @@ export const InventoryList = () => {
 
   const filteredItems = Array.isArray(items) ? filterItems(items) : [];
 
+  // Updated sorting logic to prioritize postponed items
   const sortedAndFilteredItems = [...filteredItems].sort((a, b) => {
+    // First, sort by postponed status
     if (a.postponed && !b.postponed) return -1;
     if (!a.postponed && b.postponed) return 1;
     
+    // If both items have the same postponed status, sort by the selected field
     const aValue = a[sortField];
     const bValue = b[sortField];
-    return sortDirection === "asc"
-      ? String(aValue).localeCompare(String(bValue))
-      : String(bValue).localeCompare(String(aValue));
+    
+    if (typeof aValue === 'string' && typeof bValue === 'string') {
+      return sortDirection === "asc"
+        ? aValue.localeCompare(bValue)
+        : bValue.localeCompare(aValue);
+    }
+    
+    // Handle non-string values
+    if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
+    if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
+    return 0;
   });
 
   const totalPages = Math.ceil(sortedAndFilteredItems.length / itemsPerPage);
