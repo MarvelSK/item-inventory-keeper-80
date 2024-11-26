@@ -46,25 +46,20 @@ export const findItemByCode = async (code: string) => {
   try {
     const { data: items, error } = await supabase
       .from('items')
-      .select('*')
+      .select()
       .eq('code', code.trim())
-      .eq('deleted', false);
+      .eq('deleted', false)
+      .maybeSingle();
 
     if (error) {
       console.error('Error finding item:', error);
-      throw error;
-    }
-
-    // Return null if no items found
-    if (!items || items.length === 0) {
       return null;
     }
 
-    // Return the first item if multiple are found
-    return mapDbItemToItem(items[0] as DbItem);
+    return items ? mapDbItemToItem(items as DbItem) : null;
   } catch (error) {
     console.error('Error in findItemByCode:', error);
-    throw error;
+    return null;
   }
 };
 
@@ -84,18 +79,19 @@ export const addItem = async (item: Item) => {
       created_by: user.id,
       updated_by: user.id,
     }))
-    .select();
+    .select()
+    .maybeSingle();
 
   if (error) {
     console.error('Error adding item:', error);
     throw error;
   }
 
-  if (!data || data.length === 0) {
+  if (!data) {
     throw new Error('No data returned from insert');
   }
 
-  return mapDbItemToItem(data[0] as DbItem);
+  return mapDbItemToItem(data as DbItem);
 };
 
 export const updateItem = async (updatedItem: Item) => {
@@ -109,18 +105,19 @@ export const updateItem = async (updatedItem: Item) => {
       updated_by: user.id,
     }))
     .eq('id', updatedItem.id)
-    .select();
+    .select()
+    .maybeSingle();
 
   if (error) {
     console.error('Error updating item:', error);
     throw error;
   }
 
-  if (!data || data.length === 0) {
+  if (!data) {
     throw new Error('No data returned from update');
   }
 
-  return mapDbItemToItem(data[0] as DbItem);
+  return mapDbItemToItem(data as DbItem);
 };
 
 export const deleteItem = async (id: string) => {
@@ -141,7 +138,7 @@ export const getAllItems = async () => {
   try {
     const { data: items, error } = await supabase
       .from('items')
-      .select('*')
+      .select()
       .eq('deleted', false)
       .order('created_at', { ascending: false });
 
