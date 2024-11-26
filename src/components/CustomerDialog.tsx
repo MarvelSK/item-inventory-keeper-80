@@ -83,14 +83,14 @@ export const CustomerDialog = ({ open, onOpenChange }: CustomerDialogProps) => {
             </Button>
           </DialogTrigger>
         )}
-        <DialogContent className="w-[95vw] max-w-[625px] h-[90vh] md:h-auto">
+        <DialogContent className="w-[95vw] max-w-[625px] h-[90vh] md:h-[80vh]">
           <DialogHeader>
             <DialogTitle>Správa zakázok</DialogTitle>
             <DialogDescription>
               Pridajte, upravte alebo vymažte zakázky
             </DialogDescription>
           </DialogHeader>
-          <ScrollArea className="h-[calc(90vh-180px)] md:h-auto">
+          <ScrollArea className="flex-1 h-[calc(90vh-180px)] md:h-[calc(80vh-180px)]">
             <div className="space-y-4 p-1">
               <div className="flex flex-col md:flex-row gap-2">
                 <Input
