@@ -1,10 +1,9 @@
 import { useState } from "react";
 import { Item } from "@/lib/types";
-import { toast } from "sonner";
 
 interface InventoryListLogicProps {
   items: Item[];
-  updateItem: (item: Item) => Promise<void>;
+  updateItem: (item: Item) => Promise<Item>;
   deleteItem: (id: string) => Promise<void>;
   currentPage: number;
   itemsPerPage: number;
@@ -50,6 +49,15 @@ export const InventoryListLogic = ({
     });
   };
 
+  const toggleSort = (field: keyof Item) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortDirection("asc");
+    }
+  };
+
   const filteredAndSortedItems = sortItems(filterItems(Array.isArray(items) ? items : []));
   const totalPages = Math.ceil(filteredAndSortedItems.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -68,28 +76,22 @@ export const InventoryListLogic = ({
   };
 
   const handlePostpone = async (item: Item) => {
-    if (!item.postponed) {
-      const reason = prompt("Zadajte dôvod odloženia položky:");
-      if (!reason) return;
-      
-      const updatedItem = {
-        ...item,
-        postponed: true,
-        postponeReason: reason,
-        updatedAt: new Date()
-      };
-      await updateItem(updatedItem);
-      toast.success("Položka bola označená ako odložená");
-    } else {
-      const updatedItem = {
-        ...item,
-        postponed: false,
-        postponeReason: undefined,
-        updatedAt: new Date()
-      };
-      await updateItem(updatedItem);
-      toast.success("Položka už nie je označená ako odložená");
-    }
+    const updatedItem = item.postponed
+      ? { ...item, postponed: false, postponeReason: undefined, updatedAt: new Date() }
+      : {
+          ...item,
+          postponed: true,
+          postponeReason: prompt("Zadajte dôvod odloženia položky:") || undefined,
+          updatedAt: new Date()
+        };
+
+    if (updatedItem.postponed && !updatedItem.postponeReason) return;
+    
+    await updateItem(updatedItem);
+    toast.success(updatedItem.postponed 
+      ? "Položka bola označená ako odložená"
+      : "Položka už nie je označená ako odložená"
+    );
   };
 
   const handleFilterChange = (newFilters: any) => {
@@ -108,5 +110,8 @@ export const InventoryListLogic = ({
     handleEdit,
     handlePostpone,
     handleFilterChange,
+    sortField,
+    sortDirection,
+    toggleSort,
   };
 };

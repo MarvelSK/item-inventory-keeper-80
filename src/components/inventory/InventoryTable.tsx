@@ -10,7 +10,7 @@ interface InventoryTableProps {
   toggleSort: (field: keyof Item) => void;
   onEdit: (item: Item) => void;
   onDelete: (id: string) => void;
-  onPostpone: (item: Item) => void;
+  onPostpone: (item: Item) => Promise<void>;
 }
 
 export const InventoryTable = ({

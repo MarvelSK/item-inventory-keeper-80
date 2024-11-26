@@ -67,8 +67,8 @@ export const useItems = () => {
     items,
     isLoading,
     error,
-    addItem: addMutation.mutate,
-    updateItem: updateMutation.mutate,
-    deleteItem: deleteMutation.mutate,
+    addItem: addMutation.mutateAsync,
+    updateItem: updateMutation.mutateAsync,
+    deleteItem: deleteMutation.mutateAsync,
   };
 };
