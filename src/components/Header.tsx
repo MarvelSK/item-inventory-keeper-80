@@ -1,5 +1,4 @@
 import { CustomerDialog } from "./CustomerDialog";
-import { DatabaseBackup } from "lucide-react";
 import { MobileMenu } from "./header/MobileMenu";
 import { BackupDialog } from "./header/BackupDialog";
 import { StatisticsDialog } from "./header/StatisticsDialog";
