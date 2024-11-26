@@ -7,12 +7,9 @@ import {
   DialogTrigger,
 } from "../ui/dialog";
 import { DatabaseBackup } from "lucide-react";
-import { backupAll, importAll, wipeAll } from "@/lib/services/backupService";
-import { toast } from "sonner";
-import { Upload, Save, Trash2 } from "lucide-react";
-import { useItems } from "@/hooks/useItems";
-import { useCompanies } from "@/hooks/useCompanies";
-import { useCustomers } from "@/hooks/useCustomers";
+import { BackupSection } from "./backup/BackupSection";
+import { ImportSection } from "./backup/ImportSection";
+import { WipeSection } from "./backup/WipeSection";
 
 interface BackupDialogProps {
   open?: boolean;
@@ -20,41 +17,6 @@ interface BackupDialogProps {
 }
 
 export const BackupDialog = ({ open, onOpenChange }: BackupDialogProps) => {
-  const { items } = useItems();
-  const { companies } = useCompanies();
-  const { customers } = useCustomers();
-
-  const handleBackup = async () => {
-    try {
-      await backupAll(items, companies, customers);
-      toast.success("Záloha bola úspešne vytvorená");
-    } catch (error) {
-      toast.error("Chyba pri vytváraní zálohy");
-    }
-  };
-
-  const handleImport = async (file: File) => {
-    try {
-      await importAll(file);
-      toast.success("Dáta boli úspešne importované");
-      window.location.reload();
-    } catch (error) {
-      toast.error(`Chyba pri importovaní: ${error}`);
-    }
-  };
-
-  const handleWipe = async () => {
-    if (confirm("Naozaj chcete vymazať všetky dáta? Táto akcia sa nedá vrátiť späť.")) {
-      try {
-        await wipeAll();
-        toast.success("Všetky dáta boli vymazané");
-        window.location.reload();
-      } catch (error) {
-        toast.error("Chyba pri vymazávaní dát");
-      }
-    }
-  };
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       {!onOpenChange && (
@@ -70,41 +32,15 @@ export const BackupDialog = ({ open, onOpenChange }: BackupDialogProps) => {
           <DialogTitle>Zálohovanie a správa dát</DialogTitle>
         </DialogHeader>
         <div className="space-y-6">
-          <div className="flex flex-col gap-4">
-            <Button 
-              className="bg-[#212490] hover:bg-[#47acc9] rounded-md"
-              onClick={handleBackup}
-            >
-              <Save className="mr-2 h-4 w-4" />
-              Zálohovať všetky dáta
-            </Button>
-
-            <Button
-              variant="outline"
-              className="hover:text-[#47acc9]"
-              onClick={() => {
-                const input = document.createElement('input');
-                input.type = 'file';
-                input.accept = '.json';
-                input.onchange = (e) => {
-                  const file = (e.target as HTMLInputElement).files?.[0];
-                  if (file) handleImport(file);
-                };
-                input.click();
-              }}
-            >
-              <Upload className="mr-2 h-4 w-4" />
-              Importovať všetky dáta
-            </Button>
-
-            <Button 
-              variant="destructive" 
-              className="rounded-md"
-              onClick={handleWipe}
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              Vymazať všetky dáta
-            </Button>
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium">Zálohovanie dát</h3>
+            <BackupSection />
+            
+            <h3 className="text-lg font-medium mt-6">Import dát</h3>
+            <ImportSection />
+            
+            <h3 className="text-lg font-medium mt-6">Vymazanie dát</h3>
+            <WipeSection />
           </div>
         </div>
       </DialogContent>
