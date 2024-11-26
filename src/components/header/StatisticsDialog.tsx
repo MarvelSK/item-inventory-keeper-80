@@ -87,7 +87,7 @@ export const StatisticsDialog = () => {
                               toast.success("Export PDF bol spustený");
                             }}
                           >
-                            {({ loading }: { loading: boolean }) => (
+                            {({ loading }) => (
                               loading ? (
                                 <Button variant="outline" size="icon" disabled>
                                   <Loader2 className="h-4 w-4 animate-spin" />
