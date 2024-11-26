@@ -5,8 +5,11 @@ import { Card } from "./ui/card";
 import { toast } from "sonner";
 import { Camera, CameraOff } from "lucide-react";
 
+type ScanMode = "qr" | "barcode";
+
 export const Scanner = () => {
   const [isScanning, setIsScanning] = useState(false);
+  const [mode, setMode] = useState<ScanMode>("qr");
   const videoRef = useRef<HTMLVideoElement>(null);
   const codeReader = useRef<BrowserMultiFormatReader>();
   const mediaStream = useRef<MediaStream | null>(null);
@@ -38,7 +41,7 @@ export const Scanner = () => {
         videoRef.current,
         (result, error) => {
           if (result) {
-            toast.success(`Code scanned: ${result.getText()}`);
+            toast.success(`Code scanned: ${result.text}`);
           }
           if (error && !(error instanceof TypeError)) {
             console.error(error);
@@ -47,7 +50,7 @@ export const Scanner = () => {
       );
 
       if (result) {
-        toast.success(`Code scanned: ${result.getText()}`);
+        toast.success(`Code scanned: ${result.text}`);
       }
     } catch (error) {
       console.error("Error accessing camera:", error);
@@ -67,6 +70,22 @@ export const Scanner = () => {
     <div className="space-y-4">
       <Card className="p-4">
         <div className="space-y-4">
+          <div className="flex justify-center gap-2">
+            <Button
+              variant={mode === "qr" ? "default" : "outline"}
+              onClick={() => setMode("qr")}
+              className="w-full sm:w-auto"
+            >
+              QR Code
+            </Button>
+            <Button
+              variant={mode === "barcode" ? "default" : "outline"}
+              onClick={() => setMode("barcode")}
+              className="w-full sm:w-auto"
+            >
+              Barcode
+            </Button>
+          </div>
           <div className="flex justify-center">
             <Button
               onClick={isScanning ? stopScanning : startScanning}
