@@ -8,12 +8,14 @@ import {
 } from "../ui/dropdown-menu";
 import { CustomerDialog } from "../CustomerDialog";
 import { BackupDialog } from "./BackupDialog";
+import { StatisticsDialog } from "./StatisticsDialog";
 import { useState } from "react";
 
 export const MobileMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isCustomerDialogOpen, setIsCustomerDialogOpen] = useState(false);
   const [isBackupDialogOpen, setIsBackupDialogOpen] = useState(false);
+  const [isStatisticsDialogOpen, setIsStatisticsDialogOpen] = useState(false);
 
   const handleMenuItemClick = (dialogSetter: (open: boolean) => void) => {
     setIsOpen(false);
@@ -51,11 +53,21 @@ export const MobileMenu = () => {
           >
             Zálohovanie
           </DropdownMenuItem>
+          <DropdownMenuItem 
+            className="p-3 focus:bg-transparent hover:bg-slate-50 cursor-pointer"
+            onSelect={(e) => {
+              e.preventDefault();
+              handleMenuItemClick(setIsStatisticsDialogOpen);
+            }}
+          >
+            Štatistiky
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 
       <CustomerDialog open={isCustomerDialogOpen} onOpenChange={setIsCustomerDialogOpen} />
       <BackupDialog open={isBackupDialogOpen} onOpenChange={setIsBackupDialogOpen} />
+      <StatisticsDialog />
     </>
   );
 };

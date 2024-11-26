@@ -2,6 +2,7 @@ import { CustomerDialog } from "./CustomerDialog";
 import { DatabaseBackup } from "lucide-react";
 import { MobileMenu } from "./header/MobileMenu";
 import { BackupDialog } from "./header/BackupDialog";
+import { StatisticsDialog } from "./header/StatisticsDialog";
 
 export const Header = () => {
   return (
@@ -28,6 +29,7 @@ export const Header = () => {
           <nav className="hidden md:flex items-center space-x-4">
             <CustomerDialog />
             <BackupDialog />
+            <StatisticsDialog />
           </nav>
         </div>
       </div>
