@@ -121,24 +121,19 @@ export const importMassItems = async (data: string) => {
     console.log(`Processing order: ${orderInfo} with ${items.length} items`);
     
     try {
-      // Create customer for the order with tag if available
-      const customerTags = [];
+      // First create the customer with just the name
+      const customer = await addCustomer(orderInfo);
+      console.log('Created customer:', customer);
+
+      // Then update the customer's tags if available
       if (tags[tagIndex]) {
-        customerTags.push({
+        customer.tags = [{
           id: uuidv4(),
           name: tags[tagIndex],
           color: `#${Math.floor(Math.random()*16777215).toString(16)}`
-        });
+        }];
         tagIndex++;
       }
-
-      const customer = await addCustomer({
-        id: uuidv4(),
-        name: orderInfo,
-        tags: customerTags,
-        deleted: false
-      });
-      console.log('Created customer:', customer);
 
       // Create items for the order
       for (const item of items) {
