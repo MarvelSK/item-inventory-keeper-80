@@ -110,7 +110,6 @@ export const importMassItems = async (data: string) => {
           const newItem = await addItem({
             id: uuidv4(),
             code: item.code,
-            company: "1",
             customer: customer.id,
             description: item.description,
             length: item.length,
