@@ -20,7 +20,13 @@ import {
 import { format } from "date-fns";
 import { BatchExportDialog } from "../pdf/BatchExportDialog";
 
-export const StatisticsDialog = () => {
+interface StatisticsDialogProps {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  trigger?: React.ReactNode;
+}
+
+export const StatisticsDialog = ({ open, onOpenChange, trigger }: StatisticsDialogProps) => {
   const { items } = useItems();
 
   // Group items by customer
@@ -48,11 +54,13 @@ export const StatisticsDialog = () => {
   const totalOrders = customerOrders.length;
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="icon" className="ml-2">
-          <BarChart className="h-5 w-5" />
-        </Button>
+        {trigger || (
+          <Button variant="outline" size="icon" className="hidden md:inline-flex ml-2">
+            <BarChart className="h-5 w-5" />
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="w-[95vw] max-w-2xl h-[90vh] md:h-[80vh]">
         <DialogHeader>

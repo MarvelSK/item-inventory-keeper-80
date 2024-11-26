@@ -67,7 +67,7 @@ export const MobileMenu = () => {
 
       <CustomerDialog open={isCustomerDialogOpen} onOpenChange={setIsCustomerDialogOpen} />
       <BackupDialog open={isBackupDialogOpen} onOpenChange={setIsBackupDialogOpen} />
-      <StatisticsDialog />
+      <StatisticsDialog open={isStatisticsDialogOpen} onOpenChange={setIsStatisticsDialogOpen} />
     </>
   );
 };
