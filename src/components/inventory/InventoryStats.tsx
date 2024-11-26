@@ -1,5 +1,5 @@
 import { Item } from "@/lib/types";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Card, CardContent } from "../ui/card";
 import { Badge } from "../ui/badge";
 
 interface InventoryStatsProps {
@@ -27,33 +27,25 @@ export const InventoryStats = ({ items }: InventoryStatsProps) => {
   return (
     <div className="grid grid-cols-5 gap-2">
       <Card className="col-span-1">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 p-2">
-          <CardTitle className="text-xs font-medium">
-            <Badge variant="secondary" className="text-xs">
-              Celkom
-            </Badge>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-2 pt-0">
-          <div className="text-2xl font-bold text-gray-900 tracking-tight">
+        <CardContent className="p-2 flex items-center justify-between">
+          <Badge variant="secondary" className="text-xs">
+            Celkom
+          </Badge>
+          <span className="text-xl font-bold text-gray-900">
             {totalItems}
-          </div>
+          </span>
         </CardContent>
       </Card>
       
       {Object.entries(STATUS_MAP).map(([status, info]) => (
         <Card key={status} className="col-span-1">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-2">
-            <CardTitle className="text-xs font-medium">
-              <Badge variant={info.variant as any} className="text-xs">
-                {info.label}
-              </Badge>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-2 pt-0">
-            <div className="text-2xl font-bold text-gray-900 tracking-tight">
+          <CardContent className="p-2 flex items-center justify-between">
+            <Badge variant={info.variant as any} className="text-xs">
+              {info.label}
+            </Badge>
+            <span className="text-xl font-bold text-gray-900">
               {statusCounts[status] || 0}
-            </div>
+            </span>
           </CardContent>
         </Card>
       ))}
