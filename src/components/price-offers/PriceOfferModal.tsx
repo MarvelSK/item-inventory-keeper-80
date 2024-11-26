@@ -93,10 +93,18 @@ export const PriceOfferModal = ({ offer, open, onOpenChange }: PriceOfferModalPr
             </div>
 
             <div>
+              <h3 className="font-medium mb-3 text-[#212490]">Správa</h3>
+              <textarea
+                className="w-full min-h-[100px] p-3 border rounded-md bg-gray-50 text-sm"
+                defaultValue={offer.message}
+                readOnly
+              />
+            </div>
+
+            <div>
               <h3 className="font-medium mb-3 text-[#212490]">Poznámky</h3>
               <textarea
                 className="w-full min-h-[100px] p-3 border rounded-md bg-gray-50 text-sm"
-                placeholder="Pridať poznámku..."
                 defaultValue={offer.notices}
                 readOnly
               />
@@ -108,7 +116,7 @@ export const PriceOfferModal = ({ offer, open, onOpenChange }: PriceOfferModalPr
                 onClick={handleSendSatisfactionEmail}
               >
                 <Mail className="mr-2 h-4 w-4" />
-                Mail o spokojnosti
+                Poslať mail o spokojnosti
               </Button>
               <Button className="w-full">
                 <Send className="mr-2 h-4 w-4" />
