@@ -10,6 +10,7 @@ interface InventorySearchProps {
   viewMode: "list" | "grid";
   setViewMode: (mode: "list" | "grid") => void;
   onFilterChange: (filters: any) => void;
+  showArchived?: boolean;
 }
 
 export const InventorySearch = ({
@@ -18,6 +19,7 @@ export const InventorySearch = ({
   viewMode,
   setViewMode,
   onFilterChange,
+  showArchived,
 }: InventorySearchProps) => {
   return (
     <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-2">
