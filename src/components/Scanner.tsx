@@ -32,6 +32,7 @@ export const Scanner = () => {
   const [scanner, setScanner] = useState<Html5QrcodeScanner | null>(null);
   const [scannedItem, setScannedItem] = useState<Item | null>(null);
   const [scanMode, setScanMode] = useState<ScanMode>("naskladnenie");
+  const [lastScannedTime, setLastScannedTime] = useState(0);
   const { updateItem } = useItems();
 
   useEffect(() => {
@@ -59,6 +60,13 @@ export const Scanner = () => {
   }, [scanning]);
 
   const onScanSuccess = async (decodedText: string) => {
+    const currentTime = Date.now();
+    // Prevent multiple scans within 3 seconds
+    if (currentTime - lastScannedTime < 3000) {
+      return;
+    }
+    setLastScannedTime(currentTime);
+
     console.log("Scanned code:", decodedText);
     setScanning(true);
     setScannedCode(decodedText);
