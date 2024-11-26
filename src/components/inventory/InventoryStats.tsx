@@ -7,9 +7,9 @@ interface InventoryStatsProps {
 }
 
 const STATUS_MAP = {
-  waiting: { label: 'Čaká na dovoz', variant: 'warning' },
+  waiting: { label: 'Čaká na dovoz', variant: 'secondary' },
   in_stock: { label: 'Na sklade', variant: 'success' },
-  in_transit: { label: 'V preprave', variant: 'primary' },
+  in_transit: { label: 'V preprave', variant: 'warning' },
   delivered: { label: 'Doručené', variant: 'default' }
 } as const;
 
