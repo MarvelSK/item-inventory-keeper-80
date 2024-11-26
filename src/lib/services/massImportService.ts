@@ -148,7 +148,7 @@ export const importMassItems = async (data: string) => {
           length: item.length,
           width: item.width,
           height: item.height,
-          status: 'waiting',
+          status: 'waiting', // Always set status to 'waiting' (Čaká na dovoz)
           tags: [],
           createdAt: new Date(),
           updatedAt: new Date(),
