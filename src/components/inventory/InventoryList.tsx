@@ -2,13 +2,16 @@ import { useState } from "react";
 import { Item } from "@/lib/types";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "../ui/alert-dialog";
 import { EditItemDialog } from "./EditItemDialog";
+import { InventorySearch } from "./InventorySearch";
 import { InventoryTable } from "./InventoryTable";
 import { InventoryGrid } from "./InventoryGrid";
 import { useItems } from "@/hooks/useItems";
 import { Loader2 } from "lucide-react";
+import { MassImportDialog } from "./MassImportDialog";
 import { InventoryStats } from "./InventoryStats";
 import { InventoryPagination } from "./InventoryPagination";
-import { InventoryHeader } from "./InventoryHeader";
+import { toast } from "sonner";
+import { isWithinInterval, startOfDay, endOfDay } from "date-fns";
 import { InventoryListLogic } from "./InventoryListLogic";
 
 export const InventoryList = () => {
@@ -18,13 +21,11 @@ export const InventoryList = () => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(50);
-  const [sortField, setSortField] = useState<keyof Item>("code");
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
   const { items, isLoading, error, updateItem, deleteItem } = useItems();
-
-  const {
-    paginatedItems,
+  const { 
+    filteredAndSortedItems, 
+    paginatedItems, 
     totalPages,
     editingItem,
     setEditingItem,
@@ -34,22 +35,7 @@ export const InventoryList = () => {
     handleEdit,
     handlePostpone,
     handleFilterChange,
-  } = InventoryListLogic({
-    items,
-    updateItem,
-    deleteItem,
-    currentPage,
-    itemsPerPage,
-  });
-
-  const toggleSort = (field: keyof Item) => {
-    if (sortField === field) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
-    } else {
-      setSortField(field);
-      setSortDirection("asc");
-    }
-  };
+  } = InventoryListLogic({ items, updateItem, deleteItem, currentPage, itemsPerPage });
 
   if (error) {
     return (
@@ -69,60 +55,66 @@ export const InventoryList = () => {
 
   return (
     <div className="space-y-4">
-      <InventoryHeader
-        search={search}
-        setSearch={setSearch}
-        viewMode={viewMode}
-        setViewMode={setViewMode}
-        onFilterChange={handleFilterChange}
-      />
-
-      <InventoryStats items={items} />
-
-      {viewMode === "list" ? (
-        <InventoryTable
-          items={paginatedItems}
-          sortField={sortField}
-          sortDirection={sortDirection}
-          toggleSort={toggleSort}
-          onEdit={async (item) => {
-            setEditingItem(item);
-            setIsEditDialogOpen(true);
-          }}
-          onDelete={async (id) => {
-            setDeletingItemId(id);
-            setIsDeleteDialogOpen(true);
-          }}
-          onPostpone={handlePostpone}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+        <InventorySearch
+          search={search}
+          setSearch={setSearch}
+          viewMode={viewMode}
+          setViewMode={setViewMode}
+          onFilterChange={handleFilterChange}
         />
-      ) : (
-        <InventoryGrid
-          items={paginatedItems}
-          onEdit={async (item) => {
-            setEditingItem(item);
-            setIsEditDialogOpen(true);
-          }}
-          onDelete={async (id) => {
-            setDeletingItemId(id);
-            setIsDeleteDialogOpen(true);
-          }}
-          onPostpone={handlePostpone}
-        />
-      )}
+        <div className="w-full sm:w-auto">
+          <MassImportDialog />
+        </div>
+      </div>
 
-      <InventoryPagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        itemsPerPage={itemsPerPage}
-        onPageChange={(page) => {
-          setCurrentPage(page);
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }}
-        onItemsPerPageChange={(value) => {
-          setItemsPerPage(parseInt(value, 10));
-          setCurrentPage(1);
-        }}
-      />
+      <InventoryStats items={filteredAndSortedItems} />
+
+      <div className="-mx-4 sm:mx-0">
+        {viewMode === "list" ? (
+          <InventoryTable
+            items={paginatedItems}
+            onEdit={(item) => {
+              setEditingItem(item);
+              setIsEditDialogOpen(true);
+            }}
+            onDelete={(id) => {
+              setDeletingItemId(id);
+              setIsDeleteDialogOpen(true);
+            }}
+            onPostpone={handlePostpone}
+          />
+        ) : (
+          <InventoryGrid
+            items={paginatedItems}
+            onEdit={(item) => {
+              setEditingItem(item);
+              setIsEditDialogOpen(true);
+            }}
+            onDelete={(id) => {
+              setDeletingItemId(id);
+              setIsDeleteDialogOpen(true);
+            }}
+            onPostpone={handlePostpone}
+          />
+        )}
+      </div>
+
+      <div className="px-4 sm:px-0">
+        <InventoryPagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          itemsPerPage={itemsPerPage}
+          onPageChange={(page) => {
+            setCurrentPage(page);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          onItemsPerPageChange={(value) => {
+            setItemsPerPage(parseInt(value, 10));
+            setCurrentPage(1);
+          }}
+        />
+      </div>
 
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent className="w-[95vw] max-w-[425px]">
