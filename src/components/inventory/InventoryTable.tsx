@@ -10,6 +10,7 @@ interface InventoryTableProps {
   toggleSort: (field: keyof Item) => void;
   onEdit: (item: Item) => void;
   onDelete: (id: string) => void;
+  onPostpone: (item: Item) => void;
 }
 
 export const InventoryTable = ({
@@ -19,6 +20,7 @@ export const InventoryTable = ({
   toggleSort,
   onEdit,
   onDelete,
+  onPostpone,
 }: InventoryTableProps) => {
   return (
     <div className="rounded-md border overflow-x-auto -mx-4 sm:mx-0">
@@ -90,6 +92,7 @@ export const InventoryTable = ({
               item={item}
               onEdit={onEdit}
               onDelete={onDelete}
+              onPostpone={onPostpone}
             />
           ))}
         </TableBody>
