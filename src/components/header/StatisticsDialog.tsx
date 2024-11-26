@@ -22,6 +22,7 @@ import { PDFDownloadLink } from '@react-pdf/renderer';
 import { CustomerOrderPDF } from "../pdf/CustomerOrderPDF";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { BatchExportDialog } from "../pdf/BatchExportDialog";
 
 export const StatisticsDialog = () => {
   const { items } = useItems();
@@ -34,6 +35,12 @@ export const StatisticsDialog = () => {
     acc[item.customer].push(item);
     return acc;
   }, {} as Record<string, typeof items>);
+
+  const customerOrders = Object.entries(itemsByCustomer).map(([customerId, items]) => {
+    const customer = customers.find((c) => c.id === customerId);
+    if (!customer) return null;
+    return { customer, items };
+  }).filter((order): order is NonNullable<typeof order> => order !== null);
 
   const STATUS_MAP = {
     waiting: { label: 'Čaká na dovoz', variant: 'secondary' },
@@ -51,7 +58,10 @@ export const StatisticsDialog = () => {
       </DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
         <DialogHeader>
-          <DialogTitle>Štatistiky zakázok</DialogTitle>
+          <div className="flex items-center justify-between">
+            <DialogTitle>Štatistiky zakázok</DialogTitle>
+            <BatchExportDialog customerOrders={customerOrders} />
+          </div>
         </DialogHeader>
         <ScrollArea className="flex-grow">
           <div className="space-y-2 p-2">
@@ -87,17 +97,9 @@ export const StatisticsDialog = () => {
                               toast.success("Export PDF bol spustený");
                             }}
                           >
-                            {({ loading }) => 
-                              loading ? (
-                                <Button variant="outline" size="icon" disabled>
-                                  <Loader2 className="h-4 w-4 animate-spin" />
-                                </Button>
-                              ) : (
-                                <Button variant="outline" size="icon">
-                                  <Download className="h-4 w-4" />
-                                </Button>
-                              )
-                            }
+                            <Button variant="outline" size="icon">
+                              <Download className="h-4 w-4" />
+                            </Button>
                           </PDFDownloadLink>
                         </div>
                         <div className="flex flex-wrap gap-1">

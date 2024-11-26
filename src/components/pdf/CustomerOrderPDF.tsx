@@ -66,6 +66,10 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: '#9ca3af',
   },
+  pageBreak: {
+    marginBottom: 20,
+    breakAfter: 'page',
+  },
 });
 
 const STATUS_MAP = {
@@ -76,17 +80,19 @@ const STATUS_MAP = {
 } as const;
 
 interface CustomerOrderPDFProps {
-  customer: Customer;
-  items: Item[];
+  orders?: { customer: Customer; items: Item[] }[];
+  customer?: Customer;
+  items?: Item[];
+  template?: 'default' | 'compact';
 }
 
-export const CustomerOrderPDF = ({ customer, items }: CustomerOrderPDFProps) => (
-  <Document>
-    <Page size="A4" style={styles.page}>
-      <Text style={styles.header}>Zákazka</Text>
-      
-      <View style={styles.customerInfo}>
-        <Text style={styles.customerName}>{customer.name}</Text>
+const OrderPage = ({ customer, items, template = 'default' }: { customer: Customer; items: Item[]; template?: 'default' | 'compact' }) => (
+  <View style={styles.page}>
+    <Text style={styles.header}>Zákazka</Text>
+    
+    <View style={styles.customerInfo}>
+      <Text style={styles.customerName}>{customer.name}</Text>
+      {template === 'default' && (
         <View style={styles.tags}>
           {customer.tags?.map((tag) => (
             <Text key={tag.id} style={[styles.tag, { color: tag.color }]}>
@@ -94,36 +100,62 @@ export const CustomerOrderPDF = ({ customer, items }: CustomerOrderPDFProps) => 
             </Text>
           ))}
         </View>
-      </View>
+      )}
+    </View>
 
-      <Text style={styles.itemsHeader}>Položky</Text>
-      <View style={styles.table}>
-        <View style={styles.tableHeader}>
-          <Text style={styles.col1}>Kód</Text>
-          <Text style={styles.col2}>Popis</Text>
-          <Text style={styles.col3}>Stav</Text>
-          <Text style={styles.col4}>Dátum</Text>
+    <Text style={styles.itemsHeader}>Položky</Text>
+    <View style={styles.table}>
+      <View style={styles.tableHeader}>
+        <Text style={styles.col1}>Kód</Text>
+        <Text style={styles.col2}>Popis</Text>
+        <Text style={styles.col3}>Stav</Text>
+        <Text style={styles.col4}>Dátum</Text>
+      </View>
+      {items.map((item) => (
+        <View key={item.id} style={styles.tableRow}>
+          <Text style={styles.col1}>{item.code}</Text>
+          <Text style={styles.col2}>
+            {item.description || '-'}
+            {template === 'default' && item.length && item.width && item.height
+              ? `\nRozmery: ${item.length}×${item.width}×${item.height} cm`
+              : ''}
+          </Text>
+          <Text style={styles.col3}>{STATUS_MAP[item.status]}</Text>
+          <Text style={styles.col4}>
+            {new Date(item.createdAt).toLocaleDateString('sk-SK')}
+          </Text>
         </View>
-        {items.map((item) => (
-          <View key={item.id} style={styles.tableRow}>
-            <Text style={styles.col1}>{item.code}</Text>
-            <Text style={styles.col2}>
-              {item.description || '-'}
-              {item.length && item.width && item.height
-                ? `\nRozmery: ${item.length}×${item.width}×${item.height} cm`
-                : ''}
-            </Text>
-            <Text style={styles.col3}>{STATUS_MAP[item.status]}</Text>
-            <Text style={styles.col4}>
-              {new Date(item.createdAt).toLocaleDateString('sk-SK')}
-            </Text>
-          </View>
-        ))}
-      </View>
+      ))}
+    </View>
 
-      <Text style={styles.footer}>
-        Vygenerované {new Date().toLocaleDateString('sk-SK')}
-      </Text>
-    </Page>
-  </Document>
+    <Text style={styles.footer}>
+      Vygenerované {new Date().toLocaleDateString('sk-SK')}
+    </Text>
+  </View>
 );
+
+export const CustomerOrderPDF = ({ orders, customer, items, template = 'default' }: CustomerOrderPDFProps) => {
+  // Handle single order case
+  if (customer && items) {
+    return (
+      <Document>
+        <Page size="A4">
+          <OrderPage customer={customer} items={items} template={template} />
+        </Page>
+      </Document>
+    );
+  }
+
+  // Handle batch export case
+  if (!orders) return null;
+
+  return (
+    <Document>
+      {orders.map(({ customer, items }, index) => (
+        <Page key={customer.id} size="A4">
+          <OrderPage customer={customer} items={items} template={template} />
+        </Page>
+      ))}
+    </Document>
+  );
+};
