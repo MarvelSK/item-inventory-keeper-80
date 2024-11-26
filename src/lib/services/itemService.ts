@@ -43,19 +43,29 @@ const mapItemToDb = (item: Item): Omit<DbItem, 'id' | 'created_at' | 'updated_at
 });
 
 export const findItemByCode = async (code: string) => {
-  const { data: items, error } = await supabase
-    .from('items')
-    .select('*')
-    .eq('code', code.trim())
-    .eq('deleted', false)
-    .single();
+  try {
+    const { data: items, error } = await supabase
+      .from('items')
+      .select('*')
+      .eq('code', code.trim())
+      .eq('deleted', false);
 
-  if (error) {
-    console.error('Error finding item:', error);
-    return null;
+    if (error) {
+      console.error('Error finding item:', error);
+      throw error;
+    }
+
+    // Return null if no items found
+    if (!items || items.length === 0) {
+      return null;
+    }
+
+    // Return the first item if multiple are found
+    return mapDbItemToItem(items[0] as DbItem);
+  } catch (error) {
+    console.error('Error in findItemByCode:', error);
+    throw error;
   }
-
-  return items ? mapDbItemToItem(items as DbItem) : null;
 };
 
 export const addItem = async (item: Item) => {
@@ -74,15 +84,18 @@ export const addItem = async (item: Item) => {
       created_by: user.id,
       updated_by: user.id,
     }))
-    .select()
-    .single();
+    .select();
 
   if (error) {
     console.error('Error adding item:', error);
     throw error;
   }
 
-  return mapDbItemToItem(data as DbItem);
+  if (!data || data.length === 0) {
+    throw new Error('No data returned from insert');
+  }
+
+  return mapDbItemToItem(data[0] as DbItem);
 };
 
 export const updateItem = async (updatedItem: Item) => {
@@ -96,40 +109,52 @@ export const updateItem = async (updatedItem: Item) => {
       updated_by: user.id,
     }))
     .eq('id', updatedItem.id)
-    .select()
-    .single();
+    .select();
 
   if (error) {
     console.error('Error updating item:', error);
     throw error;
   }
 
-  return mapDbItemToItem(data as DbItem);
+  if (!data || data.length === 0) {
+    throw new Error('No data returned from update');
+  }
+
+  return mapDbItemToItem(data[0] as DbItem);
 };
 
 export const deleteItem = async (id: string) => {
-  const { error } = await supabase
-    .from('items')
-    .update({ deleted: true })
-    .eq('id', id);
+  try {
+    const { error } = await supabase
+      .from('items')
+      .update({ deleted: true })
+      .eq('id', id);
 
-  if (error) {
+    if (error) throw error;
+  } catch (error) {
     console.error('Error deleting item:', error);
     throw error;
   }
 };
 
 export const getAllItems = async () => {
-  const { data: items, error } = await supabase
-    .from('items')
-    .select('*')
-    .eq('deleted', false)
-    .order('created_at', { ascending: false });
+  try {
+    const { data: items, error } = await supabase
+      .from('items')
+      .select('*')
+      .eq('deleted', false)
+      .order('created_at', { ascending: false });
 
-  if (error) {
-    console.error('Error fetching items:', error);
+    if (error) {
+      console.error('Error fetching items:', error);
+      throw error;
+    }
+
+    if (!items) return [];
+
+    return (items as DbItem[]).map(mapDbItemToItem);
+  } catch (error) {
+    console.error('Error in getAllItems:', error);
     throw error;
   }
-
-  return (items as DbItem[]).map(mapDbItemToItem);
 };
