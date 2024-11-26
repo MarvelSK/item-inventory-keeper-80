@@ -13,8 +13,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { PriceOfferModal } from "./PriceOfferModal";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Eye } from "lucide-react";
 
 export const PriceOffersList = () => {
   const [selectedOffer, setSelectedOffer] = useState<any>(null);
@@ -45,45 +43,38 @@ export const PriceOffersList = () => {
       <div className="overflow-x-auto rounded-lg border">
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead>Číslo</TableHead>
-              <TableHead>Produkt</TableHead>
-              <TableHead>Zákazník</TableHead>
-              <TableHead>Kontakt</TableHead>
-              <TableHead>Dátum</TableHead>
-              <TableHead>Stav</TableHead>
-              <TableHead className="text-right">Akcie</TableHead>
+            <TableRow className="h-10">
+              <TableHead className="text-xs">Číslo</TableHead>
+              <TableHead className="text-xs">Produkt</TableHead>
+              <TableHead className="text-xs">Zákazník</TableHead>
+              <TableHead className="text-xs">Kontakt</TableHead>
+              <TableHead className="text-xs">Dátum</TableHead>
+              <TableHead className="text-xs">Stav</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {offers?.map((offer) => (
-              <TableRow key={offer.id} className="hover:bg-gray-50">
-                <TableCell className="font-medium">#{offer.id}</TableCell>
-                <TableCell>{offer.product}</TableCell>
-                <TableCell>{offer.name}</TableCell>
+              <TableRow 
+                key={offer.id} 
+                className="h-12 hover:bg-gray-50 cursor-pointer"
+                onClick={() => setSelectedOffer(offer)}
+              >
+                <TableCell className="text-xs font-medium">#{offer.id}</TableCell>
+                <TableCell className="text-xs">{offer.product}</TableCell>
+                <TableCell className="text-xs">{offer.name}</TableCell>
                 <TableCell>
-                  <div className="text-sm">
+                  <div className="text-xs">
                     <p>{offer.phone_number}</p>
                     <p className="text-gray-500">{offer.email}</p>
                   </div>
                 </TableCell>
-                <TableCell>
+                <TableCell className="text-xs">
                   {format(new Date(offer.created_at), "dd.MM.yyyy")}
                 </TableCell>
                 <TableCell>
-                  <Badge variant={offer.notification ? "success" : "secondary"}>
+                  <Badge variant={offer.notification ? "default" : "secondary"} className="text-xs">
                     {offer.notification ? "Odoslané" : "Neodoslané"}
                   </Badge>
-                </TableCell>
-                <TableCell className="text-right">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setSelectedOffer(offer)}
-                  >
-                    <Eye className="h-4 w-4 mr-1" />
-                    Detail
-                  </Button>
                 </TableCell>
               </TableRow>
             ))}
