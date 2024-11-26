@@ -2,6 +2,8 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PriceOffersList } from "@/components/price-offers/PriceOffersList";
+import { DistributorsList } from "@/components/price-offers/DistributorsList";
+import { Separator } from "@/components/ui/separator";
 
 const CenovePonuky = () => {
   return (
@@ -19,15 +21,27 @@ const CenovePonuky = () => {
             </TabsList>
             
             <TabsContent value="slovakia">
-              <PriceOffersList region="slovakia" />
+              <div className="space-y-8">
+                <DistributorsList region="slovakia" />
+                <Separator />
+                <PriceOffersList region="slovakia" />
+              </div>
             </TabsContent>
             
             <TabsContent value="hungary">
-              <PriceOffersList region="hungary" />
+              <div className="space-y-8">
+                <DistributorsList region="hungary" />
+                <Separator />
+                <PriceOffersList region="hungary" />
+              </div>
             </TabsContent>
             
             <TabsContent value="romania">
-              <PriceOffersList region="romania" />
+              <div className="space-y-8">
+                <DistributorsList region="romania" />
+                <Separator />
+                <PriceOffersList region="romania" />
+              </div>
             </TabsContent>
           </Tabs>
         </div>

@@ -57,6 +57,63 @@ export type Database = {
           },
         ]
       }
+      distributors: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          deleted: boolean
+          email: string | null
+          id: string
+          name: string
+          phone: string | null
+          region: Database["public"]["Enums"]["region_type"]
+          sales_rep_email: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          deleted?: boolean
+          email?: string | null
+          id?: string
+          name: string
+          phone?: string | null
+          region: Database["public"]["Enums"]["region_type"]
+          sales_rep_email?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          deleted?: boolean
+          email?: string | null
+          id?: string
+          name?: string
+          phone?: string | null
+          region?: Database["public"]["Enums"]["region_type"]
+          sales_rep_email?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "distributors_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "distributors_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       items: {
         Row: {
           code: string
@@ -281,7 +338,7 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      region_type: "slovakia" | "hungary" | "romania"
     }
     CompositeTypes: {
       [_ in never]: never
