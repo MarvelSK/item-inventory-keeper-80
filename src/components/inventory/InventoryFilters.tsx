@@ -38,7 +38,7 @@ interface InventoryFiltersProps {
 export const InventoryFilters = ({ onFilterChange }: InventoryFiltersProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [filters, setFilters] = useState<FilterValues>({
-    status: "",
+    status: "all",
   });
 
   const handleFilterChange = (newFilters: Partial<FilterValues>) => {
@@ -67,7 +67,7 @@ export const InventoryFilters = ({ onFilterChange }: InventoryFiltersProps) => {
                 <SelectValue placeholder="Všetky stavy" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Všetky stavy</SelectItem>
+                <SelectItem value="all">Všetky stavy</SelectItem>
                 <SelectItem value="waiting">Čaká na dovoz</SelectItem>
                 <SelectItem value="in_stock">Na sklade</SelectItem>
                 <SelectItem value="in_transit">V preprave</SelectItem>
