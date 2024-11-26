@@ -36,10 +36,7 @@ export const ItemActionsDropdown = ({
         <DropdownMenuItem onClick={() => onEdit(item)}>
           Upraviť
         </DropdownMenuItem>
-        <DropdownMenuItem 
-          onClick={() => onPostpone(item)}
-          className="bg-amber-100 hover:bg-amber-200"
-        >
+        <DropdownMenuItem onClick={() => onPostpone(item)}>
           Označiť ako odložené
         </DropdownMenuItem>
         <DropdownMenuItem 
