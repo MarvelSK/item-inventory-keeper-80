@@ -2,10 +2,10 @@ import { v4 as uuidv4 } from 'uuid';
 import { addCustomer } from './customerService';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from 'sonner';
-import { Item } from '../types';
+import { Item, Tag } from '../types';
 
 const VALID_DESCRIPTIONS = ['Příslušenství', 'Plechy', 'Žaluzie', 'Vodící profily'];
-const BATCH_SIZE = 50; // Process items in batches of 50
+const BATCH_SIZE = 50;
 
 interface ParsedItem {
   code: string;
@@ -14,6 +14,23 @@ interface ParsedItem {
   width: number;
   height: number;
   orderInfo: string;
+}
+
+interface SupabaseItem {
+  id: string;
+  code: string;
+  customer: string;
+  description: string | null;
+  length: number | null;
+  width: number | null;
+  height: number | null;
+  status: string;
+  tags: Tag[];
+  created_at?: string;
+  updated_at?: string;
+  deleted: boolean;
+  postponed?: boolean | null;
+  postpone_reason?: string | null;
 }
 
 const parseItems = (data: string): ParsedItem[] => {
@@ -77,10 +94,28 @@ const parseItems = (data: string): ParsedItem[] => {
   return items;
 };
 
+const convertToSupabaseItems = (items: Item[]): Omit<SupabaseItem, 'created_at' | 'updated_at'>[] => {
+  return items.map(item => ({
+    id: item.id,
+    code: item.code,
+    customer: item.customer,
+    description: item.description,
+    length: item.length,
+    width: item.width,
+    height: item.height,
+    status: item.status,
+    tags: [], // Initialize with empty array as per schema
+    deleted: false,
+    postponed: item.postponed,
+    postpone_reason: item.postponeReason
+  }));
+};
+
 const insertItemsBatch = async (items: Item[]) => {
+  const supabaseItems = convertToSupabaseItems(items);
   const { error } = await supabase
     .from('items')
-    .insert(items);
+    .insert(supabaseItems);
 
   if (error) throw error;
 };
@@ -117,10 +152,8 @@ export const importMassItems = async (
     try {
       onProgress('Creating customers', (processedOrders / totalOrders) * 100);
       
-      // Create customer for the order
       const customer = await addCustomer(orderInfo);
       
-      // Prepare items for batch insert
       const itemBatches: Item[][] = [];
       const batchItems: Item[] = [];
       
