@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Html5QrcodeScanner } from "html5-qrcode";
 import { findItemByCode } from "@/lib/inventory";
+import { toast } from "sonner";
 import { Button } from "./ui/button";
 import { Item } from "@/lib/types";
 import { useItems } from "@/hooks/useItems";
@@ -10,15 +11,18 @@ type ScanMode = "naskladnenie" | "nalozenie" | "dorucenie";
 const STATUS_TRANSITIONS = {
   naskladnenie: {
     from: "waiting",
-    to: "in_stock"
+    to: "in_stock",
+    message: "Položka naskladnená"
   },
   nalozenie: {
     from: "in_stock",
-    to: "in_transit"
+    to: "in_transit",
+    message: "Položka naložená"
   },
   dorucenie: {
     from: "in_transit",
-    to: "delivered"
+    to: "delivered",
+    message: "Položka doručená"
   }
 } as const;
 
@@ -28,8 +32,6 @@ export const Scanner = () => {
   const [scanner, setScanner] = useState<Html5QrcodeScanner | null>(null);
   const [scannedItem, setScannedItem] = useState<Item | null>(null);
   const [scanMode, setScanMode] = useState<ScanMode>("naskladnenie");
-  const [lastScannedTime, setLastScannedTime] = useState(0);
-  const [scanResult, setScanResult] = useState<"success" | "error" | null>(null);
   const { updateItem } = useItems();
 
   useEffect(() => {
@@ -56,48 +58,36 @@ export const Scanner = () => {
     };
   }, [scanning]);
 
-  // Add styles for scan feedback
-  useEffect(() => {
-    const qrBox = document.querySelector("#reader__scan_region");
-    if (qrBox) {
-      if (scanResult === "success") {
-        qrBox.classList.add("border-4", "border-green-500");
-        qrBox.classList.remove("border-red-500");
-      } else if (scanResult === "error") {
-        qrBox.classList.add("border-4", "border-red-500");
-        qrBox.classList.remove("border-green-500");
-      } else {
-        qrBox.classList.remove("border-4", "border-green-500", "border-red-500");
-      }
-      
-      // Reset visual feedback after 1 second
-      const timeout = setTimeout(() => {
-        setScanResult(null);
-      }, 1000);
-      
-      return () => clearTimeout(timeout);
-    }
-  }, [scanResult]);
-
   const onScanSuccess = async (decodedText: string) => {
-    const currentTime = Date.now();
-    // Prevent multiple scans within 1 second
-    if (currentTime - lastScannedTime < 1000) {
-      return;
-    }
-    setLastScannedTime(currentTime);
+    console.log("Scanned code:", decodedText);
+    setScanning(true);
+    setScannedCode(decodedText);
 
+    // Trim the code to remove any whitespace
     const trimmedCode = decodedText.trim();
+    console.log("Looking for item with code:", trimmedCode);
+    
     const item = await findItemByCode(trimmedCode);
+    console.log("Found item:", item);
     
     if (!item) {
-      setScanResult("error");
+      toast.error("Položka nebola nájdená v systéme");
+      setTimeout(() => {
+        setScanning(false);
+        setScannedCode(null);
+        setScannedItem(null);
+      }, 2000);
       return;
     }
 
     const transition = STATUS_TRANSITIONS[scanMode];
     if (item.status !== transition.from) {
-      setScanResult("error");
+      toast.error(`Položka musí byť v stave "${transition.from}" pre ${scanMode}`);
+      setTimeout(() => {
+        setScanning(false);
+        setScannedCode(null);
+        setScannedItem(null);
+      }, 2000);
       return;
     }
 
@@ -109,10 +99,14 @@ export const Scanner = () => {
       };
       await updateItem(updatedItem);
       setScannedItem(updatedItem);
-      setScanResult("success");
-      setScannedCode(trimmedCode);
+      toast.success(transition.message);
     } catch (error) {
-      setScanResult("error");
+      toast.error("Chyba pri aktualizácii položky");
+      setTimeout(() => {
+        setScanning(false);
+        setScannedCode(null);
+        setScannedItem(null);
+      }, 2000);
     }
   };
 
@@ -124,7 +118,6 @@ export const Scanner = () => {
     setScanning(false);
     setScannedCode(null);
     setScannedItem(null);
-    setScanResult(null);
   };
 
   return (
@@ -164,6 +157,15 @@ export const Scanner = () => {
             <p className="text-base sm:text-lg font-semibold mt-2">
               Status: {scannedItem.status}
             </p>
+          </div>
+          <div className="text-center mt-4">
+            <Button
+              variant="outline"
+              onClick={resetScanner}
+              className="text-gray-600 hover:text-gray-800 text-sm sm:text-base w-full sm:w-auto"
+            >
+              Skenovať ďalší kód
+            </Button>
           </div>
         </div>
       )}
