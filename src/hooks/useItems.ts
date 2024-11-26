@@ -2,7 +2,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getAllItems, addItem, updateItem, deleteItem } from '../lib/services/itemService';
 import { toast } from 'sonner';
 import { Item } from '../lib/types';
-import { v4 as uuidv4 } from 'uuid';
 
 export const useItems = () => {
   const queryClient = useQueryClient();
@@ -17,7 +16,6 @@ export const useItems = () => {
     mutationFn: (newItem: Omit<Item, 'id' | 'createdAt' | 'updatedAt' | 'deleted'>) => {
       const fullItem: Item = {
         ...newItem,
-        id: uuidv4(),
         createdAt: new Date(),
         updatedAt: new Date(),
         deleted: false
@@ -57,11 +55,6 @@ export const useItems = () => {
       toast.error('Chyba pri vymazaní položky');
     },
   });
-
-  if (error) {
-    console.error('Error fetching items:', error);
-    toast.error('Failed to load items');
-  }
 
   return {
     items,

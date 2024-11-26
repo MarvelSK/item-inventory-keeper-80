@@ -1,106 +1,96 @@
 import { Item } from '../types';
-import { cache } from '../cache';
 import { supabase } from '@/integrations/supabase/client';
-
-export let items: Item[] = [];
-
-const areItemsEqual = (item1: Item, item2: Item) => {
-  return (
-    item1.code === item2.code &&
-    item1.company === item2.company &&
-    item1.customer === item2.customer &&
-    item1.description === item2.description &&
-    item1.length === item2.length &&
-    item1.width === item2.width &&
-    item1.height === item2.height &&
-    item1.status === item2.status
-  );
-};
+import { toast } from 'sonner';
 
 export const findItemByCode = async (code: string) => {
-  console.log('Finding item by code:', code);
-  const normalizedCode = code.trim().toLowerCase();
-  const item = items.find((i) => i.code.toLowerCase() === normalizedCode && !i.deleted);
-  console.log('Found item:', item);
-  return item;
+  const { data: items, error } = await supabase
+    .from('items')
+    .select('*')
+    .eq('code', code.trim())
+    .eq('deleted', false)
+    .single();
+
+  if (error) {
+    console.error('Error finding item:', error);
+    return null;
+  }
+
+  return items;
 };
 
 export const addItem = async (item: Item) => {
-  console.log('Adding new item:', item);
-  
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('User not authenticated');
-  
-  const existingItem = items.find(i => !i.deleted && i.code === item.code);
-  
+
+  const existingItem = await findItemByCode(item.code);
   if (existingItem) {
-    console.log('Item with this code already exists:', existingItem);
     throw new Error('Item with this code already exists');
   }
 
-  const itemWithUser = {
-    ...item,
-    created_by: user.id,
-    updated_by: user.id
-  };
+  const { data, error } = await supabase
+    .from('items')
+    .insert({
+      ...item,
+      created_by: user.id,
+      updated_by: user.id,
+    })
+    .select()
+    .single();
 
-  items.push(itemWithUser);
-  cache.set('items', items);
-  console.log('Current items count after adding:', items.length);
-  console.log('Item added successfully:', itemWithUser);
-  return itemWithUser;
+  if (error) {
+    console.error('Error adding item:', error);
+    throw error;
+  }
+
+  return data;
 };
 
 export const updateItem = async (updatedItem: Item) => {
-  console.log('Updating item:', updatedItem);
-  
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('User not authenticated');
 
-  const index = items.findIndex((item) => item.id === updatedItem.id);
-  if (index !== -1) {
-    items[index] = {
+  const { data, error } = await supabase
+    .from('items')
+    .update({
       ...updatedItem,
       updated_by: user.id,
-      updatedAt: new Date(),
-    };
-    cache.set('items', items);
-    console.log('Item updated successfully:', items[index]);
-    return items[index];
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', updatedItem.id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error updating item:', error);
+    throw error;
   }
-  console.log('Item not found for update:', updatedItem.id);
-  return null;
+
+  return data;
 };
 
 export const deleteItem = async (id: string) => {
-  console.log('Deleting item:', id);
-  const item = items.find(item => item.id === id);
-  if (item) {
-    item.deleted = true;
-    item.updatedAt = new Date();
-    cache.set('items', items);
-    console.log('Item marked as deleted:', item);
+  const { error } = await supabase
+    .from('items')
+    .update({ deleted: true })
+    .eq('id', id);
+
+  if (error) {
+    console.error('Error deleting item:', error);
+    throw error;
   }
 };
 
 export const getAllItems = async () => {
-  console.log('Fetching all items');
-  const cachedItems = cache.get<Item[]>('items');
-  if (cachedItems) {
-    console.log('Returning cached items:', cachedItems.length);
-    console.log('Active cached items:', cachedItems.filter(item => !item.deleted).length);
-    return cachedItems.filter(item => !item.deleted);
-  }
-  
-  const activeItems = items.filter(item => !item.deleted);
-  console.log('No cached items found, returning from memory:', activeItems.length);
-  cache.set('items', activeItems);
-  return activeItems;
-};
+  const { data: items, error } = await supabase
+    .from('items')
+    .select('*')
+    .eq('deleted', false)
+    .order('created_at', { ascending: false });
 
-export const wipeItems = async () => {
-  console.log('Wiping all items');
-  items = [];
-  cache.set('items', items);
-  console.log('Items wiped successfully');
+  if (error) {
+    console.error('Error fetching items:', error);
+    throw error;
+  }
+
+  return items;
 };
