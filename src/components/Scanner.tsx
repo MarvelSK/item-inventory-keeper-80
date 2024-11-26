@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react";
-import { BrowserMultiFormatReader, Result, DecodeHintType } from "@zxing/browser";
+import { BrowserMultiFormatReader } from "@zxing/browser";
+import { DecodeHintType, Result } from "@zxing/library";
 import { findItemByCode } from "@/lib/inventory";
 import { Button } from "./ui/button";
-import { Item } from "@/lib/types";
 import { useItems } from "@/hooks/useItems";
 
 type ScanMode = "naskladnenie" | "nalozenie" | "dorucenie";
@@ -41,7 +41,7 @@ export const Scanner = () => {
 
     return () => {
       if (readerRef.current) {
-        readerRef.current.reset();
+        readerRef.current.stopStreams();
       }
     };
   }, []);
@@ -110,7 +110,7 @@ export const Scanner = () => {
         }
       );
     } else if (!scanning && readerRef.current) {
-      readerRef.current.reset();
+      readerRef.current.stopStreams();
       if (containerRef.current) {
         containerRef.current.style.border = "none";
       }
