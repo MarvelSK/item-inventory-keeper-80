@@ -35,7 +35,9 @@ export const InventoryStats = ({ items }: InventoryStatsProps) => {
           </CardTitle>
         </CardHeader>
         <CardContent className="p-2 pt-0">
-          <div className="text-xl font-bold">{totalItems}</div>
+          <div className="text-2xl font-bold text-gray-900 tracking-tight">
+            {totalItems}
+          </div>
         </CardContent>
       </Card>
       
@@ -49,7 +51,7 @@ export const InventoryStats = ({ items }: InventoryStatsProps) => {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-2 pt-0">
-            <div className="text-xl font-bold">
+            <div className="text-2xl font-bold text-gray-900 tracking-tight">
               {statusCounts[status] || 0}
             </div>
           </CardContent>
