@@ -21,6 +21,7 @@ import { format } from "date-fns";
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import { CustomerOrderPDF } from "../pdf/CustomerOrderPDF";
 import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 export const StatisticsDialog = () => {
   const { items } = useItems();
@@ -59,7 +60,6 @@ export const StatisticsDialog = () => {
                 const customer = customers.find((c) => c.id === customerId);
                 if (!customer) return null;
 
-                // Count items by status
                 const statusCounts = customerItems.reduce((acc, item) => {
                   if (!acc[item.status]) {
                     acc[item.status] = 0;
@@ -79,12 +79,7 @@ export const StatisticsDialog = () => {
                         <div className="flex items-center justify-between w-full">
                           <h3 className="text-base font-medium">{customer.name}</h3>
                           <PDFDownloadLink
-                            document={
-                              <CustomerOrderPDF 
-                                customer={customer} 
-                                items={customerItems}
-                              />
-                            }
+                            document={<CustomerOrderPDF customer={customer} items={customerItems} />}
                             fileName={`zakazka-${customer.name.toLowerCase()}.pdf`}
                             className="ml-2"
                             onClick={(e) => {
@@ -93,13 +88,15 @@ export const StatisticsDialog = () => {
                             }}
                           >
                             {({ loading }) => (
-                              <Button 
-                                variant="outline" 
-                                size="icon" 
-                                disabled={loading}
-                              >
-                                <Download className="h-4 w-4" />
-                              </Button>
+                              loading ? (
+                                <Button variant="outline" size="icon" disabled>
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                </Button>
+                              ) : (
+                                <Button variant="outline" size="icon">
+                                  <Download className="h-4 w-4" />
+                                </Button>
+                              )
                             )}
                           </PDFDownloadLink>
                         </div>

@@ -54,8 +54,8 @@ const styles = StyleSheet.create({
     fontSize: 10,
   },
   col1: { width: '20%' },
-  col2: { width: '40%' },
-  col3: { width: '20%' },
+  col2: { width: '35%' },
+  col3: { width: '25%' },
   col4: { width: '20%' },
   footer: {
     position: 'absolute',
@@ -67,6 +67,13 @@ const styles = StyleSheet.create({
     color: '#9ca3af',
   },
 });
+
+const STATUS_MAP = {
+  waiting: 'Čaká na dovoz',
+  in_stock: 'Na sklade',
+  in_transit: 'V preprave',
+  delivered: 'Doručené'
+} as const;
 
 interface CustomerOrderPDFProps {
   customer: Customer;
@@ -100,8 +107,13 @@ export const CustomerOrderPDF = ({ customer, items }: CustomerOrderPDFProps) => 
         {items.map((item) => (
           <View key={item.id} style={styles.tableRow}>
             <Text style={styles.col1}>{item.code}</Text>
-            <Text style={styles.col2}>{item.description || '-'}</Text>
-            <Text style={styles.col3}>{item.status}</Text>
+            <Text style={styles.col2}>
+              {item.description || '-'}
+              {item.length && item.width && item.height
+                ? `\nRozmery: ${item.length}×${item.width}×${item.height} cm`
+                : ''}
+            </Text>
+            <Text style={styles.col3}>{STATUS_MAP[item.status]}</Text>
             <Text style={styles.col4}>
               {new Date(item.createdAt).toLocaleDateString('sk-SK')}
             </Text>
