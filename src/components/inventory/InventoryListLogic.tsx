@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Item } from "@/lib/types";
+import { toast } from "sonner";
 
 interface InventoryListLogicProps {
   items: Item[];
@@ -21,10 +22,23 @@ export const InventoryListLogic = ({
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [editingItem, setEditingItem] = useState<Item | null>(null);
   const [deletingItemId, setDeletingItemId] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
 
   const filterItems = (items: Item[]) => {
     return items.filter((item) => {
+      // Apply status filter
       if (filters.status && item.status !== filters.status) return false;
+      
+      // Apply search filter
+      if (search) {
+        const searchLower = search.toLowerCase();
+        return (
+          item.code.toLowerCase().includes(searchLower) ||
+          item.description?.toLowerCase().includes(searchLower) ||
+          item.status.toLowerCase().includes(searchLower)
+        );
+      }
+      
       return true;
     });
   };
@@ -98,6 +112,10 @@ export const InventoryListLogic = ({
     setFilters(newFilters);
   };
 
+  const handleSearchChange = (searchValue: string) => {
+    setSearch(searchValue);
+  };
+
   return {
     filteredAndSortedItems,
     paginatedItems,
@@ -110,6 +128,8 @@ export const InventoryListLogic = ({
     handleEdit,
     handlePostpone,
     handleFilterChange,
+    handleSearchChange,
+    search,
     sortField,
     sortDirection,
     toggleSort,

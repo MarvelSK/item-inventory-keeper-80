@@ -10,12 +10,9 @@ import { Loader2 } from "lucide-react";
 import { MassImportDialog } from "./MassImportDialog";
 import { InventoryStats } from "./InventoryStats";
 import { InventoryPagination } from "./InventoryPagination";
-import { toast } from "sonner";
-import { isWithinInterval, startOfDay, endOfDay } from "date-fns";
 import { InventoryListLogic } from "./InventoryListLogic";
 
 export const InventoryList = () => {
-  const [search, setSearch] = useState("");
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -24,8 +21,7 @@ export const InventoryList = () => {
 
   const { items, isLoading, error, updateItem, deleteItem } = useItems();
   const { 
-    filteredAndSortedItems, 
-    paginatedItems, 
+    paginatedItems,
     totalPages,
     editingItem,
     setEditingItem,
@@ -35,6 +31,11 @@ export const InventoryList = () => {
     handleEdit,
     handlePostpone,
     handleFilterChange,
+    handleSearchChange,
+    search,
+    sortField,
+    sortDirection,
+    toggleSort,
   } = InventoryListLogic({ items, updateItem, deleteItem, currentPage, itemsPerPage });
 
   if (error) {
@@ -58,7 +59,7 @@ export const InventoryList = () => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
         <InventorySearch
           search={search}
-          setSearch={setSearch}
+          setSearch={handleSearchChange}
           viewMode={viewMode}
           setViewMode={setViewMode}
           onFilterChange={handleFilterChange}
@@ -68,12 +69,15 @@ export const InventoryList = () => {
         </div>
       </div>
 
-      <InventoryStats items={filteredAndSortedItems} />
+      <InventoryStats items={items} />
 
       <div className="-mx-4 sm:mx-0">
         {viewMode === "list" ? (
           <InventoryTable
             items={paginatedItems}
+            sortField={sortField}
+            sortDirection={sortDirection}
+            toggleSort={toggleSort}
             onEdit={(item) => {
               setEditingItem(item);
               setIsEditDialogOpen(true);
