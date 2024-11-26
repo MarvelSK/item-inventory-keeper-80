@@ -9,12 +9,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Loader2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { PriceOfferModal } from "./PriceOfferModal";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import { fetchPriceOffers } from "@/lib/services/priceOfferService";
 
 interface PriceOffersListProps {
   region: 'slovakia' | 'hungary' | 'romania';
@@ -25,18 +25,9 @@ export const PriceOffersList = ({ region }: PriceOffersListProps) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(50);
 
-  const { data: offers, isLoading } = useQuery({
+  const { data: offers = [], isLoading } = useQuery({
     queryKey: ["price-offers", region],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("price_offers")
-        .select("*")
-        .eq('deleted', false)
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
-      return data;
-    },
+    queryFn: () => fetchPriceOffers(region),
   });
 
   const totalPages = Math.ceil((offers?.length || 0) / itemsPerPage);
@@ -78,7 +69,7 @@ export const PriceOffersList = ({ region }: PriceOffersListProps) => {
                   {format(new Date(offer.created_at), "dd.MM.yyyy HH:mm")}
                 </TableCell>
                 <TableCell className="text-xs py-1">
-                  {offer.vendor_contact || "-"}
+                  {offer.distributors?.name || "-"}
                 </TableCell>
                 <TableCell className="text-xs py-1">
                   {offer.vendor_date 
