@@ -16,17 +16,21 @@ interface ParsedItem {
 
 interface ParsedData {
   items: ParsedItem[];
-  tags: string[];
+  tags: Array<{
+    tag: string;
+    orderInfo: string;
+  }>;
 }
 
 const parseItems = (data: string): ParsedData => {
   console.log('Starting to parse items from data');
   const lines = data.split('\n');
   const items: ParsedItem[] = [];
-  const tags: string[] = [];
+  const tags: Array<{tag: string; orderInfo: string}> = [];
   
   let currentOrderInfo = '';
   let parsingTags = false;
+  let lastOrderInfo = '';
   
   for (const line of lines) {
     const trimmedLine = line.trim();
@@ -40,7 +44,20 @@ const parseItems = (data: string): ParsedData => {
 
     // If we're in tags section and line matches tag pattern (no numbers), collect it
     if (parsingTags && !trimmedLine.match(/\d/) && !trimmedLine.includes('NEVA')) {
-      tags.push(trimmedLine);
+      // Find the corresponding order info for this tag
+      const orderInfos = items.reduce((acc: string[], item) => {
+        if (!acc.includes(item.orderInfo)) {
+          acc.push(item.orderInfo);
+        }
+        return acc;
+      }, []);
+      
+      if (orderInfos[tags.length]) {
+        tags.push({
+          tag: trimmedLine,
+          orderInfo: orderInfos[tags.length]
+        });
+      }
       continue;
     }
 
@@ -59,6 +76,7 @@ const parseItems = (data: string): ParsedData => {
       const orderMatch = trimmedLine.match(/24ZA\d+\s*-\s*[^]+?(?=\s+(?:Příslušenství|Plechy|Žaluzie|Vodící profily)|$)/);
       if (orderMatch) {
         currentOrderInfo = orderMatch[0].trim();
+        lastOrderInfo = currentOrderInfo;
         
         // Parse the first item if it exists in the header line
         const itemMatch = trimmedLine.match(new RegExp(`(${VALID_DESCRIPTIONS.join('|')})\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(24P\\d+)`));
@@ -116,7 +134,6 @@ export const importMassItems = async (data: string) => {
   });
 
   // Process each order
-  let tagIndex = 0;
   for (const [orderInfo, items] of orderGroups) {
     console.log(`Processing order: ${orderInfo} with ${items.length} items`);
     
@@ -125,14 +142,14 @@ export const importMassItems = async (data: string) => {
       const customer = await addCustomer(orderInfo);
       console.log('Created customer:', customer);
 
-      // Then update the customer's tags if available
-      if (tags[tagIndex]) {
+      // Find matching tag for this order
+      const matchingTag = tags.find(t => t.orderInfo === orderInfo);
+      if (matchingTag) {
         customer.tags = [{
           id: uuidv4(),
-          name: tags[tagIndex],
+          name: matchingTag.tag,
           color: `#${Math.floor(Math.random()*16777215).toString(16)}`
         }];
-        tagIndex++;
       }
 
       // Create items for the order
