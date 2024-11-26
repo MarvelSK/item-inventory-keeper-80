@@ -1,18 +1,10 @@
-import { Document, Page, Text, View, StyleSheet, Font } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
 import { Customer, Item } from '@/lib/types';
-import { format } from 'date-fns';
-import { sk } from 'date-fns/locale';
-
-// Register a font that supports special characters
-Font.register({
-  family: 'Open Sans',
-  src: 'https://fonts.gstatic.com/s/opensans/v34/memvYaGs126MiZpBA-UvWbX2vVnXBbObj2OVTS-mu0SC55I.woff2'
-});
 
 const styles = StyleSheet.create({
   page: {
     padding: 30,
-    fontFamily: 'Open Sans',
+    fontFamily: 'Helvetica',
   },
   header: {
     fontSize: 24,
@@ -43,11 +35,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 10,
     color: '#212490',
-  },
-  itemCount: {
-    fontSize: 12,
-    marginBottom: 10,
-    color: '#4b5563',
   },
   table: {
     width: '100%',
@@ -110,8 +97,6 @@ export const CustomerOrderPDF = ({ customer, items }: CustomerOrderPDFProps) => 
       </View>
 
       <Text style={styles.itemsHeader}>Položky</Text>
-      <Text style={styles.itemCount}>Celkový počet položiek: {items.length}</Text>
-      
       <View style={styles.table}>
         <View style={styles.tableHeader}>
           <Text style={styles.col1}>Kód</Text>
@@ -130,14 +115,14 @@ export const CustomerOrderPDF = ({ customer, items }: CustomerOrderPDFProps) => 
             </Text>
             <Text style={styles.col3}>{STATUS_MAP[item.status]}</Text>
             <Text style={styles.col4}>
-              {format(new Date(item.createdAt), 'dd.MM.yyyy', { locale: sk })}
+              {new Date(item.createdAt).toLocaleDateString('sk-SK')}
             </Text>
           </View>
         ))}
       </View>
 
       <Text style={styles.footer}>
-        Vygenerované {format(new Date(), 'dd.MM.yyyy HH:mm', { locale: sk })}
+        Vygenerované {new Date().toLocaleDateString('sk-SK')}
       </Text>
     </Page>
   </Document>

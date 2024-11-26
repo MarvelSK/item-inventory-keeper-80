@@ -78,13 +78,17 @@ export const StatisticsDialog = () => {
                       <div className="flex flex-col items-start space-y-1 w-full">
                         <div className="flex items-center justify-between w-full">
                           <h3 className="text-base font-medium">{customer.name}</h3>
-                          <div onClick={(e) => e.stopPropagation()}>
-                            <PDFDownloadLink
-                              document={<CustomerOrderPDF customer={customer} items={customerItems} />}
-                              fileName={`zakazka-${customer.name.toLowerCase()}.pdf`}
-                              onClick={() => toast.success("Export PDF bol spustený")}
-                            >
-                              {({ loading }) => loading ? (
+                          <PDFDownloadLink
+                            document={<CustomerOrderPDF customer={customer} items={customerItems} />}
+                            fileName={`zakazka-${customer.name.toLowerCase()}.pdf`}
+                            className="ml-2"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toast.success("Export PDF bol spustený");
+                            }}
+                          >
+                            {({ loading }: { loading: boolean }) => (
+                              loading ? (
                                 <Button variant="outline" size="icon" disabled>
                                   <Loader2 className="h-4 w-4 animate-spin" />
                                 </Button>
@@ -92,9 +96,9 @@ export const StatisticsDialog = () => {
                                 <Button variant="outline" size="icon">
                                   <Download className="h-4 w-4" />
                                 </Button>
-                              )}
-                            </PDFDownloadLink>
-                          </div>
+                              )
+                            )}
+                          </PDFDownloadLink>
                         </div>
                         <div className="flex flex-wrap gap-1">
                           {Object.entries(statusCounts).map(([status, count]) => (
@@ -124,7 +128,7 @@ export const StatisticsDialog = () => {
                                       : "-"}
                                   </p>
                                   <p className="text-xs text-gray-500">
-                                    {format(new Date(item.createdAt), "dd.MM.yyyy HH:mm")}
+                                    {format(item.createdAt, "dd.MM.yyyy HH:mm")}
                                   </p>
                                 </div>
                                 <Badge 
