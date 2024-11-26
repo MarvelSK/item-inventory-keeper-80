@@ -17,6 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
 
 interface PriceOfferModalProps {
   offer: any;
@@ -24,14 +25,22 @@ interface PriceOfferModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
-const VENDORS = [
-  { id: 1, name: "Dodávateľ 1" },
-  { id: 2, name: "Dodávateľ 2" },
-  { id: 3, name: "Dodávateľ 3" },
-];
-
 export const PriceOfferModal = ({ offer, open, onOpenChange }: PriceOfferModalProps) => {
   const [notes, setNotes] = useState(offer?.notices || "");
+  const [selectedDistributor, setSelectedDistributor] = useState<string>(offer?.vendor_id?.toString() || '');
+
+  const { data: distributors = [] } = useQuery({
+    queryKey: ['distributors'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('distributors')
+        .select('*')
+        .eq('deleted', false)
+        .order('name');
+      return data || [];
+    },
+    enabled: open,
+  });
   
   if (!offer) return null;
 
@@ -61,6 +70,21 @@ export const PriceOfferModal = ({ offer, open, onOpenChange }: PriceOfferModalPr
     }
   };
 
+  const handleDistributorChange = async (distributorId: string) => {
+    try {
+      const { error } = await supabase
+        .from('price_offers')
+        .update({ vendor_id: distributorId })
+        .eq('id', offer.id);
+
+      if (error) throw error;
+      setSelectedDistributor(distributorId);
+      toast.success("Dodávateľ bol úspešne priradený");
+    } catch (error) {
+      toast.error("Nepodarilo sa priradiť dodávateľa");
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -71,19 +95,28 @@ export const PriceOfferModal = ({ offer, open, onOpenChange }: PriceOfferModalPr
         </DialogHeader>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="space-y-1">
-            <h3 className="font-medium mb-3 text-[#212490] text-[14px]">Produkt</h3>
-            <DetailRow label="Produkt" value={offer.product} />
-            <DetailRow label="Ovládanie" value={offer.control} />
-            <DetailRow label="Ovládanie motora" value={offer.motor} />
-            <DetailRow label="Štandardná farba" value={offer.color} />
-            <DetailRow label="Krytie plechy" value={offer.casing} />
-            <DetailRow label="Pripočítať paket" value={offer.packet} />
-            <DetailRow label="Vodiace lišty" value={offer.rails} />
-            <DetailRow label="Prevedenie" value={offer.facade} />
-            <DetailRow label="Počet" value={offer.count} />
-            <DetailRow label="Šírka [mm]" value={offer.width} />
-            <DetailRow label="Výška [mm]" value={offer.height} />
+          <div className="space-y-4">
+            <div>
+              <h3 className="font-medium mb-3 text-[#212490] text-[14px]">Produkt</h3>
+              <DetailRow label="Produkt" value={offer.product} />
+              <DetailRow label="Ovládanie" value={offer.control} />
+              <DetailRow label="Ovládanie motora" value={offer.motor} />
+              <DetailRow label="Štandardná farba" value={offer.color} />
+              <DetailRow label="Krytie plechy" value={offer.casing} />
+              <DetailRow label="Pripočítať paket" value={offer.packet} />
+              <DetailRow label="Vodiace lišty" value={offer.rails} />
+              <DetailRow label="Prevedenie" value={offer.facade} />
+              <DetailRow label="Počet" value={offer.count} />
+              <DetailRow label="Šírka [mm]" value={offer.width} />
+              <DetailRow label="Výška [mm]" value={offer.height} />
+            </div>
+
+            <div>
+              <h3 className="font-medium mb-3 text-[#212490] text-[14px]">Správa</h3>
+              <div className="w-full p-3 border rounded-md bg-gray-50 text-[14px] min-h-[100px] whitespace-pre-wrap">
+                {offer.message}
+              </div>
+            </div>
           </div>
 
           <div className="space-y-4">
@@ -98,25 +131,18 @@ export const PriceOfferModal = ({ offer, open, onOpenChange }: PriceOfferModalPr
             
             <div>
               <h3 className="font-medium mb-3 text-[#212490] text-[14px]">Dodávateľ</h3>
-              <Select defaultValue={offer.vendor_id?.toString()}>
+              <Select value={selectedDistributor} onValueChange={handleDistributorChange}>
                 <SelectTrigger className="w-full text-[14px]">
                   <SelectValue placeholder="Vybrať dodávateľa" />
                 </SelectTrigger>
                 <SelectContent>
-                  {VENDORS.map((vendor) => (
-                    <SelectItem key={vendor.id} value={vendor.id.toString()}>
-                      {vendor.name}
+                  {distributors.map((distributor: any) => (
+                    <SelectItem key={distributor.id} value={distributor.id}>
+                      {distributor.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-            </div>
-
-            <div>
-              <h3 className="font-medium mb-3 text-[#212490] text-[14px]">Správa</h3>
-              <div className="w-full p-3 border rounded-md bg-gray-50 text-[14px] min-h-[100px] whitespace-pre-wrap">
-                {offer.message}
-              </div>
             </div>
 
             <div>
