@@ -30,7 +30,10 @@ export const MassImportDialog = () => {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="hover:text-[#47acc9]">
+        <Button 
+          variant="outline" 
+          className="w-full sm:w-auto hover:text-[#47acc9]"
+        >
           Hromadný import
         </Button>
       </DialogTrigger>
