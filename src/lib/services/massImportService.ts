@@ -14,81 +14,16 @@ interface ParsedItem {
   orderInfo: string;
 }
 
-interface ParsedData {
-  items: ParsedItem[];
-  tags: Array<{
-    tag: string;
-    orderInfo: string;
-  }>;
-}
-
-const parseItems = (data: string): ParsedData => {
+const parseItems = (data: string): ParsedItem[] => {
   console.log('Starting to parse items from data');
   const lines = data.split('\n');
   const items: ParsedItem[] = [];
-  const tags: Array<{tag: string; orderInfo: string}> = [];
   
   let currentOrderInfo = '';
-  let parsingTags = false;
-  let orderInfos: string[] = [];
   
-  // First pass: collect all order infos
   for (const line of lines) {
     const trimmedLine = line.trim();
     if (!trimmedLine) continue;
-
-    const orderMatch = trimmedLine.match(/24ZA\d+\s*-\s*[^]+?(?=\s+(?:Příslušenství|Plechy|Žaluzie|Vodící profily)|$)/);
-    if (orderMatch) {
-      const orderInfo = orderMatch[0].trim();
-      if (!orderInfos.includes(orderInfo)) {
-        orderInfos.push(orderInfo);
-      }
-    }
-  }
-
-  // Second pass: parse items and tags
-  for (const line of lines) {
-    const trimmedLine = line.trim();
-    if (!trimmedLine) continue;
-
-    // Start collecting tags after seeing BALÍCÍ LIST
-    if (trimmedLine.includes('BALÍCÍ LIST')) {
-      parsingTags = true;
-      continue;
-    }
-
-    // If we're in tags section and line matches tag pattern (no numbers), collect it
-    if (parsingTags && !trimmedLine.match(/\d/) && !trimmedLine.includes('NEVA')) {
-      const tag = trimmedLine.trim();
-      // Skip empty tags
-      if (!tag) continue;
-
-      // Map specific tags to their corresponding orders based on the provided mapping
-      if (tag === 'toptrans-hadek' && orderInfos.find(o => o.includes('pitmart'))) {
-        tags.push({ tag, orderInfo: orderInfos.find(o => o.includes('pitmart'))! });
-      } else if (tag === 'auto 1-valzam' && orderInfos.find(o => o.includes('241003'))) {
-        tags.push({ tag, orderInfo: orderInfos.find(o => o.includes('241003'))! });
-      } else if (tag === 'auto 1-zatienime') {
-        // Handle multiple orders for auto 1-zatienime tag
-        const suchyOrder = orderInfos.find(o => o.includes('Suchý Z-90 WT PRIPRAVA'));
-        const lassoOrder = orderInfos.find(o => o.includes('Lasso Neporadza'));
-        
-        if (suchyOrder && !tags.some(t => t.orderInfo === suchyOrder)) {
-          tags.push({ tag, orderInfo: suchyOrder });
-        }
-        if (lassoOrder && !tags.some(t => t.orderInfo === lassoOrder)) {
-          tags.push({ tag, orderInfo: lassoOrder });
-        }
-      } else if (tag === 'auto 1- mm mont' && orderInfos.find(o => o.includes('PECHÁČ'))) {
-        const pechacOrder = orderInfos.find(o => o.includes('PECHÁČ'));
-        if (pechacOrder && !tags.some(t => t.orderInfo === pechacOrder)) {
-          tags.push({ tag, orderInfo: pechacOrder });
-        }
-      } else if (tag === 'sklad-madmont' && orderInfos.find(o => o.includes('140 H-L'))) {
-        tags.push({ tag, orderInfo: orderInfos.find(o => o.includes('140 H-L'))! });
-      }
-      continue;
-    }
 
     // Skip irrelevant lines
     if (
@@ -137,13 +72,12 @@ const parseItems = (data: string): ParsedData => {
   }
 
   console.log('Parsed items:', items);
-  console.log('Parsed tags:', tags);
-  return { items, tags };
+  return items;
 };
 
 export const importMassItems = async (data: string) => {
   console.log('Starting mass import of items');
-  const { items: parsedItems, tags } = parseItems(data);
+  const parsedItems = parseItems(data);
   
   if (parsedItems.length === 0) {
     toast.error('Neboli nájdené žiadne položky na import');
@@ -166,19 +100,9 @@ export const importMassItems = async (data: string) => {
     console.log(`Processing order: ${orderInfo} with ${items.length} items`);
     
     try {
-      // First create the customer with just the name
+      // Create customer for the order
       const customer = await addCustomer(orderInfo);
       console.log('Created customer:', customer);
-
-      // Find matching tag for this order
-      const matchingTag = tags.find(t => t.orderInfo === orderInfo);
-      if (matchingTag) {
-        customer.tags = [{
-          id: uuidv4(),
-          name: matchingTag.tag,
-          color: `#${Math.floor(Math.random()*16777215).toString(16)}`
-        }];
-      }
 
       // Create items for the order
       for (const item of items) {
