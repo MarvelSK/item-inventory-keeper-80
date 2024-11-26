@@ -2,8 +2,31 @@ import { CustomerDialog } from "./CustomerDialog";
 import { MobileMenu } from "./header/MobileMenu";
 import { BackupDialog } from "./header/BackupDialog";
 import { StatisticsDialog } from "./header/StatisticsDialog";
+import { useNavigate } from "react-router-dom";
+import { Button } from "./ui/button";
+import { Users } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Header = () => {
+  const navigate = useNavigate();
+  
+  const { data: currentUser } = useQuery({
+    queryKey: ['currentUser'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+      
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+      
+      return profile;
+    }
+  });
+
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4">
@@ -29,6 +52,16 @@ export const Header = () => {
             <CustomerDialog />
             <BackupDialog />
             <StatisticsDialog />
+            {currentUser?.role === 'Administrátor' && (
+              <Button
+                variant="outline"
+                className="flex items-center"
+                onClick={() => navigate('/users')}
+              >
+                <Users className="mr-2 h-4 w-4" />
+                Používatelia
+              </Button>
+            )}
           </nav>
         </div>
       </div>
