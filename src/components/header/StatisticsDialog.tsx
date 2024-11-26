@@ -7,7 +7,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { BarChart } from "lucide-react";
+import {BarChart, ChartArea, DatabaseBackup} from "lucide-react";
 import { useItems } from "@/hooks/useItems";
 import { useCustomers } from "@/hooks/useCustomers";
 import { Badge } from "../ui/badge";
@@ -58,9 +58,10 @@ export const StatisticsDialog = ({ open, onOpenChange, trigger }: StatisticsDial
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
         {trigger || (
-          <Button variant="outline" size="icon" className="hidden md:inline-flex ml-2">
-            <BarChart className="h-5 w-5" />
-          </Button>
+            <Button variant="outline" className="hover:text-[#47acc9] w-full md:w-auto">
+              <ChartArea className="mr-2 h-4 w-4" />
+              Štatistiky zakázok
+            </Button>
         )}
       </DialogTrigger>
       <DialogContent className="w-[95vw] max-w-2xl h-[90vh] md:h-[80vh]">

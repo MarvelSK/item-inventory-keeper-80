@@ -182,7 +182,7 @@ export const DistributorDialog = ({ region, open, onOpenChange }: DistributorDia
                   <Input
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    placeholder="+421 XXX XXX XXX"
+                    placeholder="Zadajte kontaktné údaje"
                   />
                 </div>
 
@@ -192,7 +192,7 @@ export const DistributorDialog = ({ region, open, onOpenChange }: DistributorDia
                     type="email"
                     value={salesRepEmail}
                     onChange={(e) => setSalesRepEmail(e.target.value)}
-                    placeholder="obchodny.zastupca@example.com"
+                    placeholder="priezvisko@nevask.eu"
                   />
                 </div>
 

@@ -20,7 +20,7 @@ import {
 } from "./ui/alert-dialog";
 import { Input } from "./ui/input";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "./ui/table";
-import { Trash2, Edit2 } from "lucide-react";
+import {Trash2, Edit2, DatabaseBackup, SlidersVertical} from "lucide-react";
 import { EditCustomerForm } from "./EditCustomerForm";
 import { toast } from "sonner";
 import { ScrollArea } from "./ui/scroll-area";
@@ -49,7 +49,7 @@ export const CustomerDialog = ({ open, onOpenChange }: CustomerDialogProps) => {
 
   const handleAddCustomer = async () => {
     if (!customerName.trim()) {
-      toast.error("Vyplňte meno zákazníka");
+      toast.error("Vyplňte názov zakázky");
       return;
     }
     await addCustomer(customerName);
@@ -83,6 +83,7 @@ export const CustomerDialog = ({ open, onOpenChange }: CustomerDialogProps) => {
         {!onOpenChange && (
           <DialogTrigger asChild>
             <Button variant="outline" className="hover:text-[#47acc9] w-full md:w-auto">
+              <SlidersVertical className="mr-2 h-4 w-4" />
               Správa zakázok
             </Button>
           </DialogTrigger>
@@ -98,7 +99,7 @@ export const CustomerDialog = ({ open, onOpenChange }: CustomerDialogProps) => {
             <div className="space-y-4 p-1">
               <div className="flex flex-col md:flex-row gap-2">
                 <Input
-                  placeholder="Meno zákazníka"
+                  placeholder="Názov zakázky"
                   value={customerName}
                   onChange={(e) => setCustomerName(e.target.value)}
                   className="flex-1"

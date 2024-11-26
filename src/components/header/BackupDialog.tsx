@@ -23,23 +23,18 @@ export const BackupDialog = ({ open, onOpenChange }: BackupDialogProps) => {
         <DialogTrigger asChild>
           <Button variant="outline" className="hover:text-[#47acc9] w-full md:w-auto">
             <DatabaseBackup className="mr-2 h-4 w-4" />
-            Zálohovanie
+            Zálohovanie a obnova
           </Button>
         </DialogTrigger>
       )}
-      <DialogContent className="w-[95vw] max-w-[800px] rounded-lg">
+      <DialogContent className="w-[95vw] max-w-[600px] rounded-lg">
         <DialogHeader className="text-center md:text-left">
           <DialogTitle>Zálohovanie a správa dát</DialogTitle>
         </DialogHeader>
         <div className="space-y-6">
           <div className="space-y-4 text-center md:text-left">
-            <h3 className="text-lg font-medium">Zálohovanie dát</h3>
             <BackupSection />
-            
-            <h3 className="text-lg font-medium mt-6">Import dát</h3>
             <ImportSection />
-            
-            <h3 className="text-lg font-medium mt-6">Vymazanie dát</h3>
             <WipeSection />
           </div>
         </div>
