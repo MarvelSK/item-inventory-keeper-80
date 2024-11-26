@@ -2,7 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Customer, Tag } from "../types";
 import { Json } from "@/integrations/supabase/types";
 
-const isValidTag = (item: Json): item is Tag => {
+const isValidTag = (item: unknown): item is Tag => {
   if (typeof item !== 'object' || item === null) return false;
   
   const tag = item as Record<string, unknown>;
@@ -15,7 +15,7 @@ const isValidTag = (item: Json): item is Tag => {
 
 const convertJsonToTags = (json: Json | null): Tag[] => {
   if (!Array.isArray(json)) return [];
-  return json.filter(isValidTag);
+  return json.filter((item): item is Tag => isValidTag(item));
 };
 
 const convertTagsToJson = (tags: Tag[]): Json => {
