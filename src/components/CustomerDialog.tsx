@@ -84,7 +84,7 @@ export const CustomerDialog = ({ open, onOpenChange }: CustomerDialogProps) => {
           </DialogTrigger>
         )}
         <DialogContent className="w-[95vw] max-w-[625px] h-[90vh] md:h-[80vh]">
-          <DialogHeader>
+          <DialogHeader className="text-center md:text-left">
             <DialogTitle>Správa zakázok</DialogTitle>
             <DialogDescription>
               Pridajte, upravte alebo vymažte zakázky
@@ -110,24 +110,24 @@ export const CustomerDialog = ({ open, onOpenChange }: CustomerDialogProps) => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Meno</TableHead>
-                      <TableHead>Štítky</TableHead>
-                      <TableHead className="w-[100px]">Akcie</TableHead>
+                      <TableHead className="text-center md:text-left">Meno</TableHead>
+                      <TableHead className="text-center md:text-left">Štítky</TableHead>
+                      <TableHead className="text-center md:text-left w-[100px]">Akcie</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {customers.filter(c => !c.deleted).map((customer) => (
                       <TableRow key={customer.id}>
-                        <TableCell className="font-medium">{customer.name}</TableCell>
-                        <TableCell>
-                          <div className="flex flex-wrap gap-1">
+                        <TableCell className="font-medium text-center md:text-left">{customer.name}</TableCell>
+                        <TableCell className="text-center md:text-left">
+                          <div className="flex flex-wrap gap-1 justify-center md:justify-start">
                             {customer.tags?.map((tag) => (
                               <LabelBadge key={tag.id} label={tag} />
                             ))}
                           </div>
                         </TableCell>
                         <TableCell>
-                          <div className="flex space-x-2">
+                          <div className="flex space-x-2 justify-center md:justify-start">
                             <Button
                               variant="ghost"
                               size="icon"

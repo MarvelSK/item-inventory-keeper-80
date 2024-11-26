@@ -64,8 +64,8 @@ export const StatisticsDialog = ({ open, onOpenChange, trigger }: StatisticsDial
       </DialogTrigger>
       <DialogContent className="w-[95vw] max-w-2xl h-[90vh] md:h-[80vh]">
         <DialogHeader>
-          <div className="flex items-center justify-between">
-            <div>
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="text-center md:text-left">
               <DialogTitle>Štatistiky zakázok</DialogTitle>
               <p className="text-sm text-muted-foreground mt-1">
                 Celkový počet zakázok: {totalOrders}
@@ -96,11 +96,11 @@ export const StatisticsDialog = ({ open, onOpenChange, trigger }: StatisticsDial
                     className="border rounded-lg bg-white"
                   >
                     <AccordionTrigger className="hover:no-underline px-3 py-2">
-                      <div className="flex flex-col items-start space-y-1 w-full">
+                      <div className="flex flex-col items-center md:items-start space-y-1 w-full">
                         <div className="flex items-center justify-between w-full">
                           <h3 className="text-base font-medium">{customer.name}</h3>
                         </div>
-                        <div className="flex flex-wrap gap-1">
+                        <div className="flex flex-wrap gap-1 justify-center md:justify-start">
                           {Object.entries(statusCounts).map(([status, count]) => (
                             <Badge 
                               key={status} 
@@ -118,8 +118,8 @@ export const StatisticsDialog = ({ open, onOpenChange, trigger }: StatisticsDial
                         <div className="space-y-2">
                           {customerItems.map((item) => (
                             <div key={item.id} className="border rounded p-2 bg-gray-50 text-sm">
-                              <div className="flex justify-between items-start gap-2">
-                                <div className="space-y-0.5">
+                              <div className="flex flex-col md:flex-row justify-between items-center md:items-start gap-2">
+                                <div className="space-y-0.5 text-center md:text-left">
                                   <p className="font-medium">{item.code}</p>
                                   <p className="text-gray-600 text-xs">{item.description || "-"}</p>
                                   <p className="text-xs">

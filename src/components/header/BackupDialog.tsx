@@ -28,11 +28,11 @@ export const BackupDialog = ({ open, onOpenChange }: BackupDialogProps) => {
         </DialogTrigger>
       )}
       <DialogContent className="w-[95vw] max-w-[800px] rounded-lg">
-        <DialogHeader>
+        <DialogHeader className="text-center md:text-left">
           <DialogTitle>Zálohovanie a správa dát</DialogTitle>
         </DialogHeader>
         <div className="space-y-6">
-          <div className="space-y-4">
+          <div className="space-y-4 text-center md:text-left">
             <h3 className="text-lg font-medium">Zálohovanie dát</h3>
             <BackupSection />
             
