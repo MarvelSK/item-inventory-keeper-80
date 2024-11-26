@@ -25,8 +25,8 @@ export const InventoryStats = ({ items }: InventoryStatsProps) => {
   }, {} as Record<string, number>);
 
   return (
-    <div className="grid grid-cols-5 gap-2">
-      <Card className="col-span-1">
+    <div className="flex gap-2 overflow-x-auto pb-2">
+      <Card className="min-w-[120px] flex-shrink-0">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 p-2">
           <CardTitle className="text-xs font-medium">
             <Badge variant="secondary" className="text-xs">
@@ -42,7 +42,7 @@ export const InventoryStats = ({ items }: InventoryStatsProps) => {
       </Card>
       
       {Object.entries(STATUS_MAP).map(([status, info]) => (
-        <Card key={status} className="col-span-1">
+        <Card key={status} className="min-w-[120px] flex-shrink-0">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 p-2">
             <CardTitle className="text-xs font-medium">
               <Badge variant={info.variant as any} className="text-xs">
