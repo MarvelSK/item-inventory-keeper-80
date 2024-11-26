@@ -1,7 +1,5 @@
 import { Item } from "@/lib/types";
-import { Button } from "../ui/button";
 import { TableCell, TableRow } from "../ui/table";
-import { Edit2, Trash2, ChevronRight } from "lucide-react";
 import { customers } from "@/lib/inventory";
 import { format } from "date-fns";
 import {
@@ -13,11 +11,13 @@ import {
 import { useState, useEffect } from "react";
 import { TagBadge } from "../tags/TagBadge";
 import { Badge } from "../ui/badge";
+import { ItemActionsDropdown } from "./ItemActionsDropdown";
 
 interface InventoryListItemProps {
   item: Item;
   onEdit: (item: Item) => void;
   onDelete: (id: string) => void;
+  onPostpone: (item: Item) => void;
 }
 
 const STATUS_MAP = {
@@ -27,7 +27,7 @@ const STATUS_MAP = {
   delivered: { label: 'Doručené', variant: 'default' }
 } as const;
 
-export const InventoryListItem = ({ item, onEdit, onDelete }: InventoryListItemProps) => {
+export const InventoryListItem = ({ item, onEdit, onDelete, onPostpone }: InventoryListItemProps) => {
   const [isMobile, setIsMobile] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   
@@ -57,7 +57,10 @@ export const InventoryListItem = ({ item, onEdit, onDelete }: InventoryListItemP
 
   return (
     <>
-      <TableRow className="group cursor-pointer" onClick={handleRowClick}>
+      <TableRow 
+        className={`group cursor-pointer ${item.postponed ? 'bg-gray-50' : ''}`} 
+        onClick={handleRowClick}
+      >
         <TableCell className="font-medium">{item.code}</TableCell>
         <TableCell>
           <Badge variant={statusInfo.variant as any}>{statusInfo.label}</Badge>
@@ -78,42 +81,13 @@ export const InventoryListItem = ({ item, onEdit, onDelete }: InventoryListItemP
           {format(item.createdAt, "dd.MM.yyyy HH:mm")}
         </TableCell>
         <TableCell>
-          <div className="flex justify-end sm:justify-start space-x-2">
-            {!isMobile && (
-              <>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="hover:text-[#47acc9] h-8 w-8"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onEdit(item);
-                  }}
-                >
-                  <Edit2 className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="hover:text-red-500 h-8 w-8"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDelete(item.id);
-                  }}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </>
-            )}
-            {isMobile && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="hover:text-[#47acc9] h-8 w-8"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            )}
+          <div className="flex justify-end sm:justify-start">
+            <ItemActionsDropdown
+              item={item}
+              onEdit={onEdit}
+              onDelete={onDelete}
+              onPostpone={onPostpone}
+            />
           </div>
         </TableCell>
       </TableRow>
@@ -144,27 +118,12 @@ export const InventoryListItem = ({ item, onEdit, onDelete }: InventoryListItemP
                 <p><strong>Vytvorené:</strong> {format(item.createdAt, "dd.MM.yyyy HH:mm")}</p>
               </div>
               <div className="flex space-x-2">
-                <Button
-                  className="flex-1 bg-[#212490] hover:bg-[#47acc9]"
-                  onClick={() => {
-                    setIsDialogOpen(false);
-                    onEdit(item);
-                  }}
-                >
-                  <Edit2 className="h-4 w-4 mr-2" />
-                  Upraviť
-                </Button>
-                <Button
-                  variant="destructive"
-                  className="flex-1"
-                  onClick={() => {
-                    setIsDialogOpen(false);
-                    onDelete(item.id);
-                  }}
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Vymazať
-                </Button>
+                <ItemActionsDropdown
+                  item={item}
+                  onEdit={onEdit}
+                  onDelete={onDelete}
+                  onPostpone={onPostpone}
+                />
               </div>
             </div>
           </DialogContent>

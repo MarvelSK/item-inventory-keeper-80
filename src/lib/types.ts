@@ -12,6 +12,7 @@ export interface Item {
   createdAt: Date;
   updatedAt: Date;
   deleted: boolean;
+  postponed?: boolean;
 }
 
 export interface Company {

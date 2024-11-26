@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Item } from "@/lib/types";
-import { toast } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "./ui/alert-dialog";
 import { EditItemDialog } from "./inventory/EditItemDialog";
 import { InventorySearch } from "./inventory/InventorySearch";
@@ -12,6 +11,7 @@ import { MassImportDialog } from "./inventory/MassImportDialog";
 import { InventoryStats } from "./inventory/InventoryStats";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "./ui/pagination";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { toast } from "sonner";
 
 export const InventoryList = () => {
   const [search, setSearch] = useState("");
@@ -23,7 +23,7 @@ export const InventoryList = () => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(50); // Changed default to 50
+  const [itemsPerPage, setItemsPerPage] = useState(50);
 
   const { items, isLoading, error, updateItem, deleteItem } = useItems();
 
@@ -53,6 +53,11 @@ export const InventoryList = () => {
     : [];
 
   const sortedAndFilteredItems = [...filteredItems].sort((a, b) => {
+    // First, sort by postponed status
+    if (a.postponed && !b.postponed) return -1;
+    if (!a.postponed && b.postponed) return 1;
+    
+    // Then apply regular sorting
     const aValue = a[sortField];
     const bValue = b[sortField];
     return sortDirection === "asc"
@@ -87,6 +92,16 @@ export const InventoryList = () => {
     setIsEditDialogOpen(false);
   };
 
+  const handlePostpone = async (item: Item) => {
+    const updatedItem = {
+      ...item,
+      postponed: !item.postponed,
+      updatedAt: new Date()
+    };
+    await updateItem(updatedItem);
+    toast.success(item.postponed ? "Položka už nie je označená ako odložená" : "Položka bola označená ako odložená");
+  };
+
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -95,7 +110,7 @@ export const InventoryList = () => {
   const handleItemsPerPageChange = (value: string) => {
     const newItemsPerPage = parseInt(value, 10);
     setItemsPerPage(newItemsPerPage);
-    setCurrentPage(1); // Reset to first page when changing items per page
+    setCurrentPage(1);
   };
 
   return (
@@ -126,6 +141,7 @@ export const InventoryList = () => {
             setDeletingItemId(id);
             setIsDeleteDialogOpen(true);
           }}
+          onPostpone={handlePostpone}
         />
       ) : (
         <InventoryGrid
@@ -138,6 +154,7 @@ export const InventoryList = () => {
             setDeletingItemId(id);
             setIsDeleteDialogOpen(true);
           }}
+          onPostpone={handlePostpone}
         />
       )}
 
