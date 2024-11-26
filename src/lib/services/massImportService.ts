@@ -14,16 +14,35 @@ interface ParsedItem {
   orderInfo: string;
 }
 
-const parseItems = (data: string): ParsedItem[] => {
+interface ParsedData {
+  items: ParsedItem[];
+  tags: string[];
+}
+
+const parseItems = (data: string): ParsedData => {
   console.log('Starting to parse items from data');
   const lines = data.split('\n');
   const items: ParsedItem[] = [];
+  const tags: string[] = [];
   
   let currentOrderInfo = '';
+  let parsingTags = false;
   
   for (const line of lines) {
     const trimmedLine = line.trim();
     if (!trimmedLine) continue;
+
+    // Start collecting tags after seeing BALÍCÍ LIST
+    if (trimmedLine.includes('BALÍCÍ LIST')) {
+      parsingTags = true;
+      continue;
+    }
+
+    // If we're in tags section and line matches tag pattern (no numbers), collect it
+    if (parsingTags && !trimmedLine.match(/\d/) && !trimmedLine.includes('NEVA')) {
+      tags.push(trimmedLine);
+      continue;
+    }
 
     // Skip irrelevant lines
     if (
@@ -72,12 +91,13 @@ const parseItems = (data: string): ParsedItem[] => {
   }
 
   console.log('Parsed items:', items);
-  return items;
+  console.log('Parsed tags:', tags);
+  return { items, tags };
 };
 
 export const importMassItems = async (data: string) => {
   console.log('Starting mass import of items');
-  const parsedItems = parseItems(data);
+  const { items: parsedItems, tags } = parseItems(data);
   
   if (parsedItems.length === 0) {
     toast.error('Neboli nájdené žiadne položky na import');
@@ -96,12 +116,28 @@ export const importMassItems = async (data: string) => {
   });
 
   // Process each order
+  let tagIndex = 0;
   for (const [orderInfo, items] of orderGroups) {
     console.log(`Processing order: ${orderInfo} with ${items.length} items`);
     
     try {
-      // Create customer for the order
-      const customer = await addCustomer(orderInfo);
+      // Create customer for the order with tag if available
+      const customerTags = [];
+      if (tags[tagIndex]) {
+        customerTags.push({
+          id: uuidv4(),
+          name: tags[tagIndex],
+          color: `#${Math.floor(Math.random()*16777215).toString(16)}`
+        });
+        tagIndex++;
+      }
+
+      const customer = await addCustomer({
+        id: uuidv4(),
+        name: orderInfo,
+        tags: customerTags,
+        deleted: false
+      });
       console.log('Created customer:', customer);
 
       // Create items for the order
