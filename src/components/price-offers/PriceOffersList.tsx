@@ -8,16 +8,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { PriceOfferModal } from "./PriceOfferModal";
+import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Eye } from "lucide-react";
 
 export const PriceOffersList = () => {
+  const [selectedOffer, setSelectedOffer] = useState<any>(null);
+
   const { data: offers, isLoading } = useQuery({
     queryKey: ["price-offers"],
     queryFn: async () => {
@@ -40,85 +41,61 @@ export const PriceOffersList = () => {
   }
 
   return (
-    <div className="overflow-x-auto">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Objednávka č.</TableHead>
-            <TableHead>Dátum objednávky</TableHead>
-            <TableHead>Dodávateľ</TableHead>
-            <TableHead>Dátum notifikácie</TableHead>
-            <TableHead>Zákazník</TableHead>
-            <TableHead>Kontakt</TableHead>
-            <TableHead>Dotazník spokojnosti</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {offers?.map((offer) => (
-            <TableRow key={offer.id}>
-              <TableCell>
-                <Accordion type="single" collapsible>
-                  <AccordionItem value={offer.id.toString()}>
-                    <AccordionTrigger className="hover:no-underline">
-                      {offer.id}
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <div className="space-y-2 p-4 bg-gray-50 rounded-md">
-                        <h3 className="font-semibold">Detaily objednávky</h3>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <p><strong>Produkt:</strong> {offer.product}</p>
-                            <p><strong>Ovládanie:</strong> {offer.control}</p>
-                            <p><strong>Farba:</strong> {offer.color}</p>
-                            <p><strong>Doplnková farba:</strong> {offer.color_adv}</p>
-                            <p><strong>Lamela:</strong> {offer.plate}</p>
-                            <p><strong>Fasáda:</strong> {offer.facade}</p>
-                            <p><strong>Krytie:</strong> {offer.casing}</p>
-                            <p><strong>Počet:</strong> {offer.count}</p>
-                          </div>
-                          <div>
-                            <p><strong>Šírka:</strong> {offer.width}</p>
-                            <p><strong>Výška:</strong> {offer.height}</p>
-                            <p><strong>Balík:</strong> {offer.packet}</p>
-                            <p><strong>Vodiace lišty:</strong> {offer.rails}</p>
-                            <p><strong>Motor:</strong> {offer.motor}</p>
-                            <p><strong>Príslušenstvo motora:</strong> {offer.motor_acc}</p>
-                            <p><strong>Poznámky:</strong> {offer.notices}</p>
-                            <p><strong>Správa:</strong> {offer.message}</p>
-                          </div>
-                        </div>
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
-              </TableCell>
-              <TableCell>
-                {format(new Date(offer.created_at), "dd.MM.yyyy HH:mm")}
-              </TableCell>
-              <TableCell>{offer.vendor_contact || "-"}</TableCell>
-              <TableCell>
-                {offer.vendor_date
-                  ? format(new Date(offer.vendor_date), "dd.MM.yyyy")
-                  : "-"}
-              </TableCell>
-              <TableCell>{offer.name}</TableCell>
-              <TableCell>
-                <div>
-                  <p>{offer.phone_number}</p>
-                  <p className="text-sm text-gray-500">{offer.email}</p>
-                </div>
-              </TableCell>
-              <TableCell>
-                {offer.notification ? (
-                  <span className="text-green-600">Odoslané</span>
-                ) : (
-                  <span className="text-gray-500">Neodoslané</span>
-                )}
-              </TableCell>
+    <div className="space-y-4">
+      <div className="overflow-x-auto rounded-lg border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Číslo</TableHead>
+              <TableHead>Produkt</TableHead>
+              <TableHead>Zákazník</TableHead>
+              <TableHead>Kontakt</TableHead>
+              <TableHead>Dátum</TableHead>
+              <TableHead>Stav</TableHead>
+              <TableHead className="text-right">Akcie</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {offers?.map((offer) => (
+              <TableRow key={offer.id} className="hover:bg-gray-50">
+                <TableCell className="font-medium">#{offer.id}</TableCell>
+                <TableCell>{offer.product}</TableCell>
+                <TableCell>{offer.name}</TableCell>
+                <TableCell>
+                  <div className="text-sm">
+                    <p>{offer.phone_number}</p>
+                    <p className="text-gray-500">{offer.email}</p>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  {format(new Date(offer.created_at), "dd.MM.yyyy")}
+                </TableCell>
+                <TableCell>
+                  <Badge variant={offer.notification ? "success" : "secondary"}>
+                    {offer.notification ? "Odoslané" : "Neodoslané"}
+                  </Badge>
+                </TableCell>
+                <TableCell className="text-right">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setSelectedOffer(offer)}
+                  >
+                    <Eye className="h-4 w-4 mr-1" />
+                    Detail
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+
+      <PriceOfferModal
+        offer={selectedOffer}
+        open={!!selectedOffer}
+        onOpenChange={(open) => !open && setSelectedOffer(null)}
+      />
     </div>
   );
 };
