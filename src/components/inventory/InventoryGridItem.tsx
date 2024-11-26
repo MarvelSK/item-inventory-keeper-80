@@ -1,5 +1,5 @@
 import { Item } from "@/lib/types";
-import { customers } from "@/lib/inventory";
+import { useCustomers } from "@/hooks/useCustomers";
 import { format } from "date-fns";
 import { Badge } from "../ui/badge";
 import { ItemActionsDropdown } from "./ItemActionsDropdown";
@@ -25,6 +25,7 @@ const STATUS_MAP = {
 } as const;
 
 export const InventoryGridItem = ({ item, onEdit, onDelete, onPostpone }: InventoryGridItemProps) => {
+  const { customers } = useCustomers();
   const customer = customers.find((c) => c.id === item.customer)?.name || "Unknown";
   const statusInfo = STATUS_MAP[item.status];
 
@@ -44,8 +45,8 @@ export const InventoryGridItem = ({ item, onEdit, onDelete, onPostpone }: Invent
                 : "-"}
               </div>
               <div>Stav: <Badge variant={statusInfo.variant as any}>{statusInfo.label}</Badge></div>
-              <div>Vytvorené: {format(item.createdAt, "dd.MM.yyyy HH:mm")}</div>
-              <div>Upravené: {format(item.updatedAt, "dd.MM.yyyy HH:mm")}</div>
+              <div>Vytvorené: {format(new Date(item.createdAt), "dd.MM.yyyy HH:mm")}</div>
+              <div>Upravené: {format(new Date(item.updatedAt), "dd.MM.yyyy HH:mm")}</div>
             </div>
             <div className="flex justify-end">
               <ItemActionsDropdown

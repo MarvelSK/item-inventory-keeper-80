@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { customers } from "@/lib/inventory";
+import { useCustomers } from "@/hooks/useCustomers";
 import { Item } from "@/lib/types";
 import { useState, useEffect } from "react";
 import { Textarea } from "../ui/textarea";
@@ -34,6 +34,7 @@ const STATUS_OPTIONS = [
 
 export const EditItemDialog = ({ item, isOpen, onOpenChange, onSave }: EditItemDialogProps) => {
   const [editedItem, setEditedItem] = useState<Item | null>(null);
+  const { customers } = useCustomers();
 
   useEffect(() => {
     if (item) {

@@ -1,6 +1,6 @@
 import { Item } from "@/lib/types";
 import { TableCell, TableRow } from "../ui/table";
-import { customers } from "@/lib/inventory";
+import { useCustomers } from "@/hooks/useCustomers";
 import { format } from "date-fns";
 import {
   Dialog,
@@ -36,6 +36,7 @@ const STATUS_MAP = {
 export const InventoryListItem = ({ item, onEdit, onDelete, onPostpone }: InventoryListItemProps) => {
   const [isMobile, setIsMobile] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const { customers } = useCustomers();
   
   const customer = customers.find((c) => c.id === item.customer);
   const customerName = customer?.name || "Unknown";
@@ -89,7 +90,7 @@ export const InventoryListItem = ({ item, onEdit, onDelete, onPostpone }: Invent
                 {formatDimensions(item)}
               </TableCell>
               <TableCell className="hidden sm:table-cell">
-                {format(item.createdAt, "dd.MM.yyyy HH:mm")}
+                {format(new Date(item.createdAt), "dd.MM.yyyy HH:mm")}
               </TableCell>
               <TableCell>
                 <div className="flex justify-end sm:justify-start">
@@ -134,7 +135,7 @@ export const InventoryListItem = ({ item, onEdit, onDelete, onPostpone }: Invent
                 )}
                 <p><strong>Popis:</strong> {item.description || "-"}</p>
                 <p><strong>Rozmery:</strong> {formatDimensions(item)} cm</p>
-                <p><strong>Vytvorené:</strong> {format(item.createdAt, "dd.MM.yyyy HH:mm")}</p>
+                <p><strong>Vytvorené:</strong> {format(new Date(item.createdAt), "dd.MM.yyyy HH:mm")}</p>
                 <p><strong>Vytvoril:</strong> {item.created_by || "-"}</p>
                 <p><strong>Naposledy upravil:</strong> {item.updated_by || "-"}</p>
               </div>

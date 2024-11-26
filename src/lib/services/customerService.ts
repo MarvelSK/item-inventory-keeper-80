@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
-import { Customer } from "../types";
+import { Customer, Tag } from "../types";
+import { Json } from "@/integrations/supabase/types";
 
 export const getActiveCustomers = async (): Promise<Customer[]> => {
   const { data, error } = await supabase
@@ -9,21 +10,25 @@ export const getActiveCustomers = async (): Promise<Customer[]> => {
     .order('name');
 
   if (error) throw error;
+  
   return data.map(customer => ({
     ...customer,
-    tags: customer.tags || [],
+    tags: (customer.tags as Json[] || []).map(tag => tag as Tag),
   }));
 };
 
 export const addCustomer = async (name: string): Promise<Customer> => {
   const { data, error } = await supabase
     .from('customers')
-    .insert([{ name }])
+    .insert([{ name, tags: [] }])
     .select()
     .single();
 
   if (error) throw error;
-  return { ...data, tags: data.tags || [] };
+  return {
+    ...data,
+    tags: (data.tags as Json[] || []).map(tag => tag as Tag),
+  };
 };
 
 export const updateCustomer = async (customer: Customer): Promise<Customer> => {
@@ -31,7 +36,7 @@ export const updateCustomer = async (customer: Customer): Promise<Customer> => {
     .from('customers')
     .update({
       name: customer.name,
-      tags: customer.tags,
+      tags: customer.tags as Json[],
       updated_at: new Date().toISOString(),
     })
     .eq('id', customer.id)
@@ -39,7 +44,10 @@ export const updateCustomer = async (customer: Customer): Promise<Customer> => {
     .single();
 
   if (error) throw error;
-  return { ...data, tags: data.tags || [] };
+  return {
+    ...data,
+    tags: (data.tags as Json[] || []).map(tag => tag as Tag),
+  };
 };
 
 export const deleteCustomer = async (id: string): Promise<void> => {

@@ -9,7 +9,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { BarChart } from "lucide-react";
 import { useItems } from "@/hooks/useItems";
-import { customers } from "@/lib/inventory";
+import { useCustomers } from "@/hooks/useCustomers";
 import { Badge } from "../ui/badge";
 import {
   Accordion,
@@ -28,6 +28,7 @@ interface StatisticsDialogProps {
 
 export const StatisticsDialog = ({ open, onOpenChange, trigger }: StatisticsDialogProps) => {
   const { items } = useItems();
+  const { customers } = useCustomers();
 
   // Group items by customer
   const itemsByCustomer = items.reduce((acc, item) => {
@@ -77,11 +78,8 @@ export const StatisticsDialog = ({ open, onOpenChange, trigger }: StatisticsDial
         <ScrollArea className="flex-1 h-[calc(90vh-100px)] md:h-[calc(80vh-100px)]">
           <div className="space-y-2 p-2">
             <Accordion type="single" collapsible className="space-y-2">
-              {Object.entries(itemsByCustomer).map(([customerId, customerItems]) => {
-                const customer = customers.find((c) => c.id === customerId);
-                if (!customer) return null;
-
-                const statusCounts = customerItems.reduce((acc, item) => {
+              {customerOrders.map(({ customer, items }) => {
+                const statusCounts = items.reduce((acc, item) => {
                   if (!acc[item.status]) {
                     acc[item.status] = 0;
                   }
@@ -91,8 +89,8 @@ export const StatisticsDialog = ({ open, onOpenChange, trigger }: StatisticsDial
 
                 return (
                   <AccordionItem 
-                    key={customerId} 
-                    value={customerId}
+                    key={customer.id} 
+                    value={customer.id}
                     className="border rounded-lg bg-white"
                   >
                     <AccordionTrigger className="hover:no-underline px-3 py-2">
@@ -116,7 +114,7 @@ export const StatisticsDialog = ({ open, onOpenChange, trigger }: StatisticsDial
                     <AccordionContent>
                       <div className="px-3 pb-3 space-y-2">
                         <div className="space-y-2">
-                          {customerItems.map((item) => (
+                          {items.map((item) => (
                             <div key={item.id} className="border rounded p-2 bg-gray-50 text-sm">
                               <div className="flex flex-col md:flex-row justify-between items-center md:items-start gap-2">
                                 <div className="space-y-0.5 text-center md:text-left">
@@ -128,7 +126,7 @@ export const StatisticsDialog = ({ open, onOpenChange, trigger }: StatisticsDial
                                       : "-"}
                                   </p>
                                   <p className="text-xs text-gray-500">
-                                    {format(item.createdAt, "dd.MM.yyyy HH:mm")}
+                                    {format(new Date(item.createdAt), "dd.MM.yyyy HH:mm")}
                                   </p>
                                 </div>
                                 <Badge 

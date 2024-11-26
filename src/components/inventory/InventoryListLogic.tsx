@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Item } from "@/lib/types";
 import { toast } from "sonner";
-import { customers } from "@/lib/inventory";
+import { useCustomers } from "@/hooks/useCustomers";
 
 interface InventoryListLogicProps {
   items: Item[];
@@ -24,6 +24,7 @@ export const InventoryListLogic = ({
   const [editingItem, setEditingItem] = useState<Item | null>(null);
   const [deletingItemId, setDeletingItemId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const { customers } = useCustomers();
 
   const filterItems = (items: Item[]) => {
     return items.filter((item) => {
