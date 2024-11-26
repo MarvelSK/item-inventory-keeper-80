@@ -7,7 +7,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { BarChart, Download } from "lucide-react";
+import { BarChart } from "lucide-react";
 import { useItems } from "@/hooks/useItems";
 import { customers } from "@/lib/inventory";
 import { Badge } from "../ui/badge";
@@ -18,10 +18,6 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { format } from "date-fns";
-import { PDFDownloadLink } from '@react-pdf/renderer';
-import { CustomerOrderPDF } from "../pdf/CustomerOrderPDF";
-import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
 import { BatchExportDialog } from "../pdf/BatchExportDialog";
 
 export const StatisticsDialog = () => {
@@ -88,19 +84,6 @@ export const StatisticsDialog = () => {
                       <div className="flex flex-col items-start space-y-1 w-full">
                         <div className="flex items-center justify-between w-full">
                           <h3 className="text-base font-medium">{customer.name}</h3>
-                          <PDFDownloadLink
-                            document={<CustomerOrderPDF customer={customer} items={customerItems} />}
-                            fileName={`zakazka-${customer.name.toLowerCase()}.pdf`}
-                            className="ml-2"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toast.success("Export PDF bol spustený");
-                            }}
-                          >
-                            <Button variant="outline" size="icon">
-                              <Download className="h-4 w-4" />
-                            </Button>
-                          </PDFDownloadLink>
                         </div>
                         <div className="flex flex-wrap gap-1">
                           {Object.entries(statusCounts).map(([status, count]) => (
