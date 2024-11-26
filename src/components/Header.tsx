@@ -1,5 +1,5 @@
 import { CustomerDialog } from "./CustomerDialog";
-import { DatabaseBackup } from "lucide-react";
+import { DatabaseBackup, Users, BarChart3 } from "lucide-react";
 import { MobileMenu } from "./header/MobileMenu";
 import { BackupDialog } from "./header/BackupDialog";
 import { StatisticsDialog } from "./header/StatisticsDialog";
@@ -27,9 +27,18 @@ export const Header = () => {
 
           {/* Desktop Menu */}
           <nav className="hidden md:flex items-center space-x-4">
-            <CustomerDialog />
-            <BackupDialog />
-            <StatisticsDialog />
+            <div className="flex items-center space-x-1">
+              <Users className="h-4 w-4" />
+              <CustomerDialog />
+            </div>
+            <div className="flex items-center space-x-1">
+              <DatabaseBackup className="h-4 w-4" />
+              <BackupDialog />
+            </div>
+            <div className="flex items-center space-x-1">
+              <BarChart3 className="h-4 w-4" />
+              <StatisticsDialog />
+            </div>
           </nav>
         </div>
       </div>
