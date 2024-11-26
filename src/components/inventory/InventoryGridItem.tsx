@@ -1,5 +1,5 @@
 import { Item } from "@/lib/types";
-import { companies, customers } from "@/lib/inventory";
+import { customers } from "@/lib/inventory";
 import { format } from "date-fns";
 import { Badge } from "../ui/badge";
 import { ItemActionsDropdown } from "./ItemActionsDropdown";
@@ -25,7 +25,6 @@ const STATUS_MAP = {
 } as const;
 
 export const InventoryGridItem = ({ item, onEdit, onDelete, onPostpone }: InventoryGridItemProps) => {
-  const company = companies.find((c) => c.id === item.company)?.name || "Unknown";
   const customer = customers.find((c) => c.id === item.customer)?.name || "Unknown";
   const statusInfo = STATUS_MAP[item.status];
 
@@ -38,7 +37,6 @@ export const InventoryGridItem = ({ item, onEdit, onDelete, onPostpone }: Invent
           }`}>
             <div className="font-medium">{item.code}</div>
             <div className="text-sm text-gray-500">
-              <div>Spoločnosť: {company}</div>
               <div>Zákazník: {customer}</div>
               <div>Popis: {item.description || "-"}</div>
               <div>Rozmery: {item.height && item.width && item.length

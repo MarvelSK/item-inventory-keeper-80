@@ -4,7 +4,6 @@ import { supabase } from '@/integrations/supabase/client';
 const mapDbItemToItem = (dbItem: DbItem): Item => ({
   id: dbItem.id,
   code: dbItem.code,
-  company: dbItem.company,
   customer: dbItem.customer,
   description: dbItem.description,
   length: dbItem.length,
@@ -29,7 +28,6 @@ const mapDbItemToItem = (dbItem: DbItem): Item => ({
 
 const mapItemToDb = (item: Item): Omit<DbItem, 'id' | 'created_at' | 'updated_at'> => ({
   code: item.code,
-  company: item.company,
   customer: item.customer,
   description: item.description,
   length: item.length,

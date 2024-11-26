@@ -1,7 +1,6 @@
 export interface Item {
   id: string;
   code: string;
-  company: string;
   customer: string;
   description?: string | null;
   length?: number | null;
@@ -16,12 +15,6 @@ export interface Item {
   postponeReason?: string | null;
   created_by?: string | null;
   updated_by?: string | null;
-}
-
-export interface Company {
-  id: string;
-  name: string;
-  deleted: boolean;
 }
 
 export interface Tag {
@@ -44,7 +37,6 @@ export type Label = Tag;
 export interface DbItem {
   id: string;
   code: string;
-  company: string;
   customer: string;
   description: string | null;
   length: number | null;

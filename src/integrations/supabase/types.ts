@@ -12,7 +12,6 @@ export type Database = {
       items: {
         Row: {
           code: string
-          company: string
           created_at: string
           created_by: string | null
           customer: string
@@ -31,7 +30,6 @@ export type Database = {
         }
         Insert: {
           code: string
-          company: string
           created_at?: string
           created_by?: string | null
           customer: string
@@ -50,7 +48,6 @@ export type Database = {
         }
         Update: {
           code?: string
-          company?: string
           created_at?: string
           created_by?: string | null
           customer?: string
