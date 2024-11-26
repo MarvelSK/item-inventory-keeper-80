@@ -1,8 +1,7 @@
-import { v4 as uuidv4 } from 'uuid';
 import { addCustomer } from './customerService';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from 'sonner';
-import { Item, Tag } from '../types';
+import { Item, Tag, Json } from '../types';
 
 const VALID_DESCRIPTIONS = ['Příslušenství', 'Plechy', 'Žaluzie', 'Vodící profily'];
 const BATCH_SIZE = 50;
@@ -25,7 +24,7 @@ interface SupabaseItem {
   width: number | null;
   height: number | null;
   status: string;
-  tags: Tag[];
+  tags: Json;
   created_at?: string;
   updated_at?: string;
   deleted: boolean;
@@ -125,7 +124,7 @@ export const importMassItems = async (
   onProgress: (stage: string, progress: number) => void
 ) => {
   console.log('Starting mass import of items');
-  onProgress('Parsing items', 0);
+  onProgress('Spracovanie položiek', 0);
   
   const parsedItems = parseItems(data);
   if (parsedItems.length === 0) {
@@ -150,7 +149,7 @@ export const importMassItems = async (
   // Process each order
   for (const [orderInfo, items] of orderGroups) {
     try {
-      onProgress('Creating customers', (processedOrders / totalOrders) * 100);
+      onProgress('Vytváranie zákazníkov', (processedOrders / totalOrders) * 100);
       
       const customer = await addCustomer(orderInfo);
       
@@ -159,7 +158,7 @@ export const importMassItems = async (
       
       for (const item of items) {
         const newItem: Item = {
-          id: uuidv4(),
+          id: crypto.randomUUID(),
           code: item.code,
           customer: customer.id,
           description: item.description,
@@ -189,7 +188,7 @@ export const importMassItems = async (
       for (let i = 0; i < itemBatches.length; i++) {
         const progress = ((processedOrders / totalOrders) * 100) + 
           ((i / itemBatches.length) * (100 / totalOrders));
-        onProgress('Importing items', progress);
+        onProgress('Import položiek', progress);
         
         try {
           await insertItemsBatch(itemBatches[i]);
@@ -208,7 +207,7 @@ export const importMassItems = async (
     processedOrders++;
   }
 
-  onProgress('Completing import', 100);
+  onProgress('Dokončovanie importu', 100);
   
   if (duplicates.length > 0) {
     toast.warning(`${duplicates.length} položiek nebolo importovaných (duplicitné kódy)`);

@@ -12,6 +12,7 @@ import { importMassItems } from "@/lib/services/massImportService";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { Progress } from "../ui/progress";
+import { useQueryClient } from "@tanstack/react-query";
 
 export const MassImportDialog = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -19,6 +20,7 @@ export const MassImportDialog = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [stage, setStage] = useState<string>("");
+  const queryClient = useQueryClient();
 
   const handleImport = async () => {
     try {
@@ -30,6 +32,9 @@ export const MassImportDialog = () => {
         setStage(currentStage);
         setProgress(currentProgress);
       });
+      
+      // Refresh inventory list after successful import
+      await queryClient.invalidateQueries({ queryKey: ['items'] });
       
       setIsOpen(false);
       setData("");
