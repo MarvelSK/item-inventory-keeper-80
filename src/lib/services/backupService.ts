@@ -1,18 +1,30 @@
 import { Item, Company, Customer } from '../types';
 import { cache } from '../cache';
 
-// Export functions for backup operations
+const createBackupFile = async (data: any, filename: string) => {
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};
+
 export const backupInventory = async (items: Item[]) => {
   try {
-    const blob = new Blob([JSON.stringify(items, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `inventory-${new Date().toISOString()}.json`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    const activeItems = items.filter(item => !item.archived);
+    const archivedItems = items.filter(item => item.archived);
+    
+    // Backup active items
+    await createBackupFile(activeItems, `inventory-active-${new Date().toISOString()}.json`);
+    
+    // Backup archived items if any exist
+    if (archivedItems.length > 0) {
+      await createBackupFile(archivedItems, `inventory-archived-${new Date().toISOString()}.json`);
+    }
   } catch (error) {
     console.error('Error backing up inventory:', error);
     throw error;
@@ -21,15 +33,7 @@ export const backupInventory = async (items: Item[]) => {
 
 export const backupCompanies = async (companies: Company[]) => {
   try {
-    const blob = new Blob([JSON.stringify(companies, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `companies-${new Date().toISOString()}.json`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    await createBackupFile(companies, `companies-${new Date().toISOString()}.json`);
   } catch (error) {
     console.error('Error backing up companies:', error);
     throw error;
@@ -38,15 +42,7 @@ export const backupCompanies = async (companies: Company[]) => {
 
 export const backupCustomers = async (customers: Customer[]) => {
   try {
-    const blob = new Blob([JSON.stringify(customers, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `customers-${new Date().toISOString()}.json`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    await createBackupFile(customers, `customers-${new Date().toISOString()}.json`);
   } catch (error) {
     console.error('Error backing up customers:', error);
     throw error;
@@ -58,8 +54,17 @@ export const importInventory = async (file: File) => {
     const text = await file.text();
     const items = JSON.parse(text);
     if (!Array.isArray(items)) throw new Error('Invalid inventory data format');
-    cache.set('items', items);
-    return items;
+    
+    // Convert dates back to Date objects
+    const processedItems = items.map(item => ({
+      ...item,
+      createdAt: new Date(item.createdAt),
+      updatedAt: new Date(item.updatedAt),
+      archiveDate: item.archiveDate ? new Date(item.archiveDate) : undefined
+    }));
+    
+    cache.set('items', processedItems);
+    return processedItems;
   } catch (error) {
     console.error('Error importing inventory:', error);
     throw error;

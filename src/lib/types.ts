@@ -14,6 +14,8 @@ export interface Item {
   deleted: boolean;
   postponed?: boolean;
   postponeReason?: string;
+  archived?: boolean;
+  archiveDate?: Date;
 }
 
 export interface Company {

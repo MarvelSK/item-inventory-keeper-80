@@ -10,8 +10,8 @@ import { Loader2 } from "lucide-react";
 import { MassImportDialog } from "./inventory/MassImportDialog";
 import { InventoryStats } from "./inventory/InventoryStats";
 import { InventoryPagination } from "./inventory/InventoryPagination";
+import { ArchiveControls } from "./inventory/ArchiveControls";
 import { toast } from "sonner";
-import { isWithinInterval, startOfDay, endOfDay } from "date-fns";
 
 interface Filters {
   status: string;
@@ -23,11 +23,12 @@ interface Filters {
   maxHeight?: number;
   dateFrom?: Date;
   dateTo?: Date;
+  showArchived?: boolean;
 }
 
 export const InventoryList = () => {
   const [search, setSearch] = useState("");
-  const [filters, setFilters] = useState<Filters>({ status: "" });
+  const [filters, setFilters] = useState<Filters>({ status: "", showArchived: false });
   const [sortField, setSortField] = useState<keyof Item>("code");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
@@ -58,6 +59,9 @@ export const InventoryList = () => {
 
   const filterItems = (items: Item[]) => {
     return items.filter((item) => {
+      if (!filters.showArchived && item.archived) return false;
+      if (filters.showArchived && !item.archived) return false;
+
       // Text search
       const searchMatch =
         item.code.toLowerCase().includes(search.toLowerCase()) ||
@@ -71,9 +75,9 @@ export const InventoryList = () => {
 
       // Date range filter
       if (filters.dateFrom || filters.dateTo) {
-        const itemDate = startOfDay(item.createdAt);
-        if (filters.dateFrom && itemDate < startOfDay(filters.dateFrom)) return false;
-        if (filters.dateTo && itemDate > endOfDay(filters.dateTo)) return false;
+        const itemDate = new Date(item.createdAt);
+        if (filters.dateFrom && itemDate < filters.dateFrom) return false;
+        if (filters.dateTo && itemDate > filters.dateTo) return false;
       }
 
       // Dimension filters
@@ -162,8 +166,12 @@ export const InventoryList = () => {
           viewMode={viewMode}
           setViewMode={setViewMode}
           onFilterChange={setFilters}
+          showArchived={filters.showArchived}
         />
-        <MassImportDialog />
+        <div className="flex gap-2">
+          <ArchiveControls items={items} />
+          <MassImportDialog />
+        </div>
       </div>
 
       <InventoryStats items={sortedAndFilteredItems} />
