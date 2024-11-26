@@ -37,6 +37,9 @@ export interface Customer {
   deleted: boolean;
 }
 
+// Alias Label to Tag for backward compatibility
+export type Label = Tag;
+
 // Database type for items as they come from Supabase
 export interface DbItem {
   id: string;

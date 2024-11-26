@@ -1,4 +1,4 @@
-import { Item, DbItem, Tag } from '../types';
+import { Item, DbItem, Tag, Json } from '../types';
 import { supabase } from '@/integrations/supabase/client';
 
 const mapDbItemToItem = (dbItem: DbItem): Item => ({
@@ -11,7 +11,7 @@ const mapDbItemToItem = (dbItem: DbItem): Item => ({
   width: dbItem.width,
   height: dbItem.height,
   status: dbItem.status as Item['status'],
-  tags: (dbItem.tags as Tag[]) || [],
+  tags: Array.isArray(dbItem.tags) ? dbItem.tags as Tag[] : [],
   createdAt: new Date(dbItem.created_at),
   updatedAt: new Date(dbItem.updated_at),
   deleted: dbItem.deleted,
@@ -21,22 +21,22 @@ const mapDbItemToItem = (dbItem: DbItem): Item => ({
   updated_by: dbItem.updated_by
 });
 
-const mapItemToDb = (item: Partial<Item>) => {
-  const dbItem: Partial<DbItem> = {
-    ...item,
-    tags: item.tags as unknown as Json,
-    created_at: item.createdAt?.toISOString(),
-    updated_at: item.updatedAt?.toISOString(),
-    postpone_reason: item.postponeReason
-  };
-
-  // Remove frontend-specific fields
-  delete (dbItem as any).createdAt;
-  delete (dbItem as any).updatedAt;
-  delete (dbItem as any).postponeReason;
-
-  return dbItem;
-};
+const mapItemToDb = (item: Item): Omit<DbItem, 'id' | 'created_at' | 'updated_at'> => ({
+  code: item.code,
+  company: item.company,
+  customer: item.customer,
+  description: item.description,
+  length: item.length,
+  width: item.width,
+  height: item.height,
+  status: item.status,
+  tags: item.tags as unknown as Json,
+  deleted: item.deleted,
+  postponed: item.postponed,
+  postpone_reason: item.postponeReason,
+  created_by: item.created_by,
+  updated_by: item.updated_by
+});
 
 export const findItemByCode = async (code: string) => {
   const { data: items, error } = await supabase
@@ -90,7 +90,6 @@ export const updateItem = async (updatedItem: Item) => {
     .update(mapItemToDb({
       ...updatedItem,
       updated_by: user.id,
-      updatedAt: new Date(),
     }))
     .eq('id', updatedItem.id)
     .select()
