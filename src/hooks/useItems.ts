@@ -16,9 +16,11 @@ export const useItems = () => {
     mutationFn: (newItem: Omit<Item, 'id' | 'createdAt' | 'updatedAt' | 'deleted'>) => {
       const fullItem: Item = {
         ...newItem,
+        id: crypto.randomUUID(),
         createdAt: new Date(),
         updatedAt: new Date(),
-        deleted: false
+        deleted: false,
+        tags: newItem.tags || []
       };
       return addItem(fullItem);
     },

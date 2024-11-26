@@ -1,6 +1,42 @@
-import { Item } from '../types';
+import { Item, DbItem, Tag } from '../types';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+
+const mapDbItemToItem = (dbItem: DbItem): Item => ({
+  id: dbItem.id,
+  code: dbItem.code,
+  company: dbItem.company,
+  customer: dbItem.customer,
+  description: dbItem.description,
+  length: dbItem.length,
+  width: dbItem.width,
+  height: dbItem.height,
+  status: dbItem.status as Item['status'],
+  tags: (dbItem.tags as Tag[]) || [],
+  createdAt: new Date(dbItem.created_at),
+  updatedAt: new Date(dbItem.updated_at),
+  deleted: dbItem.deleted,
+  postponed: dbItem.postponed,
+  postponeReason: dbItem.postpone_reason,
+  created_by: dbItem.created_by,
+  updated_by: dbItem.updated_by
+});
+
+const mapItemToDb = (item: Partial<Item>) => {
+  const dbItem: Partial<DbItem> = {
+    ...item,
+    tags: item.tags as unknown as Json,
+    created_at: item.createdAt?.toISOString(),
+    updated_at: item.updatedAt?.toISOString(),
+    postpone_reason: item.postponeReason
+  };
+
+  // Remove frontend-specific fields
+  delete (dbItem as any).createdAt;
+  delete (dbItem as any).updatedAt;
+  delete (dbItem as any).postponeReason;
+
+  return dbItem;
+};
 
 export const findItemByCode = async (code: string) => {
   const { data: items, error } = await supabase
@@ -15,7 +51,7 @@ export const findItemByCode = async (code: string) => {
     return null;
   }
 
-  return items;
+  return items ? mapDbItemToItem(items as DbItem) : null;
 };
 
 export const addItem = async (item: Item) => {
@@ -29,11 +65,11 @@ export const addItem = async (item: Item) => {
 
   const { data, error } = await supabase
     .from('items')
-    .insert({
+    .insert(mapItemToDb({
       ...item,
       created_by: user.id,
       updated_by: user.id,
-    })
+    }))
     .select()
     .single();
 
@@ -42,7 +78,7 @@ export const addItem = async (item: Item) => {
     throw error;
   }
 
-  return data;
+  return mapDbItemToItem(data as DbItem);
 };
 
 export const updateItem = async (updatedItem: Item) => {
@@ -51,11 +87,11 @@ export const updateItem = async (updatedItem: Item) => {
 
   const { data, error } = await supabase
     .from('items')
-    .update({
+    .update(mapItemToDb({
       ...updatedItem,
       updated_by: user.id,
-      updated_at: new Date().toISOString(),
-    })
+      updatedAt: new Date(),
+    }))
     .eq('id', updatedItem.id)
     .select()
     .single();
@@ -65,7 +101,7 @@ export const updateItem = async (updatedItem: Item) => {
     throw error;
   }
 
-  return data;
+  return mapDbItemToItem(data as DbItem);
 };
 
 export const deleteItem = async (id: string) => {
@@ -92,5 +128,5 @@ export const getAllItems = async () => {
     throw error;
   }
 
-  return items;
+  return (items as DbItem[]).map(mapDbItemToItem);
 };
