@@ -1,4 +1,4 @@
-import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer';
 import { Customer, Item } from '@/lib/types';
 
 const styles = StyleSheet.create({
@@ -7,8 +7,16 @@ const styles = StyleSheet.create({
     fontFamily: 'Helvetica',
   },
   header: {
-    fontSize: 24,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 20,
+  },
+  logo: {
+    width: 120,
+  },
+  title: {
+    fontSize: 24,
     color: '#212490',
   },
   customerInfo: {
@@ -53,18 +61,18 @@ const styles = StyleSheet.create({
     padding: 8,
     fontSize: 10,
   },
-  col1: { width: '20%' },
-  col2: { width: '35%' },
+  col1: { width: '25%' },
+  col2: { width: '50%' },
   col3: { width: '25%' },
-  col4: { width: '20%' },
   footer: {
-    position: 'absolute',
-    bottom: 30,
-    left: 30,
-    right: 30,
-    textAlign: 'center',
+    marginTop: 20,
     fontSize: 10,
     color: '#9ca3af',
+  },
+  itemCount: {
+    marginTop: 10,
+    fontSize: 12,
+    color: '#212490',
   },
   pageBreak: {
     marginBottom: 20,
@@ -88,7 +96,13 @@ interface CustomerOrderPDFProps {
 
 const OrderPage = ({ customer, items, template = 'default' }: { customer: Customer; items: Item[]; template?: 'default' | 'compact' }) => (
   <View style={styles.page}>
-    <Text style={styles.header}>Zákazka</Text>
+    <View style={styles.header}>
+      <Image 
+        src="/logo_neva.png" 
+        style={styles.logo}
+      />
+      <Text style={styles.title}>Balíková súpiska</Text>
+    </View>
     
     <View style={styles.customerInfo}>
       <Text style={styles.customerName}>{customer.name}</Text>
@@ -109,7 +123,6 @@ const OrderPage = ({ customer, items, template = 'default' }: { customer: Custom
         <Text style={styles.col1}>Kód</Text>
         <Text style={styles.col2}>Popis</Text>
         <Text style={styles.col3}>Stav</Text>
-        <Text style={styles.col4}>Dátum</Text>
       </View>
       {items.map((item) => (
         <View key={item.id} style={styles.tableRow}>
@@ -121,12 +134,13 @@ const OrderPage = ({ customer, items, template = 'default' }: { customer: Custom
               : ''}
           </Text>
           <Text style={styles.col3}>{STATUS_MAP[item.status]}</Text>
-          <Text style={styles.col4}>
-            {new Date(item.createdAt).toLocaleDateString('sk-SK')}
-          </Text>
         </View>
       ))}
     </View>
+
+    <Text style={styles.itemCount}>
+      Počet položiek: {items.length}
+    </Text>
 
     <Text style={styles.footer}>
       Vygenerované {new Date().toLocaleDateString('sk-SK')}
