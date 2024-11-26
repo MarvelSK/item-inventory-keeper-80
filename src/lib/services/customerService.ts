@@ -3,23 +3,25 @@ import { Customer, Tag } from "../types";
 import { Json } from "@/integrations/supabase/types";
 
 const isValidTag = (tag: any): tag is Tag => {
-  return typeof tag === 'object' 
-    && tag !== null 
-    && typeof tag.id === 'string'
-    && typeof tag.name === 'string'
-    && typeof tag.color === 'string';
+  return (
+    typeof tag === 'object' && 
+    tag !== null && 
+    typeof tag.id === 'string' &&
+    typeof tag.name === 'string' &&
+    typeof tag.color === 'string'
+  );
 };
 
 const convertJsonToTags = (json: Json | null): Tag[] => {
   if (!Array.isArray(json)) return [];
-  return json.filter(isValidTag);
+  return json.filter((item): item is Tag => isValidTag(item));
 };
 
 const convertTagsToJson = (tags: Tag[]): Json => {
   return tags.map(tag => ({
     id: tag.id,
     name: tag.name,
-    color: tag.color || '#D2D2D2' // Default color if none provided
+    color: tag.color || '#D2D2D2'
   }));
 };
 
