@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { companies, customers } from "@/lib/inventory";
+import { customers } from "@/lib/inventory";
 import { Item } from "@/lib/types";
 import { useState, useEffect } from "react";
 import { Textarea } from "../ui/textarea";
@@ -61,21 +61,6 @@ export const EditItemDialog = ({ item, isOpen, onOpenChange, onSave }: EditItemD
               setEditedItem({ ...editedItem, code: e.target.value })
             }
           />
-          <Select 
-            value={editedItem.company} 
-            onValueChange={(value) => setEditedItem({ ...editedItem, company: value })}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Vybrať spoločnosť" />
-            </SelectTrigger>
-            <SelectContent>
-              {companies.filter(c => !c.deleted).map((company) => (
-                <SelectItem key={company.id} value={company.id}>
-                  {company.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
           <Select 
             value={editedItem.customer} 
             onValueChange={(value) => setEditedItem({ ...editedItem, customer: value })}
