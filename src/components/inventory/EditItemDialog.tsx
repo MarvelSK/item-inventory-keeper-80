@@ -49,99 +49,101 @@ export const EditItemDialog = ({ item, isOpen, onOpenChange, onSave }: EditItemD
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[95vw] max-w-[425px]">
+      <DialogContent className="w-[95vw] max-w-[425px] max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle>Upraviť položku</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4">
-          <Input
-            placeholder="Kód"
-            value={editedItem.code}
-            onChange={(e) =>
-              setEditedItem({ ...editedItem, code: e.target.value })
-            }
-          />
-          <Select 
-            value={editedItem.customer} 
-            onValueChange={(value) => setEditedItem({ ...editedItem, customer: value })}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Vybrať zákazníka" />
-            </SelectTrigger>
-            <SelectContent>
-              {customers.filter(c => !c.deleted).map((customer) => (
-                <SelectItem key={customer.id} value={customer.id}>
-                  {customer.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select 
-            value={editedItem.status} 
-            onValueChange={(value: 'waiting' | 'in_stock' | 'in_transit' | 'delivered') => 
-              setEditedItem({ ...editedItem, status: value })
-            }
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Vybrať stav" />
-            </SelectTrigger>
-            <SelectContent>
-              {STATUS_OPTIONS.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Textarea
-            placeholder="Popis"
-            value={editedItem.description || ""}
-            onChange={(e) =>
-              setEditedItem({ ...editedItem, description: e.target.value })
-            }
-          />
-          <div className="grid grid-cols-3 gap-2">
+        <ScrollArea className="flex-1">
+          <div className="space-y-4">
             <Input
-              type="number"
-              placeholder="Délka (cm)"
-              value={editedItem.length || ""}
+              placeholder="Kód"
+              value={editedItem.code}
               onChange={(e) =>
-                setEditedItem({
-                  ...editedItem,
-                  length: parseInt(e.target.value) || undefined,
-                })
+                setEditedItem({ ...editedItem, code: e.target.value })
               }
             />
-            <Input
-              type="number"
-              placeholder="Šířka (cm)"
-              value={editedItem.width || ""}
+            <Select 
+              value={editedItem.customer} 
+              onValueChange={(value) => setEditedItem({ ...editedItem, customer: value })}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Vybrať zákazníka" />
+              </SelectTrigger>
+              <SelectContent>
+                {customers.filter(c => !c.deleted).map((customer) => (
+                  <SelectItem key={customer.id} value={customer.id}>
+                    {customer.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select 
+              value={editedItem.status} 
+              onValueChange={(value: 'waiting' | 'in_stock' | 'in_transit' | 'delivered') => 
+                setEditedItem({ ...editedItem, status: value })
+              }
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Vybrať stav" />
+              </SelectTrigger>
+              <SelectContent>
+                {STATUS_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Textarea
+              placeholder="Popis"
+              value={editedItem.description || ""}
               onChange={(e) =>
-                setEditedItem({
-                  ...editedItem,
-                  width: parseInt(e.target.value) || undefined,
-                })
+                setEditedItem({ ...editedItem, description: e.target.value })
               }
             />
-            <Input
-              type="number"
-              placeholder="Výška (cm)"
-              value={editedItem.height || ""}
-              onChange={(e) =>
-                setEditedItem({
-                  ...editedItem,
-                  height: parseInt(e.target.value) || undefined,
-                })
-              }
-            />
+            <div className="grid grid-cols-3 gap-2">
+              <Input
+                type="number"
+                placeholder="Délka (cm)"
+                value={editedItem.length || ""}
+                onChange={(e) =>
+                  setEditedItem({
+                    ...editedItem,
+                    length: parseInt(e.target.value) || undefined,
+                  })
+                }
+              />
+              <Input
+                type="number"
+                placeholder="Šířka (cm)"
+                value={editedItem.width || ""}
+                onChange={(e) =>
+                  setEditedItem({
+                    ...editedItem,
+                    width: parseInt(e.target.value) || undefined,
+                  })
+                }
+              />
+              <Input
+                type="number"
+                placeholder="Výška (cm)"
+                value={editedItem.height || ""}
+                onChange={(e) =>
+                  setEditedItem({
+                    ...editedItem,
+                    height: parseInt(e.target.value) || undefined,
+                  })
+                }
+              />
+            </div>
+            <Button
+              onClick={handleSave}
+              className="w-full bg-[#212490] hover:bg-[#47acc9]"
+            >
+              Uložiť
+            </Button>
           </div>
-          <Button
-            onClick={handleSave}
-            className="w-full bg-[#212490] hover:bg-[#47acc9]"
-          >
-            Uložiť
-          </Button>
-        </div>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );
