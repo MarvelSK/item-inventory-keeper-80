@@ -62,7 +62,13 @@ export const Scanner = () => {
     console.log("Scanned code:", decodedText);
     setScanning(true);
     setScannedCode(decodedText);
-    const item = await findItemByCode(decodedText);
+
+    // Trim the code to remove any whitespace
+    const trimmedCode = decodedText.trim();
+    console.log("Looking for item with code:", trimmedCode);
+    
+    const item = await findItemByCode(trimmedCode);
+    console.log("Found item:", item);
     
     if (!item) {
       toast.error("Položka nebola nájdená v systéme");

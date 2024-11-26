@@ -18,8 +18,10 @@ const areItemsEqual = (item1: Item, item2: Item) => {
 
 export const findItemByCode = async (code: string) => {
   console.log('Finding item by code:', code);
-  const item = items.find((i) => i.code === code && !i.deleted);
-  console.log('Item found:', item);
+  // Trim the code and ensure case-insensitive comparison
+  const normalizedCode = code.trim().toLowerCase();
+  const item = items.find((i) => i.code.toLowerCase() === normalizedCode && !i.deleted);
+  console.log('Found item:', item);
   return item;
 };
 
