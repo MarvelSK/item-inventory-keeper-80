@@ -41,7 +41,7 @@ export const Scanner = () => {
 
     return () => {
       if (readerRef.current) {
-        readerRef.current.stopStreams();
+        readerRef.current.stream?.getTracks().forEach(track => track.stop());
       }
     };
   }, []);
@@ -110,7 +110,7 @@ export const Scanner = () => {
         }
       );
     } else if (!scanning && readerRef.current) {
-      readerRef.current.stopStreams();
+      readerRef.current.stream?.getTracks().forEach(track => track.stop());
       if (containerRef.current) {
         containerRef.current.style.border = "none";
       }
