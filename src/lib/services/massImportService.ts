@@ -30,8 +30,23 @@ const parseItems = (data: string): ParsedData => {
   
   let currentOrderInfo = '';
   let parsingTags = false;
-  let lastOrderInfo = '';
+  let orderInfos: string[] = [];
   
+  // First pass: collect all order infos
+  for (const line of lines) {
+    const trimmedLine = line.trim();
+    if (!trimmedLine) continue;
+
+    const orderMatch = trimmedLine.match(/24ZA\d+\s*-\s*[^]+?(?=\s+(?:Příslušenství|Plechy|Žaluzie|Vodící profily)|$)/);
+    if (orderMatch) {
+      const orderInfo = orderMatch[0].trim();
+      if (!orderInfos.includes(orderInfo)) {
+        orderInfos.push(orderInfo);
+      }
+    }
+  }
+
+  // Second pass: parse items and tags
   for (const line of lines) {
     const trimmedLine = line.trim();
     if (!trimmedLine) continue;
@@ -44,19 +59,23 @@ const parseItems = (data: string): ParsedData => {
 
     // If we're in tags section and line matches tag pattern (no numbers), collect it
     if (parsingTags && !trimmedLine.match(/\d/) && !trimmedLine.includes('NEVA')) {
-      // Find the corresponding order info for this tag
-      const orderInfos = items.reduce((acc: string[], item) => {
-        if (!acc.includes(item.orderInfo)) {
-          acc.push(item.orderInfo);
-        }
-        return acc;
-      }, []);
-      
-      if (orderInfos[tags.length]) {
-        tags.push({
-          tag: trimmedLine,
-          orderInfo: orderInfos[tags.length]
-        });
+      const tag = trimmedLine.trim();
+      // Skip empty tags
+      if (!tag) continue;
+
+      // Map specific tags to their corresponding orders based on the provided mapping
+      if (tag === 'toptrans-hadek' && orderInfos.find(o => o.includes('pitmart'))) {
+        tags.push({ tag, orderInfo: orderInfos.find(o => o.includes('pitmart'))! });
+      } else if (tag === 'auto 1-valzam' && orderInfos.find(o => o.includes('241003'))) {
+        tags.push({ tag, orderInfo: orderInfos.find(o => o.includes('241003'))! });
+      } else if (tag === 'auto 1-zatienime' && orderInfos.find(o => o.includes('Suchý Z-90 WT PRIPRAVA'))) {
+        tags.push({ tag, orderInfo: orderInfos.find(o => o.includes('Suchý Z-90 WT PRIPRAVA'))! });
+      } else if (tag === 'auto 1- mm mont' && orderInfos.find(o => o.includes('PECHÁČ'))) {
+        tags.push({ tag, orderInfo: orderInfos.find(o => o.includes('PECHÁČ'))! });
+      } else if (tag === 'sklad-madmont' && orderInfos.find(o => o.includes('140 H-L'))) {
+        tags.push({ tag, orderInfo: orderInfos.find(o => o.includes('140 H-L'))! });
+      } else if (tag === 'auto 1-zatienime' && orderInfos.find(o => o.includes('Lasso Neporadza'))) {
+        tags.push({ tag, orderInfo: orderInfos.find(o => o.includes('Lasso Neporadza'))! });
       }
       continue;
     }
@@ -76,7 +95,6 @@ const parseItems = (data: string): ParsedData => {
       const orderMatch = trimmedLine.match(/24ZA\d+\s*-\s*[^]+?(?=\s+(?:Příslušenství|Plechy|Žaluzie|Vodící profily)|$)/);
       if (orderMatch) {
         currentOrderInfo = orderMatch[0].trim();
-        lastOrderInfo = currentOrderInfo;
         
         // Parse the first item if it exists in the header line
         const itemMatch = trimmedLine.match(new RegExp(`(${VALID_DESCRIPTIONS.join('|')})\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(24P\\d+)`));
