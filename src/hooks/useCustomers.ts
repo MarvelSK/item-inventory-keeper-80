@@ -1,9 +1,27 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getActiveCustomers, addCustomer, deleteCustomer } from '../lib/services';
+import { getActiveCustomers, addCustomer, updateCustomer, deleteCustomer } from '../lib/services/customerService';
 import { toast } from 'sonner';
+import { useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 export const useCustomers = () => {
   const queryClient = useQueryClient();
+
+  useEffect(() => {
+    const channel = supabase
+      .channel('customers_changes')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'customers' },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['customers'] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
 
   const { data: customers = [], isLoading } = useQuery({
     queryKey: ['customers'],
@@ -11,13 +29,24 @@ export const useCustomers = () => {
   });
 
   const addMutation = useMutation({
-    mutationFn: (name: string) => addCustomer(name),
+    mutationFn: addCustomer,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['customers'] });
       toast.success('Zákazník bol pridaný');
     },
     onError: () => {
       toast.error('Chyba pri pridávaní zákazníka');
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: updateCustomer,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['customers'] });
+      toast.success('Zákazník bol upravený');
+    },
+    onError: () => {
+      toast.error('Chyba pri úprave zákazníka');
     },
   });
 
@@ -36,6 +65,7 @@ export const useCustomers = () => {
     customers,
     isLoading,
     addCustomer: addMutation.mutate,
+    updateCustomer: updateMutation.mutate,
     deleteCustomer: deleteMutation.mutate,
   };
 };

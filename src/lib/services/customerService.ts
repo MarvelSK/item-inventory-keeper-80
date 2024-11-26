@@ -1,37 +1,52 @@
-import { Customer } from '../models/types';
-import { cache } from '../cache';
+import { supabase } from "@/integrations/supabase/client";
+import { Customer } from "../types";
 
-export let customers: Customer[] = [];
+export const getActiveCustomers = async (): Promise<Customer[]> => {
+  const { data, error } = await supabase
+    .from('customers')
+    .select('*')
+    .eq('deleted', false)
+    .order('name');
+
+  if (error) throw error;
+  return data.map(customer => ({
+    ...customer,
+    tags: customer.tags || [],
+  }));
+};
 
 export const addCustomer = async (name: string): Promise<Customer> => {
-  const newCustomer: Customer = {
-    id: Math.random().toString(36).substr(2, 9),
-    name,
-    tags: [],
-    deleted: false,
-  };
-  customers.push(newCustomer);
-  return newCustomer;
+  const { data, error } = await supabase
+    .from('customers')
+    .insert([{ name }])
+    .select()
+    .single();
+
+  if (error) throw error;
+  return { ...data, tags: data.tags || [] };
+};
+
+export const updateCustomer = async (customer: Customer): Promise<Customer> => {
+  const { data, error } = await supabase
+    .from('customers')
+    .update({
+      name: customer.name,
+      tags: customer.tags,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', customer.id)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return { ...data, tags: data.tags || [] };
 };
 
 export const deleteCustomer = async (id: string): Promise<void> => {
-  const customer = customers.find(customer => customer.id === id);
-  if (customer) {
-    customer.deleted = true;
-  }
-};
+  const { error } = await supabase
+    .from('customers')
+    .update({ deleted: true })
+    .eq('id', id);
 
-export const getActiveCustomers = async (): Promise<Customer[]> => {
-  const cachedCustomers = cache.get<Customer[]>('customers');
-  if (cachedCustomers) {
-    return cachedCustomers.filter(customer => !customer.deleted);
-  }
-  
-  cache.set('customers', customers);
-  return customers.filter(customer => !customer.deleted);
-};
-
-export const wipeCustomers = async () => {
-  customers = [];
-  cache.set('customers', customers);
+  if (error) throw error;
 };

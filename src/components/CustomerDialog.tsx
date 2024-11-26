@@ -20,13 +20,14 @@ import {
 } from "./ui/alert-dialog";
 import { Input } from "./ui/input";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "./ui/table";
-import { customers, addCustomer, deleteCustomer } from "@/lib/inventory";
 import { Trash2, Edit2 } from "lucide-react";
 import { EditCustomerForm } from "./EditCustomerForm";
 import { toast } from "sonner";
 import { ScrollArea } from "./ui/scroll-area";
 import { Customer } from "@/lib/types";
 import { LabelBadge } from "./labels/LabelBadge";
+import { useCustomers } from "@/hooks/useCustomers";
+import { Loader2 } from "lucide-react";
 
 interface CustomerDialogProps {
   open?: boolean;
@@ -41,6 +42,8 @@ export const CustomerDialog = ({ open, onOpenChange }: CustomerDialogProps) => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isMainDialogOpen, setIsMainDialogOpen] = useState(false);
 
+  const { customers, isLoading, addCustomer, updateCustomer, deleteCustomer } = useCustomers();
+
   const actualOpen = open !== undefined ? open : isMainDialogOpen;
   const handleOpenChange = onOpenChange || setIsMainDialogOpen;
 
@@ -51,17 +54,11 @@ export const CustomerDialog = ({ open, onOpenChange }: CustomerDialogProps) => {
     }
     addCustomer(customerName);
     setCustomerName("");
-    toast.success("Zákazník bol pridaný");
   };
 
   const handleEditCustomer = (customer: Customer) => {
-    const customerToUpdate = customers.find(c => c.id === customer.id);
-    if (customerToUpdate) {
-      customerToUpdate.name = customer.name;
-      customerToUpdate.tags = customer.tags;
-      setIsEditDialogOpen(false);
-      toast.success("Zákazník bol upravený");
-    }
+    updateCustomer(customer);
+    setIsEditDialogOpen(false);
   };
 
   const handleDeleteCustomer = () => {
@@ -69,9 +66,16 @@ export const CustomerDialog = ({ open, onOpenChange }: CustomerDialogProps) => {
       deleteCustomer(deletingCustomerId);
       setDeletingCustomerId(null);
       setIsDeleteDialogOpen(false);
-      toast.success("Zákazník bol vymazaný");
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-4">
+        <Loader2 className="h-6 w-6 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <>
@@ -116,7 +120,7 @@ export const CustomerDialog = ({ open, onOpenChange }: CustomerDialogProps) => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {customers.filter(c => !c.deleted).map((customer) => (
+                    {customers.map((customer) => (
                       <TableRow key={customer.id}>
                         <TableCell className="font-medium text-center md:text-left">{customer.name}</TableCell>
                         <TableCell className="text-center md:text-left">
