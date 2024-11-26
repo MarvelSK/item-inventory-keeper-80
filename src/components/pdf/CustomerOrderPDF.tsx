@@ -1,15 +1,22 @@
-import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet, Font } from '@react-pdf/renderer';
 import { Customer, Item } from '@/lib/types';
+
+// Register Open Sans font
+Font.register({
+  family: 'Open Sans',
+  src: 'https://fonts.gstatic.com/s/opensans/v34/memvYaGs126MiZpBA-UvWbX2vVnXBbObj2OVTS-mu0SC55I.woff2'
+});
 
 const styles = StyleSheet.create({
   page: {
     padding: 30,
-    fontFamily: 'Helvetica',
+    fontFamily: 'Open Sans',
   },
   header: {
     fontSize: 24,
     marginBottom: 20,
     color: '#212490',
+    fontFamily: 'Open Sans',
   },
   customerInfo: {
     marginBottom: 20,
@@ -18,6 +25,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginBottom: 10,
     color: '#47acc9',
+    fontFamily: 'Open Sans',
   },
   tags: {
     flexDirection: 'row',
@@ -30,11 +38,13 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     fontSize: 10,
     backgroundColor: '#f3f4f6',
+    fontFamily: 'Open Sans',
   },
   itemsHeader: {
     fontSize: 16,
     marginBottom: 10,
     color: '#212490',
+    fontFamily: 'Open Sans',
   },
   table: {
     width: '100%',
@@ -45,6 +55,7 @@ const styles = StyleSheet.create({
     padding: 8,
     fontSize: 12,
     fontWeight: 'bold',
+    fontFamily: 'Open Sans',
   },
   tableRow: {
     flexDirection: 'row',
@@ -52,6 +63,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#e5e7eb',
     padding: 8,
     fontSize: 10,
+    fontFamily: 'Open Sans',
   },
   col1: { width: '20%' },
   col2: { width: '35%' },
@@ -65,6 +77,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 10,
     color: '#9ca3af',
+    fontFamily: 'Open Sans',
   },
 });
 
