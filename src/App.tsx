@@ -7,7 +7,6 @@ import { useEffect, useState } from "react";
 import Index from "./pages/Index";
 import { PasswordProtect } from "./components/auth/PasswordProtect";
 import { supabase } from "./integrations/supabase/client";
-import { UserManagement } from "./components/users/UserManagement";
 
 const queryClient = new QueryClient();
 
@@ -41,7 +40,6 @@ const App = () => {
           ) : (
             <Routes>
               <Route path="/" element={<Index />} />
-              <Route path="/users" element={<UserManagement />} />
             </Routes>
           )}
           <Toaster />
