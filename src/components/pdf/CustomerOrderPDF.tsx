@@ -1,10 +1,16 @@
-import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet, Font } from '@react-pdf/renderer';
 import { Customer, Item } from '@/lib/types';
+
+// Register a font that supports Slovak characters
+Font.register({
+  family: 'Open Sans',
+  src: 'https://fonts.gstatic.com/s/opensans/v34/memvYaGs126MiZpBA-UvWbX2vVnXBbObj2OVTS-mu0SC55I.woff2',
+});
 
 const styles = StyleSheet.create({
   page: {
     padding: 30,
-    fontFamily: 'Helvetica',
+    fontFamily: 'Open Sans',
   },
   header: {
     fontSize: 24,
@@ -83,7 +89,7 @@ interface CustomerOrderPDFProps {
 export const CustomerOrderPDF = ({ customer, items }: CustomerOrderPDFProps) => (
   <Document>
     <Page size="A4" style={styles.page}>
-      <Text style={styles.header}>Zákazka</Text>
+      <Text style={styles.header}>Balíková súpiska</Text>
       
       <View style={styles.customerInfo}>
         <Text style={styles.customerName}>{customer.name}</Text>
