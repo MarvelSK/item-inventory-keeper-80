@@ -1,166 +1,100 @@
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { BrowserMultiFormatReader } from "@zxing/browser";
-import { DecodeHintType, Result } from "@zxing/library";
-import { findItemByCode } from "@/lib/inventory";
 import { Button } from "./ui/button";
-import { useItems } from "@/hooks/useItems";
-
-type ScanMode = "naskladnenie" | "nalozenie" | "dorucenie";
-
-const STATUS_TRANSITIONS = {
-  naskladnenie: {
-    from: "waiting",
-    to: "in_stock",
-  },
-  nalozenie: {
-    from: "in_stock",
-    to: "in_transit",
-  },
-  dorucenie: {
-    from: "in_transit",
-    to: "delivered",
-  }
-} as const;
+import { Card } from "./ui/card";
+import { toast } from "sonner";
+import { Camera, CameraOff } from "lucide-react";
 
 export const Scanner = () => {
-  const [scanning, setScanning] = useState(false);
-  const [scanMode, setScanMode] = useState<ScanMode>("naskladnenie");
-  const { updateItem } = useItems();
+  const [isScanning, setIsScanning] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const readerRef = useRef<BrowserMultiFormatReader | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const lastScanRef = useRef<string>("");
-  const scanTimeoutRef = useRef<NodeJS.Timeout>();
+  const codeReader = useRef<BrowserMultiFormatReader>();
+  const mediaStream = useRef<MediaStream | null>(null);
 
   useEffect(() => {
-    const hints = new Map();
-    hints.set(DecodeHintType.TRY_HARDER, true);
-    hints.set(DecodeHintType.ASSUME_GS1, true);
-    
-    readerRef.current = new BrowserMultiFormatReader(hints);
-
+    codeReader.current = new BrowserMultiFormatReader();
     return () => {
-      if (readerRef.current) {
-        readerRef.current.stream?.getTracks().forEach(track => track.stop());
+      if (mediaStream.current) {
+        mediaStream.current.getTracks().forEach(track => track.stop());
       }
     };
   }, []);
 
-  useEffect(() => {
-    if (scanning && videoRef.current && containerRef.current) {
-      readerRef.current?.decodeFromConstraints(
-        {
-          video: { facingMode: "environment" }
-        },
+  const startScanning = async () => {
+    try {
+      if (!videoRef.current) return;
+
+      const constraints = {
+        video: { facingMode: "environment" }
+      };
+
+      mediaStream.current = await navigator.mediaDevices.getUserMedia(constraints);
+      videoRef.current.srcObject = mediaStream.current;
+      
+      setIsScanning(true);
+
+      const result = await codeReader.current?.decodeFromVideoDevice(
+        undefined,
         videoRef.current,
-        async (result: Result | null, error?: any) => {
+        (result, error) => {
           if (result) {
-            const code = result.getText();
-            
-            // Prevent multiple scans of the same code within 1 second
-            if (code === lastScanRef.current) {
-              return;
-            }
-            
-            lastScanRef.current = code;
-            if (scanTimeoutRef.current) {
-              clearTimeout(scanTimeoutRef.current);
-            }
-            
-            scanTimeoutRef.current = setTimeout(() => {
-              lastScanRef.current = "";
-              if (containerRef.current) {
-                containerRef.current.style.border = "none";
-              }
-            }, 1000);
-
-            const item = await findItemByCode(code.trim());
-            
-            if (!item) {
-              if (containerRef.current) {
-                containerRef.current.style.border = "4px solid red";
-              }
-              return;
-            }
-
-            const transition = STATUS_TRANSITIONS[scanMode];
-            if (item.status !== transition.from) {
-              if (containerRef.current) {
-                containerRef.current.style.border = "4px solid red";
-              }
-              return;
-            }
-
-            try {
-              const updatedItem = {
-                ...item,
-                status: transition.to,
-                updatedAt: new Date()
-              };
-              await updateItem(updatedItem);
-              if (containerRef.current) {
-                containerRef.current.style.border = "4px solid green";
-              }
-            } catch (error) {
-              if (containerRef.current) {
-                containerRef.current.style.border = "4px solid red";
-              }
-            }
+            toast.success(`Code scanned: ${result.getText()}`);
+          }
+          if (error && !(error instanceof TypeError)) {
+            console.error(error);
           }
         }
       );
-    } else if (!scanning && readerRef.current) {
-      readerRef.current.stream?.getTracks().forEach(track => track.stop());
-      if (containerRef.current) {
-        containerRef.current.style.border = "none";
+
+      if (result) {
+        toast.success(`Code scanned: ${result.getText()}`);
       }
+    } catch (error) {
+      console.error("Error accessing camera:", error);
+      toast.error("Failed to access camera. Please check permissions.");
     }
-  }, [scanning, scanMode, updateItem]);
+  };
+
+  const stopScanning = () => {
+    if (mediaStream.current) {
+      mediaStream.current.getTracks().forEach(track => track.stop());
+      mediaStream.current = null;
+    }
+    setIsScanning(false);
+  };
 
   return (
-    <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm w-full max-w-lg mx-auto">
-      <h2 className="text-lg sm:text-xl font-semibold mb-4 text-center">Skenovať položky</h2>
-      
-      <div className="flex flex-col sm:flex-row gap-2 mb-4 items-center justify-center">
-        <Button
-          variant={scanMode === "naskladnenie" ? "default" : "outline"}
-          onClick={() => setScanMode("naskladnenie")}
-          className="w-full sm:w-auto text-sm sm:text-base py-2"
-        >
-          Naskladnenie
-        </Button>
-        <Button
-          variant={scanMode === "nalozenie" ? "default" : "outline"}
-          onClick={() => setScanMode("nalozenie")}
-          className="w-full sm:w-auto text-sm sm:text-base py-2"
-        >
-          Naloženie
-        </Button>
-        <Button
-          variant={scanMode === "dorucenie" ? "default" : "outline"}
-          onClick={() => setScanMode("dorucenie")}
-          className="w-full sm:w-auto text-sm sm:text-base py-2"
-        >
-          Doručenie
-        </Button>
-      </div>
-
-      <div 
-        ref={containerRef}
-        className="relative w-full max-w-sm mx-auto transition-all duration-200"
-      >
-        <Button
-          onClick={() => setScanning(!scanning)}
-          variant="outline"
-          className="mb-4 w-full"
-        >
-          {scanning ? "Zastaviť skenovanie" : "Spustiť skenovanie"}
-        </Button>
-        <video
-          ref={videoRef}
-          className="w-full aspect-square object-cover rounded-lg"
-        />
-      </div>
+    <div className="space-y-4">
+      <Card className="p-4">
+        <div className="space-y-4">
+          <div className="flex justify-center">
+            <Button
+              onClick={isScanning ? stopScanning : startScanning}
+              className="w-full sm:w-auto"
+            >
+              {isScanning ? (
+                <>
+                  <CameraOff className="mr-2 h-4 w-4" />
+                  Stop Scanning
+                </>
+              ) : (
+                <>
+                  <Camera className="mr-2 h-4 w-4" />
+                  Start Scanning
+                </>
+              )}
+            </Button>
+          </div>
+          <div className="relative aspect-video max-w-md mx-auto">
+            <video
+              ref={videoRef}
+              className="w-full h-full object-cover rounded-lg"
+              autoPlay
+              playsInline
+            />
+          </div>
+        </div>
+      </Card>
     </div>
   );
 };
