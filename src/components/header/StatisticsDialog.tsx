@@ -45,13 +45,13 @@ export const StatisticsDialog = () => {
           <BarChart className="h-5 w-5" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-3xl max-h-[80vh] overflow-hidden flex flex-col">
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle>Štatistiky zakázok</DialogTitle>
         </DialogHeader>
         <ScrollArea className="flex-grow">
-          <div className="space-y-6 p-4">
-            <Accordion type="single" collapsible className="space-y-4">
+          <div className="space-y-2 p-2">
+            <Accordion type="single" collapsible className="space-y-2">
               {Object.entries(itemsByCustomer).map(([customerId, customerItems]) => {
                 const customer = customers.find((c) => c.id === customerId);
                 if (!customer) return null;
@@ -65,31 +65,21 @@ export const StatisticsDialog = () => {
                   return acc;
                 }, {} as Record<string, number>);
 
-                // Calculate dimensions statistics
-                const dimensionsStats = customerItems.reduce(
-                  (acc, item) => {
-                    if (item.length) acc.totalLength += item.length;
-                    if (item.width) acc.totalWidth += item.width;
-                    if (item.height) acc.totalHeight += item.height;
-                    return acc;
-                  },
-                  { totalLength: 0, totalWidth: 0, totalHeight: 0 }
-                );
-
                 return (
                   <AccordionItem 
                     key={customerId} 
                     value={customerId}
-                    className="border rounded-lg p-4 bg-white"
+                    className="border rounded-lg bg-white"
                   >
-                    <AccordionTrigger className="hover:no-underline">
-                      <div className="flex flex-col items-start space-y-2 w-full">
-                        <h3 className="text-lg font-semibold">{customer.name}</h3>
-                        <div className="flex flex-wrap gap-2">
+                    <AccordionTrigger className="hover:no-underline px-3 py-2">
+                      <div className="flex flex-col items-start space-y-1 w-full">
+                        <h3 className="text-base font-medium">{customer.name}</h3>
+                        <div className="flex flex-wrap gap-1">
                           {Object.entries(statusCounts).map(([status, count]) => (
                             <Badge 
                               key={status} 
                               variant={STATUS_MAP[status as keyof typeof STATUS_MAP].variant as any}
+                              className="text-xs px-2 py-0"
                             >
                               {STATUS_MAP[status as keyof typeof STATUS_MAP].label}: {count}
                             </Badge>
@@ -98,38 +88,32 @@ export const StatisticsDialog = () => {
                       </div>
                     </AccordionTrigger>
                     <AccordionContent>
-                      <div className="mt-4 space-y-4">
-                        <div className="text-sm">
-                          <p><strong>Celková dĺžka:</strong> {dimensionsStats.totalLength} cm</p>
-                          <p><strong>Celková šírka:</strong> {dimensionsStats.totalWidth} cm</p>
-                          <p><strong>Celková výška:</strong> {dimensionsStats.totalHeight} cm</p>
-                        </div>
-                        
+                      <div className="px-3 pb-3 space-y-2">
                         <div className="space-y-2">
-                          <h4 className="font-medium">Položky:</h4>
-                          <div className="space-y-2">
-                            {customerItems.map((item) => (
-                              <div key={item.id} className="border rounded p-3 bg-gray-50">
-                                <div className="flex justify-between items-start">
-                                  <div>
-                                    <p className="font-medium">{item.code}</p>
-                                    <p className="text-sm text-gray-600">{item.description || "-"}</p>
-                                    <p className="text-sm">
-                                      Rozmery: {item.length && item.width && item.height
-                                        ? `${item.length}×${item.width}×${item.height} cm`
-                                        : "-"}
-                                    </p>
-                                    <p className="text-sm">
-                                      Vytvorené: {format(item.createdAt, "dd.MM.yyyy HH:mm")}
-                                    </p>
-                                  </div>
-                                  <Badge variant={STATUS_MAP[item.status].variant as any}>
-                                    {STATUS_MAP[item.status].label}
-                                  </Badge>
+                          {customerItems.map((item) => (
+                            <div key={item.id} className="border rounded p-2 bg-gray-50 text-sm">
+                              <div className="flex justify-between items-start gap-2">
+                                <div className="space-y-0.5">
+                                  <p className="font-medium">{item.code}</p>
+                                  <p className="text-gray-600 text-xs">{item.description || "-"}</p>
+                                  <p className="text-xs">
+                                    Rozmery: {item.length && item.width && item.height
+                                      ? `${item.length}×${item.width}×${item.height} cm`
+                                      : "-"}
+                                  </p>
+                                  <p className="text-xs text-gray-500">
+                                    {format(item.createdAt, "dd.MM.yyyy HH:mm")}
+                                  </p>
                                 </div>
+                                <Badge 
+                                  variant={STATUS_MAP[item.status].variant as any}
+                                  className="text-xs whitespace-nowrap"
+                                >
+                                  {STATUS_MAP[item.status].label}
+                                </Badge>
                               </div>
-                            ))}
-                          </div>
+                            </div>
+                          ))}
                         </div>
                       </div>
                     </AccordionContent>
