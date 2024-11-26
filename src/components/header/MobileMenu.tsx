@@ -10,8 +10,10 @@ import { CustomerDialog } from "../CustomerDialog";
 import { BackupDialog } from "./BackupDialog";
 import { StatisticsDialog } from "./StatisticsDialog";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export const MobileMenu = () => {
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [isCustomerDialogOpen, setIsCustomerDialogOpen] = useState(false);
   const [isBackupDialogOpen, setIsBackupDialogOpen] = useState(false);
@@ -35,6 +37,15 @@ export const MobileMenu = () => {
           className="w-[90vw] max-w-[250px] bg-white shadow-lg rounded-md border border-gray-200"
           sideOffset={5}
         >
+          <DropdownMenuItem 
+            className="p-3 focus:bg-transparent hover:bg-slate-50 cursor-pointer"
+            onSelect={() => {
+              setIsOpen(false);
+              navigate('/cenove-ponuky');
+            }}
+          >
+            Cenové Ponuky
+          </DropdownMenuItem>
           <DropdownMenuItem 
             className="p-3 focus:bg-transparent hover:bg-slate-50 cursor-pointer"
             onSelect={(e) => {
