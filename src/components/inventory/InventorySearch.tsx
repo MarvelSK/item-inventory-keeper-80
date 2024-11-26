@@ -2,12 +2,14 @@ import { Input } from "../ui/input";
 import { Search } from "lucide-react";
 import { Button } from "../ui/button";
 import { Grid, List } from "lucide-react";
+import { InventoryFilters } from "./InventoryFilters";
 
 interface InventorySearchProps {
   search: string;
   setSearch: (value: string) => void;
   viewMode: "list" | "grid";
   setViewMode: (mode: "list" | "grid") => void;
+  onFilterChange: (filters: any) => void;
 }
 
 export const InventorySearch = ({
@@ -15,6 +17,7 @@ export const InventorySearch = ({
   setSearch,
   viewMode,
   setViewMode,
+  onFilterChange,
 }: InventorySearchProps) => {
   return (
     <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-2">
@@ -28,6 +31,7 @@ export const InventorySearch = ({
         />
       </div>
       <div className="flex space-x-2">
+        <InventoryFilters onFilterChange={onFilterChange} />
         <Button
           variant="outline"
           size="icon"

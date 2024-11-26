@@ -11,9 +11,23 @@ import { MassImportDialog } from "./inventory/MassImportDialog";
 import { InventoryStats } from "./inventory/InventoryStats";
 import { InventoryPagination } from "./inventory/InventoryPagination";
 import { toast } from "sonner";
+import { isWithinInterval, startOfDay, endOfDay } from "date-fns";
+
+interface Filters {
+  status: string;
+  minLength?: number;
+  maxLength?: number;
+  minWidth?: number;
+  maxWidth?: number;
+  minHeight?: number;
+  maxHeight?: number;
+  dateFrom?: Date;
+  dateTo?: Date;
+}
 
 export const InventoryList = () => {
   const [search, setSearch] = useState("");
+  const [filters, setFilters] = useState<Filters>({ status: "" });
   const [sortField, setSortField] = useState<keyof Item>("code");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
@@ -42,21 +56,44 @@ export const InventoryList = () => {
     );
   }
 
-  const filteredItems = Array.isArray(items) 
-    ? items.filter(
-        (item) =>
-          item.code.toLowerCase().includes(search.toLowerCase()) ||
-          item.company.toLowerCase().includes(search.toLowerCase()) ||
-          item.customer.toLowerCase().includes(search.toLowerCase())
-      )
-    : [];
+  const filterItems = (items: Item[]) => {
+    return items.filter((item) => {
+      // Text search
+      const searchMatch =
+        item.code.toLowerCase().includes(search.toLowerCase()) ||
+        item.company.toLowerCase().includes(search.toLowerCase()) ||
+        item.customer.toLowerCase().includes(search.toLowerCase());
+
+      if (!searchMatch) return false;
+
+      // Status filter
+      if (filters.status && item.status !== filters.status) return false;
+
+      // Date range filter
+      if (filters.dateFrom || filters.dateTo) {
+        const itemDate = startOfDay(item.createdAt);
+        if (filters.dateFrom && itemDate < startOfDay(filters.dateFrom)) return false;
+        if (filters.dateTo && itemDate > endOfDay(filters.dateTo)) return false;
+      }
+
+      // Dimension filters
+      if (filters.minLength && (!item.length || item.length < filters.minLength)) return false;
+      if (filters.maxLength && (!item.length || item.length > filters.maxLength)) return false;
+      if (filters.minWidth && (!item.width || item.width < filters.minWidth)) return false;
+      if (filters.maxWidth && (!item.width || item.width > filters.maxWidth)) return false;
+      if (filters.minHeight && (!item.height || item.height < filters.minHeight)) return false;
+      if (filters.maxHeight && (!item.height || item.height > filters.maxHeight)) return false;
+
+      return true;
+    });
+  };
+
+  const filteredItems = Array.isArray(items) ? filterItems(items) : [];
 
   const sortedAndFilteredItems = [...filteredItems].sort((a, b) => {
-    // First, sort by postponed status (postponed items first)
     if (a.postponed && !b.postponed) return -1;
     if (!a.postponed && b.postponed) return 1;
     
-    // Then apply regular sorting
     const aValue = a[sortField];
     const bValue = b[sortField];
     return sortDirection === "asc"
@@ -94,7 +131,7 @@ export const InventoryList = () => {
   const handlePostpone = async (item: Item) => {
     if (!item.postponed) {
       const reason = prompt("Zadajte dôvod odloženia položky:");
-      if (!reason) return; // Cancel if no reason provided
+      if (!reason) return;
       
       const updatedItem = {
         ...item,
@@ -116,17 +153,6 @@ export const InventoryList = () => {
     }
   };
 
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handleItemsPerPageChange = (value: string) => {
-    const newItemsPerPage = parseInt(value, 10);
-    setItemsPerPage(newItemsPerPage);
-    setCurrentPage(1);
-  };
-
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
@@ -135,6 +161,7 @@ export const InventoryList = () => {
           setSearch={setSearch}
           viewMode={viewMode}
           setViewMode={setViewMode}
+          onFilterChange={setFilters}
         />
         <MassImportDialog />
       </div>
@@ -176,8 +203,14 @@ export const InventoryList = () => {
         currentPage={currentPage}
         totalPages={totalPages}
         itemsPerPage={itemsPerPage}
-        onPageChange={handlePageChange}
-        onItemsPerPageChange={handleItemsPerPageChange}
+        onPageChange={(page) => {
+          setCurrentPage(page);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
+        onItemsPerPageChange={(value) => {
+          setItemsPerPage(parseInt(value, 10));
+          setCurrentPage(1);
+        }}
       />
 
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
