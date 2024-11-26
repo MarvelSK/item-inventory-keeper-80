@@ -55,11 +55,9 @@ export const PasswordProtect = () => {
                 loading_button_label: "Prihlasovanie...",
                 password_input_placeholder: "Vaše heslo",
                 email_input_placeholder: "Váš email",
-                forgot_password_label: "Zabudli ste heslo?",
               },
               forgotten_password: {
                 email_label: "Email",
-                password_label: "Heslo",
                 button_label: "Poslať inštrukcie na reset hesla",
                 loading_button_label: "Posielanie inštrukcií...",
                 email_input_placeholder: "Váš email",
