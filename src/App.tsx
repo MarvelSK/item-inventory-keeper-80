@@ -31,22 +31,22 @@ const App = () => {
     return null;
   }
 
-  if (!isAuthenticated) {
-    return <PasswordProtect />;
-  }
-
   return (
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
+    <BrowserRouter>
+      <QueryClientProvider client={queryClient}>
         <TooltipProvider delayDuration={0}>
-          <Routes>
-            <Route path="/" element={<Index />} />
-          </Routes>
+          {!isAuthenticated ? (
+            <PasswordProtect />
+          ) : (
+            <Routes>
+              <Route path="/" element={<Index />} />
+            </Routes>
+          )}
           <Toaster />
           <Sonner />
         </TooltipProvider>
-      </BrowserRouter>
-    </QueryClientProvider>
+      </QueryClientProvider>
+    </BrowserRouter>
   );
 };
 
