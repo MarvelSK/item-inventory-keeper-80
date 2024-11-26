@@ -7,7 +7,7 @@ interface InventoryStatsProps {
 
 export const InventoryStats = ({ items }: InventoryStatsProps) => {
   const totalItems = items.length;
-  const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);
+  const inStockItems = items.filter(item => item.status === 'in_stock').length;
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
@@ -21,10 +21,10 @@ export const InventoryStats = ({ items }: InventoryStatsProps) => {
       </Card>
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Celkové množstvo</CardTitle>
+          <CardTitle className="text-sm font-medium">Položky na sklade</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{totalQuantity}</div>
+          <div className="text-2xl font-bold">{inStockItems}</div>
         </CardContent>
       </Card>
     </div>

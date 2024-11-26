@@ -15,13 +15,13 @@ const tagSchema = z.object({
 const itemSchema = z.object({
   id: z.string(),
   code: z.string(),
-  quantity: z.number(),
   company: z.string(),
   customer: z.string(),
   description: z.string().optional(),
   length: z.number().optional(),
   width: z.number().optional(),
   height: z.number().optional(),
+  status: z.enum(['waiting', 'in_stock', 'in_transit', 'delivered']),
   tags: z.array(tagSchema),
   createdAt: z.date(),
   updatedAt: z.date(),
@@ -29,13 +29,13 @@ const itemSchema = z.object({
 });
 
 const companySchema = z.object({
-  id: z.string(),
+  id: z.string().min(1),
   name: z.string(),
   deleted: z.boolean(),
 });
 
 const customerSchema = z.object({
-  id: z.string(),
+  id: z.string().min(1),
   name: z.string(),
   tags: z.array(tagSchema),
   deleted: z.boolean(),
@@ -156,13 +156,13 @@ export const importInventory = async (file: File) => {
   const parsedItems = data.map((item: any) => ({
     id: item.id || uuidv4(),
     code: item.code || '',
-    quantity: item.quantity || 0,
     company: item.company || '',
     customer: item.customer || '',
     description: item.description || '',
     length: item.length,
     width: item.width,
     height: item.height,
+    status: item.status || 'waiting',
     tags: item.tags || [],
     createdAt: new Date(item.createdAt || Date.now()),
     updatedAt: new Date(item.updatedAt || Date.now()),

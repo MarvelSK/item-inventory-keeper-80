@@ -11,7 +11,8 @@ const areItemsEqual = (item1: Item, item2: Item) => {
     item1.description === item2.description &&
     item1.length === item2.length &&
     item1.width === item2.width &&
-    item1.height === item2.height
+    item1.height === item2.height &&
+    item1.status === item2.status
   );
 };
 
