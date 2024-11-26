@@ -87,7 +87,7 @@ export const StatisticsDialog = () => {
                               toast.success("Export PDF bol spustený");
                             }}
                           >
-                            {({ loading }) => (
+                            {({ loading }) => 
                               loading ? (
                                 <Button variant="outline" size="icon" disabled>
                                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -97,7 +97,7 @@ export const StatisticsDialog = () => {
                                   <Download className="h-4 w-4" />
                                 </Button>
                               )
-                            )}
+                            }
                           </PDFDownloadLink>
                         </div>
                         <div className="flex flex-wrap gap-1">
