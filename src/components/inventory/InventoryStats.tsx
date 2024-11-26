@@ -28,7 +28,11 @@ export const InventoryStats = ({ items }: InventoryStatsProps) => {
     <div className="grid grid-cols-5 gap-2">
       <Card className="col-span-1">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 p-2">
-          <CardTitle className="text-xs font-medium">Celkom</CardTitle>
+          <CardTitle className="text-xs font-medium">
+            <Badge variant="secondary" className="text-xs">
+              Celkom
+            </Badge>
+          </CardTitle>
         </CardHeader>
         <CardContent className="p-2 pt-0">
           <div className="text-xl font-bold">{totalItems}</div>
