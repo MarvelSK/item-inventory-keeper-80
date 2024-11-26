@@ -11,7 +11,13 @@ const mapDbItemToItem = (dbItem: DbItem): Item => ({
   width: dbItem.width,
   height: dbItem.height,
   status: dbItem.status as Item['status'],
-  tags: Array.isArray(dbItem.tags) ? dbItem.tags as Tag[] : [],
+  tags: Array.isArray(dbItem.tags) 
+    ? (dbItem.tags as unknown as Tag[]).map(tag => ({
+        id: String(tag.id),
+        name: String(tag.name),
+        color: String(tag.color)
+      }))
+    : [],
   createdAt: new Date(dbItem.created_at),
   updatedAt: new Date(dbItem.updated_at),
   deleted: dbItem.deleted,
