@@ -26,17 +26,19 @@ export const InventoryListLogic = ({
 
   const filterItems = (items: Item[]) => {
     return items.filter((item) => {
-      // Apply status filter
-      if (filters.status && item.status !== filters.status) return false;
+      const matchesFilter = !filters.status || item.status === filters.status;
       
-      // Apply search filter
+      if (!matchesFilter) return false;
+      
       if (search) {
         const searchLower = search.toLowerCase();
-        return (
-          item.code.toLowerCase().includes(searchLower) ||
+        const matchesSearch = 
+          item.code?.toLowerCase().includes(searchLower) ||
           item.description?.toLowerCase().includes(searchLower) ||
-          item.status.toLowerCase().includes(searchLower)
-        );
+          item.status?.toLowerCase().includes(searchLower) ||
+          item.customer?.toLowerCase().includes(searchLower);
+        
+        return matchesSearch;
       }
       
       return true;
