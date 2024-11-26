@@ -6,13 +6,12 @@ import { toast } from 'sonner';
 const VALID_DESCRIPTIONS = ['Příslušenství', 'Plechy', 'Žaluzie', 'Vodící profily'];
 
 interface ParsedItem {
-  orderNumber: string;
-  brand: string;
+  code: string;
   description: string;
   length: number;
   width: number;
   height: number;
-  packageNumber: string;
+  orderInfo: string;
 }
 
 const parseItems = (data: string): ParsedItem[] => {
@@ -20,93 +19,54 @@ const parseItems = (data: string): ParsedItem[] => {
   const lines = data.split('\n');
   const items: ParsedItem[] = [];
   
-  let currentOrder = '';
-  let currentBrand = '';
-  let currentCustomerName = '';
+  let currentOrderInfo = '';
   
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim();
-    
-    // Skip empty lines and headers
-    if (!line || line.includes('Číslo zakázky - Značka Popis') || line.includes('Počet balíků:')) {
+  for (const line of lines) {
+    const trimmedLine = line.trim();
+    if (!trimmedLine) continue;
+
+    // Check if this is an order header line
+    if (trimmedLine.includes('24ZA')) {
+      const orderMatch = trimmedLine.match(/(24ZA\d+\s*-\s*[^]+?)(?:\s+(?:Příslušenství|Plechy|Žaluzie|Vodící profily))/);
+      if (orderMatch) {
+        currentOrderInfo = orderMatch[1].trim();
+        
+        // Parse the first item if it exists in the header line
+        const itemMatch = trimmedLine.match(new RegExp(`(${VALID_DESCRIPTIONS.join('|')})\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(24P\\d+)`));
+        if (itemMatch) {
+          items.push({
+            orderInfo: currentOrderInfo,
+            description: itemMatch[1],
+            length: parseInt(itemMatch[2]),
+            width: parseInt(itemMatch[3]),
+            height: parseInt(itemMatch[4]),
+            code: itemMatch[5]
+          });
+        }
+      }
       continue;
     }
 
-    // Check if this is an order number line (24ZA...)
-    if (line.includes('24ZA')) {
-      // Find the index of the first valid description
-      const descriptionIndex = line.split(' ').findIndex(part => VALID_DESCRIPTIONS.includes(part));
-      if (descriptionIndex === -1) continue;
+    // Skip lines that don't contain item information
+    if (trimmedLine.includes('BALÍCÍ LIST') || !trimmedLine.includes('24P')) {
+      continue;
+    }
 
-      // Everything before the description is the customer name
-      const orderParts = line.split(' ').slice(0, descriptionIndex);
-      const orderInfo = orderParts.join(' ');
-      
-      // Extract order number and brand
-      const dashIndex = orderInfo.indexOf(' - ');
-      if (dashIndex !== -1) {
-        currentOrder = orderInfo.substring(0, dashIndex).trim();
-        currentCustomerName = orderInfo;
-        currentBrand = orderInfo.substring(dashIndex + 3).trim();
-      }
-      
-      // Parse the rest of the line for item details
-      const itemParts = line.split(' ').slice(descriptionIndex);
-      const description = VALID_DESCRIPTIONS.find(desc => itemParts.includes(desc)) || '';
-      const remainingParts = itemParts.slice(itemParts.indexOf(description) + 1);
-      const [length, width, height] = remainingParts.slice(0, 3).map(Number);
-      const packageNumber = remainingParts[3] || '';
-      
-      console.log('Parsed order line:', {
-        orderNumber: currentOrder,
-        customerName: currentCustomerName,
-        description,
-        dimensions: { length, width, height },
-        packageNumber
+    // Parse regular item lines
+    const itemMatch = trimmedLine.match(new RegExp(`(${VALID_DESCRIPTIONS.join('|')})\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(24P\\d+)`));
+    if (itemMatch && currentOrderInfo) {
+      items.push({
+        orderInfo: currentOrderInfo,
+        description: itemMatch[1],
+        length: parseInt(itemMatch[2]),
+        width: parseInt(itemMatch[3]),
+        height: parseInt(itemMatch[4]),
+        code: itemMatch[5]
       });
-      
-      if (packageNumber) {
-        items.push({
-          orderNumber: currentCustomerName,
-          brand: currentBrand,
-          description,
-          length,
-          width,
-          height,
-          packageNumber
-        });
-      }
-    } else if (currentOrder && !line.includes('Počet')) {
-      // This is a continuation line with additional items
-      const parts = line.split(' ');
-      const packageNumber = parts.pop() || '';
-      const [height, width, length] = parts.slice(-3).map(Number);
-      const description = parts.slice(0, -3)
-        .find(part => VALID_DESCRIPTIONS.includes(part)) || '';
-      
-      console.log('Parsed continuation line:', {
-        orderNumber: currentOrder,
-        customerName: currentCustomerName,
-        description,
-        dimensions: { length, width, height },
-        packageNumber
-      });
-      
-      if (packageNumber) {
-        items.push({
-          orderNumber: currentCustomerName,
-          brand: currentBrand,
-          description,
-          length,
-          width,
-          height,
-          packageNumber
-        });
-      }
     }
   }
 
-  console.log('Total parsed items:', items.length);
+  console.log('Parsed items:', items);
   return items;
 };
 
@@ -114,19 +74,24 @@ export const importMassItems = async (data: string) => {
   console.log('Starting mass import of items');
   const parsedItems = parseItems(data);
   
-  // Get unique order numbers to create customers
-  const uniqueOrders = [...new Set(parsedItems.map(item => item.orderNumber))];
-  console.log('Unique orders found:', uniqueOrders);
+  if (parsedItems.length === 0) {
+    toast.error('Neboli nájdené žiadne položky na import');
+    return [];
+  }
+
+  // Create customer for the order (using the first item's order info since all items belong to same order)
+  const orderInfo = parsedItems[0].orderInfo;
+  console.log('Creating customer for order:', orderInfo);
   
-  // Create customers for each order
-  const customerMap = new Map();
-  for (const order of uniqueOrders) {
-    if (order) {
-      console.log(`Creating customer for order: ${order}`);
-      const customer = await addCustomer(order);
-      console.log('Created customer:', customer);
-      customerMap.set(order, customer.id);
-    }
+  let customerId;
+  try {
+    const customer = await addCustomer(orderInfo);
+    customerId = customer.id;
+    console.log('Created customer:', customer);
+  } catch (error) {
+    console.error('Error creating customer:', error);
+    toast.error('Chyba pri vytváraní zákazníka');
+    return [];
   }
 
   // Create items
@@ -134,34 +99,31 @@ export const importMassItems = async (data: string) => {
   const duplicates = [];
   
   for (const item of parsedItems) {
-    console.log(`Creating item for package: ${item.packageNumber}`);
-    const customerId = customerMap.get(item.orderNumber);
+    console.log(`Creating item for package: ${item.code}`);
     
-    if (customerId) {
-      try {
-        const newItem = await addItem({
-          id: uuidv4(),
-          code: item.packageNumber,
-          company: "1",
-          customer: customerId,
-          description: item.description,
-          length: item.length,
-          width: item.width,
-          height: item.height,
-          status: 'waiting', // Always set status to 'waiting' (Čaká na dovoz)
-          tags: [],
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          deleted: false
-        });
-        console.log('Created item:', newItem);
-        createdItems.push(newItem);
-      } catch (error) {
-        if (error instanceof Error && error.message === 'Item with this code already exists') {
-          duplicates.push(item.packageNumber);
-        } else {
-          throw error;
-        }
+    try {
+      const newItem = await addItem({
+        id: uuidv4(),
+        code: item.code,
+        company: "1",
+        customer: customerId,
+        description: item.description,
+        length: item.length,
+        width: item.width,
+        height: item.height,
+        status: 'waiting',
+        tags: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        deleted: false
+      });
+      console.log('Created item:', newItem);
+      createdItems.push(newItem);
+    } catch (error) {
+      if (error instanceof Error && error.message === 'Item with this code already exists') {
+        duplicates.push(item.code);
+      } else {
+        console.error('Error creating item:', error);
       }
     }
   }
