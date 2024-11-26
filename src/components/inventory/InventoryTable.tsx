@@ -38,6 +38,18 @@ export const InventoryTable = ({
                 ))}
             </TableHead>
             <TableHead
+              className="cursor-pointer hover:text-[#47acc9] min-w-[150px]"
+              onClick={() => toggleSort("status")}
+            >
+              Stav
+              {sortField === "status" &&
+                (sortDirection === "asc" ? (
+                  <ArrowUp className="inline ml-1 h-4 w-4" />
+                ) : (
+                  <ArrowDown className="inline ml-1 h-4 w-4" />
+                ))}
+            </TableHead>
+            <TableHead
               className="cursor-pointer hover:text-[#47acc9] hidden sm:table-cell min-w-[150px]"
               onClick={() => toggleSort("customer")}
             >
@@ -66,18 +78,6 @@ export const InventoryTable = ({
             </TableHead>
             <TableHead className="hidden lg:table-cell min-w-[200px]">
               Rozmery (D×Š×V cm)
-            </TableHead>
-            <TableHead
-              className="cursor-pointer hover:text-[#47acc9] hidden sm:table-cell min-w-[150px]"
-              onClick={() => toggleSort("status")}
-            >
-              Stav
-              {sortField === "status" &&
-                (sortDirection === "asc" ? (
-                  <ArrowUp className="inline ml-1 h-4 w-4" />
-                ) : (
-                  <ArrowDown className="inline ml-1 h-4 w-4" />
-                ))}
             </TableHead>
             <TableHead className="hidden sm:table-cell">Vytvorené</TableHead>
             <TableHead className="w-[100px] text-right sm:text-left">Akcie</TableHead>

@@ -57,20 +57,6 @@ export const updateItem = async (updatedItem: Item) => {
   return null;
 };
 
-export const updateItemQuantity = async (id: string, quantity: number) => {
-  console.log('Updating item quantity:', { id, quantity });
-  const item = items.find(item => item.id === id);
-  if (item) {
-    item.quantity = quantity;
-    item.updatedAt = new Date();
-    cache.set('items', items);
-    console.log('Item quantity updated successfully:', item);
-    return item;
-  }
-  console.log('Item not found for quantity update:', id);
-  return null;
-};
-
 export const deleteItem = async (id: string) => {
   console.log('Deleting item:', id);
   const item = items.find(item => item.id === id);

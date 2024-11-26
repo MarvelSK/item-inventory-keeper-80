@@ -1,201 +1,166 @@
-import { Item, Company, Customer, Tag } from '../types';
-import { z } from 'zod';
+import { Item, Company, Customer } from '../types';
+import { addItem, wipeItems } from './itemService';
+import { addCompany, wipeCompanies } from './companyService';
+import { addCustomer, wipeCustomers } from './customerService';
 import { v4 as uuidv4 } from 'uuid';
-import { items } from './itemService';
-import { companies } from './companyService';
-import { customers } from './customerService';
-import { wipeItems, wipeCompanies, wipeCustomers } from './index';
 
-const tagSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  color: z.string(),
-});
+export const exportData = () => {
+  const items = localStorage.getItem('items');
+  const companies = localStorage.getItem('companies');
+  const customers = localStorage.getItem('customers');
 
-const itemSchema = z.object({
-  id: z.string(),
-  code: z.string(),
-  company: z.string(),
-  customer: z.string(),
-  description: z.string().optional(),
-  length: z.number().optional(),
-  width: z.number().optional(),
-  height: z.number().optional(),
-  status: z.enum(['waiting', 'in_stock', 'in_transit', 'delivered']),
-  tags: z.array(tagSchema),
-  createdAt: z.date(),
-  updatedAt: z.date(),
-  deleted: z.boolean(),
-});
-
-const companySchema = z.object({
-  id: z.string().min(1),
-  name: z.string(),
-  deleted: z.boolean(),
-});
-
-const customerSchema = z.object({
-  id: z.string().min(1),
-  name: z.string(),
-  tags: z.array(tagSchema),
-  deleted: z.boolean(),
-});
-
-export const backupAll = async () => {
-  const allData = {
-    items,
-    companies,
-    customers
+  const data = {
+    items: items ? JSON.parse(items) : [],
+    companies: companies ? JSON.parse(companies) : [],
+    customers: customers ? JSON.parse(customers) : [],
   };
-  
-  const csvContent = JSON.stringify(allData);
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = `backup_${new Date().toISOString()}.csv`;
+  link.href = url;
+  link.download = `backup-${new Date().toISOString()}.json`;
+  document.body.appendChild(link);
   link.click();
-  URL.revokeObjectURL(link.href);
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
 };
 
-export const importAll = async (file: File) => {
-  const text = await file.text();
-  const data = JSON.parse(text);
-
-  if (data.items) {
-    const parsedItems = data.items.map((item: any) => ({
-      id: item.id || uuidv4(),
-      code: item.code || '',
-      quantity: item.quantity || 0,
-      company: item.company || '',
-      customer: item.customer || '',
-      description: item.description || '',
-      length: item.length,
-      width: item.width,
-      height: item.height,
-      tags: item.tags || [],
-      createdAt: new Date(item.createdAt || Date.now()),
-      updatedAt: new Date(item.updatedAt || Date.now()),
-      deleted: false
-    } as Item));
-    
-    const validatedItems = itemSchema.array().parse(parsedItems);
-    items.push(...validatedItems);
-  }
-
-  if (data.companies) {
-    const parsedCompanies = data.companies.map((company: any) => ({
-      id: company.id || uuidv4(),
-      name: company.name || '',
-      deleted: false
-    } as Company));
-    
-    const validatedCompanies = companySchema.array().parse(parsedCompanies);
-    companies.push(...validatedCompanies);
-  }
-
-  if (data.customers) {
-    const parsedCustomers = data.customers.map((customer: any) => ({
-      id: customer.id || uuidv4(),
-      name: customer.name || '',
-      tags: customer.tags || [],
-      deleted: false
-    } as Customer));
-    
-    const validatedCustomers = customerSchema.array().parse(parsedCustomers);
-    customers.push(...validatedCustomers);
-  }
-};
-
-export const wipeAll = async () => {
+export const importData = async (jsonData: string) => {
   try {
-    await Promise.all([
-      wipeItems(),
-      wipeCompanies(),
-      wipeCustomers()
-    ]);
-    console.log('All data wiped successfully');
+    const data = JSON.parse(jsonData);
+    
+    // Validate data structure
+    if (!data || typeof data !== 'object') {
+      throw new Error('Invalid data format');
+    }
+
+    // Process items
+    if (Array.isArray(data.items)) {
+      await wipeItems();
+      for (const item of data.items) {
+        const newItem: Item = {
+          id: item.id || uuidv4(),
+          code: item.code || '',
+          company: item.company || '',
+          customer: item.customer || '',
+          description: item.description || '',
+          length: item.length || undefined,
+          width: item.width || undefined,
+          height: item.height || undefined,
+          status: item.status || 'waiting',
+          tags: Array.isArray(item.tags) ? item.tags : [],
+          createdAt: new Date(item.createdAt || Date.now()),
+          updatedAt: new Date(item.updatedAt || Date.now()),
+          deleted: item.deleted || false
+        };
+        await addItem(newItem);
+      }
+    }
+
+    // Process companies
+    if (Array.isArray(data.companies)) {
+      await wipeCompanies();
+      for (const company of data.companies) {
+        const newCompany: Company = {
+          id: company.id || uuidv4(),
+          name: company.name || '',
+          deleted: company.deleted || false
+        };
+        await addCompany(newCompany);
+      }
+    }
+
+    // Process customers
+    if (Array.isArray(data.customers)) {
+      await wipeCustomers();
+      for (const customer of data.customers) {
+        const newCustomer: Customer = {
+          id: customer.id || uuidv4(),
+          name: customer.name || '',
+          tags: Array.isArray(customer.tags) ? customer.tags.map((tag: any) => ({
+            id: tag.id || uuidv4(),
+            name: tag.name || '',
+            color: tag.color || '#000000'
+          })) : [],
+          deleted: customer.deleted || false
+        };
+        await addCustomer(newCustomer);
+      }
+    }
+
+    return true;
   } catch (error) {
-    console.error('Error wiping data:', error);
+    console.error('Error importing data:', error);
     throw error;
   }
 };
 
-export const backupInventory = async (items: Item[]) => {
-  const csvContent = JSON.stringify(items);
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = `inventory_${new Date().toISOString()}.csv`;
-  link.click();
-  URL.revokeObjectURL(link.href);
-};
+export const importLegacyData = async (jsonData: string) => {
+  try {
+    const data = JSON.parse(jsonData);
+    
+    if (!data || typeof data !== 'object') {
+      throw new Error('Invalid data format');
+    }
 
-export const backupCompanies = async (companies: Company[]) => {
-  const csvContent = JSON.stringify(companies);
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = `companies_${new Date().toISOString()}.csv`;
-  link.click();
-  URL.revokeObjectURL(link.href);
-};
+    // Process items
+    if (Array.isArray(data.items)) {
+      await wipeItems();
+      for (const item of data.items) {
+        const newItem: Item = {
+          id: item.id || uuidv4(),
+          code: item.code || '',
+          company: item.company || '',
+          customer: item.customer || '',
+          description: item.description || '',
+          length: item.length || undefined,
+          width: item.width || undefined,
+          height: item.height || undefined,
+          status: 'waiting',
+          tags: Array.isArray(item.tags) ? item.tags : [],
+          createdAt: new Date(item.createdAt || Date.now()),
+          updatedAt: new Date(item.updatedAt || Date.now()),
+          deleted: item.deleted || false
+        };
+        await addItem(newItem);
+      }
+    }
 
-export const backupCustomers = async (customers: Customer[]) => {
-  const csvContent = JSON.stringify(customers);
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = `customers_${new Date().toISOString()}.csv`;
-  link.click();
-  URL.revokeObjectURL(link.href);
-};
+    // Process companies
+    if (Array.isArray(data.companies)) {
+      await wipeCompanies();
+      for (const company of data.companies) {
+        const newCompany: Company = {
+          id: company.id || uuidv4(),
+          name: company.name || '',
+          deleted: company.deleted || false
+        };
+        await addCompany(newCompany);
+      }
+    }
 
-export const importInventory = async (file: File) => {
-  const text = await file.text();
-  const data = JSON.parse(text);
-  const parsedItems = data.map((item: any) => ({
-    id: item.id || uuidv4(),
-    code: item.code || '',
-    company: item.company || '',
-    customer: item.customer || '',
-    description: item.description || '',
-    length: item.length,
-    width: item.width,
-    height: item.height,
-    status: item.status || 'waiting',
-    tags: item.tags || [],
-    createdAt: new Date(item.createdAt || Date.now()),
-    updatedAt: new Date(item.updatedAt || Date.now()),
-    deleted: false
-  } as Item));
-  
-  const validatedItems = itemSchema.array().parse(parsedItems);
-  items.push(...validatedItems);
-};
+    // Process customers
+    if (Array.isArray(data.customers)) {
+      await wipeCustomers();
+      for (const customer of data.customers) {
+        const newCustomer: Customer = {
+          id: customer.id || uuidv4(),
+          name: customer.name || '',
+          tags: Array.isArray(customer.tags) ? customer.tags.map((tag: any) => ({
+            id: tag.id || uuidv4(),
+            name: tag.name || '',
+            color: tag.color || '#000000'
+          })) : [],
+          deleted: customer.deleted || false
+        };
+        await addCustomer(newCustomer);
+      }
+    }
 
-export const importCompanies = async (file: File) => {
-  const text = await file.text();
-  const data = JSON.parse(text);
-  const parsedCompanies = data.map((company: any) => ({
-    id: company.id || uuidv4(),
-    name: company.name || '',
-    deleted: false
-  } as Company));
-  
-  const validatedCompanies = companySchema.array().parse(parsedCompanies);
-  companies.push(...validatedCompanies);
-};
-
-export const importCustomers = async (file: File) => {
-  const text = await file.text();
-  const data = JSON.parse(text);
-  const parsedCustomers = data.map((customer: any) => ({
-    id: customer.id || uuidv4(),
-    name: customer.name || '',
-    tags: customer.tags || [],
-    deleted: false
-  } as Customer));
-  
-  const validatedCustomers = customerSchema.array().parse(parsedCustomers);
-  customers.push(...validatedCustomers);
+    return true;
+  } catch (error) {
+    console.error('Error importing legacy data:', error);
+    throw error;
+  }
 };

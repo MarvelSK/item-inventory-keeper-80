@@ -33,6 +33,7 @@ export const InventoryListItem = ({ item, onEdit, onDelete }: InventoryListItemP
   
   const customer = customers.find((c) => c.id === item.customer);
   const customerName = customer?.name || "Unknown";
+  const statusInfo = STATUS_MAP[item.status];
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 640);
@@ -54,12 +55,13 @@ export const InventoryListItem = ({ item, onEdit, onDelete }: InventoryListItemP
     return "-";
   };
 
-  const statusInfo = STATUS_MAP[item.status];
-
   return (
     <>
       <TableRow className="group cursor-pointer" onClick={handleRowClick}>
         <TableCell className="font-medium">{item.code}</TableCell>
+        <TableCell>
+          <Badge variant={statusInfo.variant as any}>{statusInfo.label}</Badge>
+        </TableCell>
         <TableCell className="hidden sm:table-cell">{customerName}</TableCell>
         <TableCell className="hidden sm:table-cell">
           <div className="flex flex-wrap gap-1">
@@ -71,9 +73,6 @@ export const InventoryListItem = ({ item, onEdit, onDelete }: InventoryListItemP
         <TableCell className="hidden lg:table-cell">{item.description || "-"}</TableCell>
         <TableCell className="hidden lg:table-cell">
           {formatDimensions(item)}
-        </TableCell>
-        <TableCell className="hidden sm:table-cell">
-          <Badge variant={statusInfo.variant as any}>{statusInfo.label}</Badge>
         </TableCell>
         <TableCell className="hidden sm:table-cell">
           {format(item.createdAt, "dd.MM.yyyy HH:mm")}
@@ -128,8 +127,8 @@ export const InventoryListItem = ({ item, onEdit, onDelete }: InventoryListItemP
             <div className="space-y-4">
               <div className="space-y-2">
                 <p><strong>Kód:</strong> {item.code}</p>
-                <p><strong>Zákazník:</strong> {customerName}</p>
                 <p><strong>Stav:</strong> <Badge variant={statusInfo.variant as any}>{statusInfo.label}</Badge></p>
+                <p><strong>Zákazník:</strong> {customerName}</p>
                 {customer?.tags && customer.tags.length > 0 && (
                   <div>
                     <strong>Štítky zákazníka:</strong>
