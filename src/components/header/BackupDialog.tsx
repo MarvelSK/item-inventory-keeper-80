@@ -7,11 +7,12 @@ import {
   DialogTrigger,
 } from "../ui/dialog";
 import { DatabaseBackup } from "lucide-react";
-import { backupAll } from "@/lib/services/backupService";
-import { importAll } from "@/lib/services/backupService";
-import { wipeAll } from "@/lib/services/backupService";
+import { backupAll, importAll, wipeAll } from "@/lib/services/backupService";
 import { toast } from "sonner";
 import { Upload, Save, Trash2 } from "lucide-react";
+import { useItems } from "@/hooks/useItems";
+import { useCompanies } from "@/hooks/useCompanies";
+import { useCustomers } from "@/hooks/useCustomers";
 
 interface BackupDialogProps {
   open?: boolean;
@@ -19,9 +20,13 @@ interface BackupDialogProps {
 }
 
 export const BackupDialog = ({ open, onOpenChange }: BackupDialogProps) => {
+  const { items } = useItems();
+  const { companies } = useCompanies();
+  const { customers } = useCustomers();
+
   const handleBackup = async () => {
     try {
-      await backupAll();
+      await backupAll(items, companies, customers);
       toast.success("Záloha bola úspešne vytvorená");
     } catch (error) {
       toast.error("Chyba pri vytváraní zálohy");
@@ -80,7 +85,7 @@ export const BackupDialog = ({ open, onOpenChange }: BackupDialogProps) => {
               onClick={() => {
                 const input = document.createElement('input');
                 input.type = 'file';
-                input.accept = '.csv';
+                input.accept = '.json';
                 input.onchange = (e) => {
                   const file = (e.target as HTMLInputElement).files?.[0];
                   if (file) handleImport(file);

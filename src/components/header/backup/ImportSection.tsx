@@ -26,7 +26,7 @@ export const ImportSection = () => {
           toast.success("Zakázky boli úspešne importované");
           break;
       }
-      window.location.reload(); // Refresh the page to show imported data
+      window.location.reload();
     } catch (error) {
       toast.error(`Chyba pri importovaní: ${error}`);
     }
@@ -47,7 +47,7 @@ export const ImportSection = () => {
           type="file"
           ref={inventoryFileRef}
           className="hidden"
-          accept=".csv"
+          accept=".json"
           onChange={(e) => {
             const file = e.target.files?.[0];
             if (file) handleImport('inventory', file);
@@ -67,7 +67,7 @@ export const ImportSection = () => {
           type="file"
           ref={companiesFileRef}
           className="hidden"
-          accept=".csv"
+          accept=".json"
           onChange={(e) => {
             const file = e.target.files?.[0];
             if (file) handleImport('companies', file);
@@ -87,7 +87,7 @@ export const ImportSection = () => {
           type="file"
           ref={customersFileRef}
           className="hidden"
-          accept=".csv"
+          accept=".json"
           onChange={(e) => {
             const file = e.target.files?.[0];
             if (file) handleImport('customers', file);
