@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Item } from "@/lib/types";
 import { toast } from "sonner";
+import { customers } from "@/lib/inventory";
 
 interface InventoryListLogicProps {
   items: Item[];
@@ -26,19 +27,25 @@ export const InventoryListLogic = ({
 
   const filterItems = (items: Item[]) => {
     return items.filter((item) => {
+      // First check status filter
       const matchesFilter = !filters.status || item.status === filters.status;
-      
       if (!matchesFilter) return false;
       
+      // Then apply search if there is a search term
       if (search) {
-        const searchLower = search.toLowerCase();
-        const matchesSearch = 
-          item.code?.toLowerCase().includes(searchLower) ||
-          item.description?.toLowerCase().includes(searchLower) ||
-          item.status?.toLowerCase().includes(searchLower) ||
-          item.customer?.toLowerCase().includes(searchLower);
+        const searchLower = search.toLowerCase().trim();
         
-        return matchesSearch;
+        // Get customer name for the item
+        const customer = customers.find(c => c.id === item.customer);
+        const customerName = customer?.name?.toLowerCase() || "";
+        
+        // Check if search matches any of the relevant fields
+        return (
+          item.code?.toLowerCase().includes(searchLower) ||
+          customerName.includes(searchLower) ||
+          item.description?.toLowerCase().includes(searchLower) ||
+          item.status?.toLowerCase().includes(searchLower)
+        );
       }
       
       return true;

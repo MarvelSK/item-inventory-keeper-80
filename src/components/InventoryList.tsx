@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Item } from "@/lib/types";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "./ui/alert-dialog";
 import { EditItemDialog } from "./inventory/EditItemDialog";
 import { InventoryTable } from "./inventory/InventoryTable";
@@ -19,7 +18,7 @@ export const InventoryList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(50);
 
-  const { items, isLoading, error, mutateAsync: updateItem, deleteItem } = useItems();
+  const { items, isLoading, error, updateItem, deleteItem } = useItems();
 
   const {
     paginatedItems,
@@ -32,6 +31,7 @@ export const InventoryList = () => {
     handleEdit,
     handlePostpone,
     handleFilterChange,
+    handleSearchChange,
     sortField,
     sortDirection,
     toggleSort,
@@ -63,7 +63,10 @@ export const InventoryList = () => {
     <div className="space-y-4">
       <InventoryHeader
         search={search}
-        setSearch={setSearch}
+        setSearch={(value) => {
+          setSearch(value);
+          handleSearchChange(value);
+        }}
         viewMode={viewMode}
         setViewMode={setViewMode}
         onFilterChange={handleFilterChange}
