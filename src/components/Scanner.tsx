@@ -118,7 +118,7 @@ export const Scanner = () => {
     <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm w-full max-w-lg mx-auto">
       <h2 className="text-lg sm:text-xl font-semibold mb-4 text-center">Skenovať položky</h2>
       
-      <div className="flex flex-col sm:flex-row gap-2 mb-4">
+      <div className="flex flex-col sm:flex-row gap-2 mb-4 items-center justify-center">
         <Button
           variant={scanMode === "naskladnenie" ? "default" : "outline"}
           onClick={() => setScanMode("naskladnenie")}
