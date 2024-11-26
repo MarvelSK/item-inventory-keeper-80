@@ -2,6 +2,27 @@ import { supabase } from "@/integrations/supabase/client";
 import { Customer, Tag } from "../types";
 import { Json } from "@/integrations/supabase/types";
 
+const isValidTag = (tag: any): tag is Tag => {
+  return typeof tag === 'object' 
+    && tag !== null 
+    && typeof tag.id === 'string'
+    && typeof tag.name === 'string'
+    && typeof tag.color === 'string';
+};
+
+const convertJsonToTags = (json: Json | null): Tag[] => {
+  if (!Array.isArray(json)) return [];
+  return json.filter(isValidTag);
+};
+
+const convertTagsToJson = (tags: Tag[]): Json => {
+  return tags.map(tag => ({
+    id: tag.id,
+    name: tag.name,
+    color: tag.color
+  }));
+};
+
 export const getActiveCustomers = async (): Promise<Customer[]> => {
   const { data, error } = await supabase
     .from('customers')
@@ -13,7 +34,7 @@ export const getActiveCustomers = async (): Promise<Customer[]> => {
   
   return data.map(customer => ({
     ...customer,
-    tags: (customer.tags as Json[] || []).map(tag => tag as Tag),
+    tags: convertJsonToTags(customer.tags),
   }));
 };
 
@@ -27,7 +48,7 @@ export const addCustomer = async (name: string): Promise<Customer> => {
   if (error) throw error;
   return {
     ...data,
-    tags: (data.tags as Json[] || []).map(tag => tag as Tag),
+    tags: convertJsonToTags(data.tags),
   };
 };
 
@@ -36,7 +57,7 @@ export const updateCustomer = async (customer: Customer): Promise<Customer> => {
     .from('customers')
     .update({
       name: customer.name,
-      tags: customer.tags as Json[],
+      tags: convertTagsToJson(customer.tags),
       updated_at: new Date().toISOString(),
     })
     .eq('id', customer.id)
@@ -46,7 +67,7 @@ export const updateCustomer = async (customer: Customer): Promise<Customer> => {
   if (error) throw error;
   return {
     ...data,
-    tags: (data.tags as Json[] || []).map(tag => tag as Tag),
+    tags: convertJsonToTags(data.tags),
   };
 };
 
