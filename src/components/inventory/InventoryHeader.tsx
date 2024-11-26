@@ -17,8 +17,8 @@ export const InventoryHeader = ({
   onFilterChange,
 }: InventoryHeaderProps) => {
   return (
-    <div className="space-y-2">
-      <div className="flex items-center space-x-2">
+    <div className="space-y-4">
+      <div className="flex flex-col w-full sm:flex-row sm:items-center sm:space-x-2">
         <InventorySearch
           search={search}
           setSearch={setSearch}
