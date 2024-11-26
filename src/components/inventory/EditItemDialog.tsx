@@ -54,17 +54,6 @@ export const EditItemDialog = ({ item, isOpen, onOpenChange, onSave }: EditItemD
               setEditedItem({ ...editedItem, code: e.target.value })
             }
           />
-          <Input
-            type="number"
-            placeholder="Množstvo"
-            value={editedItem.quantity}
-            onChange={(e) =>
-              setEditedItem({
-                ...editedItem,
-                quantity: parseInt(e.target.value) || 0,
-              })
-            }
-          />
           <Select 
             value={editedItem.company} 
             onValueChange={(value) => setEditedItem({ ...editedItem, company: value })}

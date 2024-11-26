@@ -38,18 +38,6 @@ export const InventoryTable = ({
                 ))}
             </TableHead>
             <TableHead
-              className="cursor-pointer hover:text-[#47acc9] min-w-[100px]"
-              onClick={() => toggleSort("quantity")}
-            >
-              Množstvo
-              {sortField === "quantity" &&
-                (sortDirection === "asc" ? (
-                  <ArrowUp className="inline ml-1 h-4 w-4" />
-                ) : (
-                  <ArrowDown className="inline ml-1 h-4 w-4" />
-                ))}
-            </TableHead>
-            <TableHead
               className="cursor-pointer hover:text-[#47acc9] hidden sm:table-cell min-w-[150px]"
               onClick={() => toggleSort("customer")}
             >

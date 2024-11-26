@@ -18,7 +18,6 @@ export const InventoryGridItem = ({ item, onEdit, onDelete }: InventoryGridItemP
     <div className="p-4 border rounded-lg space-y-2">
       <div className="font-medium">{item.code}</div>
       <div className="text-sm text-gray-500">
-        <div>Množstvo: {item.quantity}</div>
         <div>Spoločnosť: {company}</div>
         <div>Zákazník: {customer}</div>
         <div>Popis: {item.description || "-"}</div>

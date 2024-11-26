@@ -50,7 +50,6 @@ export const InventoryListItem = ({ item, onEdit, onDelete }: InventoryListItemP
     <>
       <TableRow className="group cursor-pointer" onClick={handleRowClick}>
         <TableCell className="font-medium">{item.code}</TableCell>
-        <TableCell>{item.quantity}</TableCell>
         <TableCell className="hidden sm:table-cell">{customerName}</TableCell>
         <TableCell className="hidden sm:table-cell">
           <div className="flex flex-wrap gap-1">
@@ -116,7 +115,6 @@ export const InventoryListItem = ({ item, onEdit, onDelete }: InventoryListItemP
             <div className="space-y-4">
               <div className="space-y-2">
                 <p><strong>Kód:</strong> {item.code}</p>
-                <p><strong>Množstvo:</strong> {item.quantity}</p>
                 <p><strong>Zákazník:</strong> {customerName}</p>
                 {customer?.tags && customer.tags.length > 0 && (
                   <div>

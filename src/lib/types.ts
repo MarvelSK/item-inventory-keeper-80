@@ -1,7 +1,6 @@
 export interface Item {
   id: string;
   code: string;
-  quantity: number;
   company: string;
   customer: string;
   description?: string;
