@@ -2,15 +2,17 @@ import { useEffect, useRef, useState } from "react";
 import { BrowserMultiFormatReader } from "@zxing/browser";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
-import { toast } from "sonner";
 import { Camera, CameraOff } from "lucide-react";
 import { useItems } from "@/hooks/useItems";
 
 type ScanMode = "receiving" | "loading" | "delivery";
+type ScanStatus = "none" | "success" | "error";
 
 export const Scanner = () => {
   const [isScanning, setIsScanning] = useState(false);
   const [mode, setMode] = useState<ScanMode>("receiving");
+  const [scanStatus, setScanStatus] = useState<ScanStatus>("none");
+  const [canScan, setCanScan] = useState(true);
   const videoRef = useRef<HTMLVideoElement>(null);
   const codeReader = useRef<BrowserMultiFormatReader>();
   const mediaStream = useRef<MediaStream | null>(null);
@@ -26,48 +28,54 @@ export const Scanner = () => {
   }, []);
 
   const handleScannedCode = async (code: string) => {
+    if (!canScan) return;
+    
+    setCanScan(false);
+    setTimeout(() => setCanScan(true), 1000);
+
     const item = items.find(item => item.code === code);
     if (!item) {
-      toast.error(`Položka s kódom ${code} nebola nájdená`);
+      setScanStatus("error");
+      setTimeout(() => setScanStatus("none"), 1000);
       return;
     }
 
     let newStatus;
-    let message;
+    let success = false;
 
     switch (mode) {
       case "receiving":
-        if (item.status !== "waiting") {
-          toast.error("Položka nie je v stave 'Čaká na dovoz'");
-          return;
+        if (item.status === "waiting") {
+          newStatus = "in_stock";
+          success = true;
         }
-        newStatus = "in_stock";
-        message = "Položka bola naskladnená";
         break;
       case "loading":
-        if (item.status !== "in_stock") {
-          toast.error("Položka nie je v stave 'Na sklade'");
-          return;
+        if (item.status === "in_stock") {
+          newStatus = "in_transit";
+          success = true;
         }
-        newStatus = "in_transit";
-        message = "Položka bola naložená";
         break;
       case "delivery":
-        if (item.status !== "in_transit") {
-          toast.error("Položka nie je v stave 'V preprave'");
-          return;
+        if (item.status === "in_transit") {
+          newStatus = "delivered";
+          success = true;
         }
-        newStatus = "delivered";
-        message = "Položka bola doručená";
         break;
     }
 
-    try {
-      await updateItem({ ...item, status: newStatus, updatedAt: new Date() });
-      toast.success(message);
-    } catch (error) {
-      toast.error("Chyba pri aktualizácii položky");
+    if (success && newStatus) {
+      try {
+        await updateItem({ ...item, status: newStatus, updatedAt: new Date() });
+        setScanStatus("success");
+      } catch (error) {
+        setScanStatus("error");
+      }
+    } else {
+      setScanStatus("error");
     }
+
+    setTimeout(() => setScanStatus("none"), 1000);
   };
 
   const startScanning = async () => {
@@ -97,7 +105,6 @@ export const Scanner = () => {
       );
     } catch (error) {
       console.error("Error accessing camera:", error);
-      toast.error("Failed to access camera. Please check permissions.");
     }
   };
 
@@ -114,6 +121,14 @@ export const Scanner = () => {
       case "receiving": return "Naskladnenie";
       case "loading": return "Naloženie";
       case "delivery": return "Doručenie";
+    }
+  };
+
+  const getScannerBorderColor = () => {
+    switch (scanStatus) {
+      case "success": return "border-green-500";
+      case "error": return "border-red-500";
+      default: return "border-gray-200";
     }
   };
 
@@ -153,7 +168,7 @@ export const Scanner = () => {
           <div className="relative aspect-video max-w-md mx-auto">
             <video
               ref={videoRef}
-              className="w-full h-full object-cover rounded-lg"
+              className={`w-full h-full object-cover rounded-lg border-4 transition-colors ${getScannerBorderColor()}`}
               autoPlay
               playsInline
             />
