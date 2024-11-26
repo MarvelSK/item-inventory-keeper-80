@@ -17,12 +17,13 @@ import { useCustomers } from "@/hooks/useCustomers";
 import { Item } from "@/lib/types";
 import { useState, useEffect } from "react";
 import { Textarea } from "../ui/textarea";
+import { Loader2 } from "lucide-react";
 
 interface EditItemDialogProps {
   item: Item | null;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (item: Item) => void;
+  onSave: (item: Item) => Promise<void>;
 }
 
 const STATUS_OPTIONS = [
@@ -34,6 +35,7 @@ const STATUS_OPTIONS = [
 
 export const EditItemDialog = ({ item, isOpen, onOpenChange, onSave }: EditItemDialogProps) => {
   const [editedItem, setEditedItem] = useState<Item | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const { customers } = useCustomers();
 
   useEffect(() => {
@@ -44,8 +46,16 @@ export const EditItemDialog = ({ item, isOpen, onOpenChange, onSave }: EditItemD
 
   if (!editedItem) return null;
 
-  const handleSave = () => {
-    onSave(editedItem);
+  const handleSave = async () => {
+    try {
+      setIsLoading(true);
+      await onSave(editedItem);
+      onOpenChange(false);
+    } catch (error) {
+      console.error('Error saving item:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -61,10 +71,12 @@ export const EditItemDialog = ({ item, isOpen, onOpenChange, onSave }: EditItemD
             onChange={(e) =>
               setEditedItem({ ...editedItem, code: e.target.value })
             }
+            disabled={isLoading}
           />
           <Select 
             value={editedItem.customer} 
             onValueChange={(value) => setEditedItem({ ...editedItem, customer: value })}
+            disabled={isLoading}
           >
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Vybrať zákazníka" />
@@ -82,6 +94,7 @@ export const EditItemDialog = ({ item, isOpen, onOpenChange, onSave }: EditItemD
             onValueChange={(value: 'waiting' | 'in_stock' | 'in_transit' | 'delivered') => 
               setEditedItem({ ...editedItem, status: value })
             }
+            disabled={isLoading}
           >
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Vybrať stav" />
@@ -100,6 +113,7 @@ export const EditItemDialog = ({ item, isOpen, onOpenChange, onSave }: EditItemD
             onChange={(e) =>
               setEditedItem({ ...editedItem, description: e.target.value })
             }
+            disabled={isLoading}
           />
           <div className="grid grid-cols-3 gap-2">
             <Input
@@ -112,6 +126,7 @@ export const EditItemDialog = ({ item, isOpen, onOpenChange, onSave }: EditItemD
                   length: parseInt(e.target.value) || undefined,
                 })
               }
+              disabled={isLoading}
             />
             <Input
               type="number"
@@ -123,6 +138,7 @@ export const EditItemDialog = ({ item, isOpen, onOpenChange, onSave }: EditItemD
                   width: parseInt(e.target.value) || undefined,
                 })
               }
+              disabled={isLoading}
             />
             <Input
               type="number"
@@ -134,13 +150,22 @@ export const EditItemDialog = ({ item, isOpen, onOpenChange, onSave }: EditItemD
                   height: parseInt(e.target.value) || undefined,
                 })
               }
+              disabled={isLoading}
             />
           </div>
           <Button
             onClick={handleSave}
             className="w-full bg-[#212490] hover:bg-[#47acc9]"
+            disabled={isLoading}
           >
-            Uložiť
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Ukladám...
+              </>
+            ) : (
+              'Uložiť'
+            )}
           </Button>
         </div>
       </DialogContent>

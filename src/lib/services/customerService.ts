@@ -19,7 +19,7 @@ const convertTagsToJson = (tags: Tag[]): Json => {
   return tags.map(tag => ({
     id: tag.id,
     name: tag.name,
-    color: tag.color
+    color: tag.color || '#D2D2D2' // Default color if none provided
   }));
 };
 
@@ -41,7 +41,10 @@ export const getActiveCustomers = async (): Promise<Customer[]> => {
 export const addCustomer = async (name: string): Promise<Customer> => {
   const { data, error } = await supabase
     .from('customers')
-    .insert([{ name, tags: [] }])
+    .insert([{ 
+      name, 
+      tags: [] 
+    }])
     .select()
     .single();
 
@@ -57,7 +60,7 @@ export const updateCustomer = async (customer: Customer): Promise<Customer> => {
     .from('customers')
     .update({
       name: customer.name,
-      tags: convertTagsToJson(customer.tags),
+      tags: convertTagsToJson(customer.tags || []),
       updated_at: new Date().toISOString(),
     })
     .eq('id', customer.id)
