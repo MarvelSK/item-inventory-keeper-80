@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Button } from "../../ui/button";
 import { Trash2 } from "lucide-react";
-import { wipeAll } from "@/lib/services/backupService";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -31,23 +30,24 @@ export const WipeSection = () => {
 
   const handleWipePreservePostponed = async () => {
     try {
-      // Get all postponed items to preserve their customers
-      const { data: postponedItems } = await supabase
-        .from('items')
-        .select('customer')
-        .eq('postponed', true)
-        .eq('deleted', false);
-
-      const customersToPreserve = [...new Set(postponedItems?.map(item => item.customer) || [])];
-
-      // Delete non-postponed items
+      // First, mark all non-postponed items as deleted
       await supabase
         .from('items')
         .update({ deleted: true })
         .eq('postponed', false)
         .eq('deleted', false);
 
-      // Delete customers not associated with postponed items
+      // Get all customers that have postponed items
+      const { data: customersWithPostponedItems } = await supabase
+        .from('items')
+        .select('customer')
+        .eq('postponed', true)
+        .eq('deleted', false);
+
+      // Extract unique customer IDs
+      const customersToPreserve = [...new Set(customersWithPostponedItems?.map(item => item.customer) || [])];
+
+      // Mark all other customers as deleted
       if (customersToPreserve.length > 0) {
         await supabase
           .from('customers')
@@ -55,6 +55,7 @@ export const WipeSection = () => {
           .not('id', 'in', `(${customersToPreserve.join(',')})`)
           .eq('deleted', false);
       } else {
+        // If no customers to preserve, mark all as deleted
         await supabase
           .from('customers')
           .update({ deleted: true })
@@ -64,6 +65,7 @@ export const WipeSection = () => {
       toast.success("Systém bol vymazaný (odložené položky boli zachované)");
       window.location.reload();
     } catch (error) {
+      console.error('Error:', error);
       toast.error("Chyba pri vymazávaní dát");
     }
   };
