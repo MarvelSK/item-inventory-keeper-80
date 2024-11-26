@@ -1,9 +1,11 @@
 import { v4 as uuidv4 } from 'uuid';
 import { addCustomer } from './customerService';
-import { addItem } from './itemService';
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from 'sonner';
+import { Item } from '../types';
 
 const VALID_DESCRIPTIONS = ['Příslušenství', 'Plechy', 'Žaluzie', 'Vodící profily'];
+const BATCH_SIZE = 50; // Process items in batches of 50
 
 interface ParsedItem {
   code: string;
@@ -75,17 +77,29 @@ const parseItems = (data: string): ParsedItem[] => {
   return items;
 };
 
-export const importMassItems = async (data: string) => {
+const insertItemsBatch = async (items: Item[]) => {
+  const { error } = await supabase
+    .from('items')
+    .insert(items);
+
+  if (error) throw error;
+};
+
+export const importMassItems = async (
+  data: string, 
+  onProgress: (stage: string, progress: number) => void
+) => {
   console.log('Starting mass import of items');
-  const parsedItems = parseItems(data);
+  onProgress('Parsing items', 0);
   
+  const parsedItems = parseItems(data);
   if (parsedItems.length === 0) {
     toast.error('Neboli nájdené žiadne položky na import');
     return [];
   }
 
-  const createdItems = [];
-  const duplicates = [];
+  const createdItems: Item[] = [];
+  const duplicates: string[] = [];
   const orderGroups = new Map<string, ParsedItem[]>();
 
   // Group items by order
@@ -95,48 +109,73 @@ export const importMassItems = async (data: string) => {
     orderGroups.set(item.orderInfo, items);
   });
 
+  const totalOrders = orderGroups.size;
+  let processedOrders = 0;
+
   // Process each order
   for (const [orderInfo, items] of orderGroups) {
-    console.log(`Processing order: ${orderInfo} with ${items.length} items`);
-    
     try {
+      onProgress('Creating customers', (processedOrders / totalOrders) * 100);
+      
       // Create customer for the order
       const customer = await addCustomer(orderInfo);
-      console.log('Created customer:', customer);
-
-      // Create items for the order
+      
+      // Prepare items for batch insert
+      const itemBatches: Item[][] = [];
+      const batchItems: Item[] = [];
+      
       for (const item of items) {
-        try {
-          const newItem = await addItem({
-            id: uuidv4(),
-            code: item.code,
-            customer: customer.id,
-            description: item.description,
-            length: item.length,
-            width: item.width,
-            height: item.height,
-            status: 'waiting',
-            tags: [],
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            deleted: false
-          });
-          console.log('Created item:', newItem);
-          createdItems.push(newItem);
-        } catch (error) {
-          if (error instanceof Error && error.message === 'Item with this code already exists') {
-            duplicates.push(item.code);
-          } else {
-            console.error('Error creating item:', error);
-          }
+        const newItem: Item = {
+          id: uuidv4(),
+          code: item.code,
+          customer: customer.id,
+          description: item.description,
+          length: item.length,
+          width: item.width,
+          height: item.height,
+          status: 'waiting',
+          tags: [],
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          deleted: false
+        };
+        
+        batchItems.push(newItem);
+        
+        if (batchItems.length === BATCH_SIZE) {
+          itemBatches.push([...batchItems]);
+          batchItems.length = 0;
         }
       }
+      
+      if (batchItems.length > 0) {
+        itemBatches.push(batchItems);
+      }
+
+      // Insert batches
+      for (let i = 0; i < itemBatches.length; i++) {
+        const progress = ((processedOrders / totalOrders) * 100) + 
+          ((i / itemBatches.length) * (100 / totalOrders));
+        onProgress('Importing items', progress);
+        
+        try {
+          await insertItemsBatch(itemBatches[i]);
+          createdItems.push(...itemBatches[i]);
+        } catch (error) {
+          console.error('Error in batch insert:', error);
+          const failedCodes = itemBatches[i].map(item => item.code);
+          duplicates.push(...failedCodes);
+        }
+      }
+
     } catch (error) {
       console.error('Error processing order:', error);
     }
+    
+    processedOrders++;
   }
 
-  console.log('Mass import completed. Total items created:', createdItems.length);
+  onProgress('Completing import', 100);
   
   if (duplicates.length > 0) {
     toast.warning(`${duplicates.length} položiek nebolo importovaných (duplicitné kódy)`);

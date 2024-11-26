@@ -11,16 +11,26 @@ import { Textarea } from "../ui/textarea";
 import { importMassItems } from "@/lib/services/massImportService";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { Progress } from "../ui/progress";
 
 export const MassImportDialog = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [data, setData] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [stage, setStage] = useState<string>("");
 
   const handleImport = async () => {
     try {
       setIsLoading(true);
-      await importMassItems(data);
+      setProgress(0);
+      setStage("");
+      
+      await importMassItems(data, (currentStage, currentProgress) => {
+        setStage(currentStage);
+        setProgress(currentProgress);
+      });
+      
       setIsOpen(false);
       setData("");
     } catch (error) {
@@ -28,6 +38,8 @@ export const MassImportDialog = () => {
       toast.error("Chyba pri importe položiek");
     } finally {
       setIsLoading(false);
+      setProgress(0);
+      setStage("");
     }
   };
 
@@ -53,6 +65,15 @@ export const MassImportDialog = () => {
             className="min-h-[300px]"
             disabled={isLoading}
           />
+          {isLoading && (
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm text-gray-500">
+                <span>{stage}</span>
+                <span>{Math.round(progress)}%</span>
+              </div>
+              <Progress value={progress} className="w-full" />
+            </div>
+          )}
           <Button 
             onClick={handleImport}
             className="w-full bg-[#212490] hover:bg-[#47acc9]"
