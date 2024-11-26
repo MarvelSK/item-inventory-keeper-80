@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { BrowserMultiFormatReader } from "@zxing/browser";
 import { Button } from "./ui/button";
-import { Card } from "./ui/card";
 import { Camera, CameraOff } from "lucide-react";
 import { useItems } from "@/hooks/useItems";
 
@@ -133,48 +132,47 @@ export const Scanner = () => {
   };
 
   return (
-    <div className="space-y-4">
-      <Card className="p-4">
-        <div className="space-y-4">
-          <div className="flex flex-wrap gap-2 justify-center">
-            {["receiving", "loading", "delivery"].map((m) => (
-              <Button
-                key={m}
-                onClick={() => setMode(m as ScanMode)}
-                variant={mode === m ? "default" : "outline"}
-              >
-                {getModeLabel(m as ScanMode)}
-              </Button>
-            ))}
-          </div>
-          <div className="flex justify-center">
+    <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm">
+      <h2 className="text-xl font-semibold mb-4 text-[#212490]">Skenovanie položiek</h2>
+      <div className="space-y-4">
+        <div className="flex flex-wrap gap-2 justify-center">
+          {["receiving", "loading", "delivery"].map((m) => (
             <Button
-              onClick={isScanning ? stopScanning : startScanning}
-              className="w-full sm:w-auto"
+              key={m}
+              onClick={() => setMode(m as ScanMode)}
+              variant={mode === m ? "default" : "outline"}
             >
-              {isScanning ? (
-                <>
-                  <CameraOff className="mr-2 h-4 w-4" />
-                  Stop Scanning
-                </>
-              ) : (
-                <>
-                  <Camera className="mr-2 h-4 w-4" />
-                  Start Scanning
-                </>
-              )}
+              {getModeLabel(m as ScanMode)}
             </Button>
-          </div>
-          <div className="relative aspect-video max-w-md mx-auto">
-            <video
-              ref={videoRef}
-              className={`w-full h-full object-cover rounded-lg border-4 transition-colors ${getScannerBorderColor()}`}
-              autoPlay
-              playsInline
-            />
-          </div>
+          ))}
         </div>
-      </Card>
+        <div className="flex justify-center">
+          <Button
+            onClick={isScanning ? stopScanning : startScanning}
+            className="w-full sm:w-auto"
+          >
+            {isScanning ? (
+              <>
+                <CameraOff className="mr-2 h-4 w-4" />
+                Stop Scanning
+              </>
+            ) : (
+              <>
+                <Camera className="mr-2 h-4 w-4" />
+                Start Scanning
+              </>
+            )}
+          </Button>
+        </div>
+        <div className="relative aspect-video max-w-md mx-auto">
+          <video
+            ref={videoRef}
+            className={`w-full h-full object-cover rounded-lg border-4 transition-colors ${getScannerBorderColor()}`}
+            autoPlay
+            playsInline
+          />
+        </div>
+      </div>
     </div>
   );
 };
