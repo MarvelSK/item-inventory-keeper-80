@@ -55,8 +55,8 @@ export const InventoryListItem = ({ item, onEdit, onDelete, onPostpone }: Invent
   };
 
   const formatDimensions = (item: Item) => {
-    if (item.length && item.width && item.height) {
-      return `D:${item.length}×Š:${item.width}×V:${item.height}`;
+    if (item.height && item.width && item.length) {
+      return `V:${item.height}×Š:${item.width}×D:${item.length}`;
     }
     return "-";
   };

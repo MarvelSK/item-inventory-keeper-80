@@ -41,8 +41,8 @@ export const InventoryGridItem = ({ item, onEdit, onDelete, onPostpone }: Invent
               <div>Spoločnosť: {company}</div>
               <div>Zákazník: {customer}</div>
               <div>Popis: {item.description || "-"}</div>
-              <div>Rozmery: {item.length && item.width && item.height
-                ? `${item.length}×${item.width}×${item.height} cm`
+              <div>Rozmery: {item.height && item.width && item.length
+                ? `V:${item.height}×Š:${item.width}×D:${item.length} cm`
                 : "-"}
               </div>
               <div>Stav: <Badge variant={statusInfo.variant as any}>{statusInfo.label}</Badge></div>
