@@ -12,12 +12,20 @@ import {
 } from "../ui/dialog";
 import { useState, useEffect } from "react";
 import { TagBadge } from "../tags/TagBadge";
+import { Badge } from "../ui/badge";
 
 interface InventoryListItemProps {
   item: Item;
   onEdit: (item: Item) => void;
   onDelete: (id: string) => void;
 }
+
+const STATUS_MAP = {
+  waiting: { label: 'Čaká na dovoz', variant: 'secondary' },
+  in_stock: { label: 'Na sklade', variant: 'success' },
+  in_transit: { label: 'V preprave', variant: 'warning' },
+  delivered: { label: 'Doručené', variant: 'default' }
+} as const;
 
 export const InventoryListItem = ({ item, onEdit, onDelete }: InventoryListItemProps) => {
   const [isMobile, setIsMobile] = useState(false);
@@ -46,6 +54,8 @@ export const InventoryListItem = ({ item, onEdit, onDelete }: InventoryListItemP
     return "-";
   };
 
+  const statusInfo = STATUS_MAP[item.status];
+
   return (
     <>
       <TableRow className="group cursor-pointer" onClick={handleRowClick}>
@@ -61,6 +71,9 @@ export const InventoryListItem = ({ item, onEdit, onDelete }: InventoryListItemP
         <TableCell className="hidden lg:table-cell">{item.description || "-"}</TableCell>
         <TableCell className="hidden lg:table-cell">
           {formatDimensions(item)}
+        </TableCell>
+        <TableCell className="hidden sm:table-cell">
+          <Badge variant={statusInfo.variant as any}>{statusInfo.label}</Badge>
         </TableCell>
         <TableCell className="hidden sm:table-cell">
           {format(item.createdAt, "dd.MM.yyyy HH:mm")}
@@ -116,6 +129,7 @@ export const InventoryListItem = ({ item, onEdit, onDelete }: InventoryListItemP
               <div className="space-y-2">
                 <p><strong>Kód:</strong> {item.code}</p>
                 <p><strong>Zákazník:</strong> {customerName}</p>
+                <p><strong>Stav:</strong> <Badge variant={statusInfo.variant as any}>{statusInfo.label}</Badge></p>
                 {customer?.tags && customer.tags.length > 0 && (
                   <div>
                     <strong>Štítky zákazníka:</strong>

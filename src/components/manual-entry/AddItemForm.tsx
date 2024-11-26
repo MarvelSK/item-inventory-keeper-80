@@ -10,11 +10,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 
 const DESCRIPTIONS = ['Příslušenství', 'Plechy', 'Žaluzie', 'Vodící profily'];
 
+const STATUS_OPTIONS = [
+  { value: 'waiting', label: 'Čaká na dovoz' },
+  { value: 'in_stock', label: 'Na sklade' },
+  { value: 'in_transit', label: 'V preprave' },
+  { value: 'delivered', label: 'Doručené' }
+];
+
 export const AddItemForm = () => {
   const [code, setCode] = useState("");
-  const [quantity, setQuantity] = useState(1);
   const [selectedCustomer, setSelectedCustomer] = useState("");
   const [description, setDescription] = useState("");
+  const [status, setStatus] = useState<'waiting' | 'in_stock' | 'in_transit' | 'delivered'>('waiting');
   const [length, setLength] = useState<number | undefined>();
   const [width, setWidth] = useState<number | undefined>();
   const [height, setHeight] = useState<number | undefined>();
@@ -34,11 +41,11 @@ export const AddItemForm = () => {
       const newItem = {
         id: uuidv4(),
         code,
-        quantity,
         description,
         length,
         width,
         height,
+        status,
         tags: [],
         customer: selectedCustomer,
         company: "",
@@ -49,9 +56,9 @@ export const AddItemForm = () => {
 
       await addItem(newItem);
       setCode("");
-      setQuantity(1);
       setSelectedCustomer("");
       setDescription("");
+      setStatus('waiting');
       setLength(undefined);
       setWidth(undefined);
       setHeight(undefined);
@@ -77,13 +84,6 @@ export const AddItemForm = () => {
         onChange={(e) => setCode(e.target.value)}
         required
       />
-      <Input
-        type="number"
-        placeholder="Množstvo"
-        value={quantity}
-        onChange={(e) => setQuantity(Number(e.target.value))}
-        required
-      />
       <Select value={description} onValueChange={setDescription}>
         <SelectTrigger>
           <SelectValue placeholder="Vyberte popis" />
@@ -92,6 +92,18 @@ export const AddItemForm = () => {
           {DESCRIPTIONS.map((desc) => (
             <SelectItem key={desc} value={desc}>
               {desc}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <Select value={status} onValueChange={(value: 'waiting' | 'in_stock' | 'in_transit' | 'delivered') => setStatus(value)}>
+        <SelectTrigger>
+          <SelectValue placeholder="Vyberte stav" />
+        </SelectTrigger>
+        <SelectContent>
+          {STATUS_OPTIONS.map((option) => (
+            <SelectItem key={option.value} value={option.value}>
+              {option.label}
             </SelectItem>
           ))}
         </SelectContent>

@@ -7,6 +7,7 @@ export interface Item {
   length?: number;
   width?: number;
   height?: number;
+  status: 'waiting' | 'in_stock' | 'in_transit' | 'delivered';
   tags: Tag[];
   createdAt: Date;
   updatedAt: Date;

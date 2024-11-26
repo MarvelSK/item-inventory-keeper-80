@@ -25,6 +25,13 @@ interface EditItemDialogProps {
   onSave: (item: Item) => void;
 }
 
+const STATUS_OPTIONS = [
+  { value: 'waiting', label: 'Čaká na dovoz' },
+  { value: 'in_stock', label: 'Na sklade' },
+  { value: 'in_transit', label: 'V preprave' },
+  { value: 'delivered', label: 'Doručené' }
+];
+
 export const EditItemDialog = ({ item, isOpen, onOpenChange, onSave }: EditItemDialogProps) => {
   const [editedItem, setEditedItem] = useState<Item | null>(null);
 
@@ -80,6 +87,23 @@ export const EditItemDialog = ({ item, isOpen, onOpenChange, onSave }: EditItemD
               {customers.filter(c => !c.deleted).map((customer) => (
                 <SelectItem key={customer.id} value={customer.id}>
                   {customer.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select 
+            value={editedItem.status} 
+            onValueChange={(value: 'waiting' | 'in_stock' | 'in_transit' | 'delivered') => 
+              setEditedItem({ ...editedItem, status: value })
+            }
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Vybrať stav" />
+            </SelectTrigger>
+            <SelectContent>
+              {STATUS_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
                 </SelectItem>
               ))}
             </SelectContent>
