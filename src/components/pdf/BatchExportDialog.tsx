@@ -24,6 +24,14 @@ export const BatchExportDialog = ({ customerOrders }: BatchExportDialogProps) =>
     );
   };
 
+  const handleSelectAll = () => {
+    if (selectedOrders.length === customerOrders.length) {
+      setSelectedOrders([]);
+    } else {
+      setSelectedOrders(customerOrders.map(order => order.customer.id));
+    }
+  };
+
   const selectedOrdersData = customerOrders.filter(
     order => selectedOrders.includes(order.customer.id)
   );
@@ -40,6 +48,16 @@ export const BatchExportDialog = ({ customerOrders }: BatchExportDialogProps) =>
           <DialogTitle>Hromadný export zakázok</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
+          <div className="flex items-center space-x-2 pb-2 border-b">
+            <Checkbox
+              id="select-all"
+              checked={selectedOrders.length === customerOrders.length}
+              onCheckedChange={handleSelectAll}
+            />
+            <label htmlFor="select-all" className="text-sm font-medium">
+              Vybrať všetky
+            </label>
+          </div>
           <div className="space-y-2">
             {customerOrders.map(({ customer }) => (
               <div key={customer.id} className="flex items-center space-x-2">
