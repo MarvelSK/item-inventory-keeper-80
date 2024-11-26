@@ -52,14 +52,14 @@ export const StatisticsDialog = () => {
           <BarChart className="h-5 w-5" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="w-[95vw] max-w-[800px] max-h-[90vh] overflow-hidden flex flex-col">
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle>Štatistiky zakázok</DialogTitle>
             <BatchExportDialog customerOrders={customerOrders} />
           </div>
         </DialogHeader>
-        <ScrollArea className="flex-1">
+        <ScrollArea className="flex-grow">
           <div className="space-y-2 p-2">
             <Accordion type="single" collapsible className="space-y-2">
               {Object.entries(itemsByCustomer).map(([customerId, customerItems]) => {

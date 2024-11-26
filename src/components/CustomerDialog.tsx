@@ -83,14 +83,14 @@ export const CustomerDialog = ({ open, onOpenChange }: CustomerDialogProps) => {
             </Button>
           </DialogTrigger>
         )}
-        <DialogContent className="w-[95vw] max-w-[625px] max-h-[90vh] overflow-hidden flex flex-col">
+        <DialogContent className="w-[95vw] max-w-[625px] h-[90vh] md:h-auto">
           <DialogHeader>
             <DialogTitle>Správa zakázok</DialogTitle>
             <DialogDescription>
               Pridajte, upravte alebo vymažte zakázky
             </DialogDescription>
           </DialogHeader>
-          <ScrollArea className="flex-1">
+          <ScrollArea className="h-[calc(90vh-180px)] md:h-auto">
             <div className="space-y-4 p-1">
               <div className="flex flex-col md:flex-row gap-2">
                 <Input
@@ -163,18 +163,16 @@ export const CustomerDialog = ({ open, onOpenChange }: CustomerDialogProps) => {
       </Dialog>
 
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="w-[95vw] max-w-[425px] max-h-[90vh] overflow-hidden flex flex-col">
+        <DialogContent className="w-[95vw] max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Upraviť zakázku</DialogTitle>
             <DialogDescription>
               Upravte údaje zakázky
             </DialogDescription>
           </DialogHeader>
-          <ScrollArea className="flex-1">
-            {editingCustomer && (
-              <EditCustomerForm customer={editingCustomer} onSave={handleEditCustomer} />
-            )}
-          </ScrollArea>
+          {editingCustomer && (
+            <EditCustomerForm customer={editingCustomer} onSave={handleEditCustomer} />
+          )}
         </DialogContent>
       </Dialog>
 
