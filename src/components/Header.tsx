@@ -1,5 +1,5 @@
 import { CustomerDialog } from "./CustomerDialog";
-import { DatabaseBackup, List, BarChart } from "lucide-react";
+import { DatabaseBackup } from "lucide-react";
 import { MobileMenu } from "./header/MobileMenu";
 import { BackupDialog } from "./header/BackupDialog";
 import { StatisticsDialog } from "./header/StatisticsDialog";
@@ -28,8 +28,8 @@ export const Header = () => {
           {/* Desktop Menu */}
           <nav className="hidden md:flex items-center space-x-4">
             <CustomerDialog />
-            <StatisticsDialog />
             <BackupDialog />
+            <StatisticsDialog />
           </nav>
         </div>
       </div>
