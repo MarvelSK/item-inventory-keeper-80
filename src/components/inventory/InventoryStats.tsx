@@ -25,27 +25,27 @@ export const InventoryStats = ({ items }: InventoryStatsProps) => {
   }, {} as Record<string, number>);
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Celkový počet položiek</CardTitle>
+    <div className="grid grid-cols-5 gap-2">
+      <Card className="col-span-1">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 p-2">
+          <CardTitle className="text-xs font-medium">Celkom</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{totalItems}</div>
+        <CardContent className="p-2 pt-0">
+          <div className="text-xl font-bold">{totalItems}</div>
         </CardContent>
       </Card>
       
       {Object.entries(STATUS_MAP).map(([status, info]) => (
-        <Card key={status}>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              <Badge variant={info.variant as any} className="ml-1">
+        <Card key={status} className="col-span-1">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-2">
+            <CardTitle className="text-xs font-medium">
+              <Badge variant={info.variant as any} className="text-xs">
                 {info.label}
               </Badge>
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
+          <CardContent className="p-2 pt-0">
+            <div className="text-xl font-bold">
               {statusCounts[status] || 0}
             </div>
           </CardContent>
