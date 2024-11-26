@@ -45,6 +45,8 @@ export const StatisticsDialog = () => {
     delivered: { label: 'Doručené', variant: 'default' }
   } as const;
 
+  const totalOrders = customerOrders.length;
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -55,7 +57,12 @@ export const StatisticsDialog = () => {
       <DialogContent className="w-[95vw] max-w-2xl h-[90vh] md:h-[80vh]">
         <DialogHeader>
           <div className="flex items-center justify-between">
-            <DialogTitle>Štatistiky zakázok</DialogTitle>
+            <div>
+              <DialogTitle>Štatistiky zakázok</DialogTitle>
+              <p className="text-sm text-muted-foreground mt-1">
+                Celkový počet zakázok: {totalOrders}
+              </p>
+            </div>
             <BatchExportDialog customerOrders={customerOrders} />
           </div>
         </DialogHeader>
