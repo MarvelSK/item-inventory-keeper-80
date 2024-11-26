@@ -25,11 +25,21 @@ const parseItems = (data: string): ParsedItem[] => {
     const trimmedLine = line.trim();
     if (!trimmedLine) continue;
 
+    // Skip irrelevant lines
+    if (
+      trimmedLine.startsWith('NEVA') ||
+      trimmedLine.startsWith('BALÍCÍ LIST') ||
+      trimmedLine.includes('24DL') ||
+      trimmedLine.startsWith('Počet balíků:')
+    ) {
+      continue;
+    }
+
     // Check if this is an order header line
     if (trimmedLine.includes('24ZA')) {
-      const orderMatch = trimmedLine.match(/(24ZA\d+\s*-\s*[^]+?)(?:\s+(?:Příslušenství|Plechy|Žaluzie|Vodící profily))/);
+      const orderMatch = trimmedLine.match(/24ZA\d+\s*-\s*[^]+?(?=\s+(?:Příslušenství|Plechy|Žaluzie|Vodící profily)|$)/);
       if (orderMatch) {
-        currentOrderInfo = orderMatch[1].trim();
+        currentOrderInfo = orderMatch[0].trim();
         
         // Parse the first item if it exists in the header line
         const itemMatch = trimmedLine.match(new RegExp(`(${VALID_DESCRIPTIONS.join('|')})\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(24P\\d+)`));
@@ -44,11 +54,6 @@ const parseItems = (data: string): ParsedItem[] => {
           });
         }
       }
-      continue;
-    }
-
-    // Skip lines that don't contain item information
-    if (trimmedLine.includes('BALÍCÍ LIST') || !trimmedLine.includes('24P')) {
       continue;
     }
 
@@ -79,52 +84,56 @@ export const importMassItems = async (data: string) => {
     return [];
   }
 
-  // Create customer for the order (using the first item's order info since all items belong to same order)
-  const orderInfo = parsedItems[0].orderInfo;
-  console.log('Creating customer for order:', orderInfo);
-  
-  let customerId;
-  try {
-    const customer = await addCustomer(orderInfo);
-    customerId = customer.id;
-    console.log('Created customer:', customer);
-  } catch (error) {
-    console.error('Error creating customer:', error);
-    toast.error('Chyba pri vytváraní zákazníka');
-    return [];
-  }
-
-  // Create items
   const createdItems = [];
   const duplicates = [];
-  
-  for (const item of parsedItems) {
-    console.log(`Creating item for package: ${item.code}`);
+  const orderGroups = new Map<string, ParsedItem[]>();
+
+  // Group items by order
+  parsedItems.forEach(item => {
+    const items = orderGroups.get(item.orderInfo) || [];
+    items.push(item);
+    orderGroups.set(item.orderInfo, items);
+  });
+
+  // Process each order
+  for (const [orderInfo, items] of orderGroups) {
+    console.log(`Processing order: ${orderInfo} with ${items.length} items`);
     
     try {
-      const newItem = await addItem({
-        id: uuidv4(),
-        code: item.code,
-        company: "1",
-        customer: customerId,
-        description: item.description,
-        length: item.length,
-        width: item.width,
-        height: item.height,
-        status: 'waiting',
-        tags: [],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        deleted: false
-      });
-      console.log('Created item:', newItem);
-      createdItems.push(newItem);
-    } catch (error) {
-      if (error instanceof Error && error.message === 'Item with this code already exists') {
-        duplicates.push(item.code);
-      } else {
-        console.error('Error creating item:', error);
+      // Create customer for the order
+      const customer = await addCustomer(orderInfo);
+      console.log('Created customer:', customer);
+
+      // Create items for the order
+      for (const item of items) {
+        try {
+          const newItem = await addItem({
+            id: uuidv4(),
+            code: item.code,
+            company: "1",
+            customer: customer.id,
+            description: item.description,
+            length: item.length,
+            width: item.width,
+            height: item.height,
+            status: 'waiting',
+            tags: [],
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            deleted: false
+          });
+          console.log('Created item:', newItem);
+          createdItems.push(newItem);
+        } catch (error) {
+          if (error instanceof Error && error.message === 'Item with this code already exists') {
+            duplicates.push(item.code);
+          } else {
+            console.error('Error creating item:', error);
+          }
+        }
       }
+    } catch (error) {
+      console.error('Error processing order:', error);
     }
   }
 
