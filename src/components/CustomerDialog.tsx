@@ -21,7 +21,7 @@ import {
 import { Input } from "./ui/input";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "./ui/table";
 import { customers, addCustomer, deleteCustomer } from "@/lib/inventory";
-import { Trash2, Edit2 } from "lucide-react";
+import { Trash2, Edit2, List } from "lucide-react";
 import { EditCustomerForm } from "./EditCustomerForm";
 import { toast } from "sonner";
 import { ScrollArea } from "./ui/scroll-area";
@@ -79,6 +79,7 @@ export const CustomerDialog = ({ open, onOpenChange }: CustomerDialogProps) => {
         {!onOpenChange && (
           <DialogTrigger asChild>
             <Button variant="outline" className="hover:text-[#47acc9] w-full md:w-auto">
+              <List className="mr-2 h-4 w-4" />
               Správa zakázok
             </Button>
           </DialogTrigger>
