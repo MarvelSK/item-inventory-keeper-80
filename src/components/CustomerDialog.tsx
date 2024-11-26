@@ -47,23 +47,23 @@ export const CustomerDialog = ({ open, onOpenChange }: CustomerDialogProps) => {
   const actualOpen = open !== undefined ? open : isMainDialogOpen;
   const handleOpenChange = onOpenChange || setIsMainDialogOpen;
 
-  const handleAddCustomer = () => {
+  const handleAddCustomer = async () => {
     if (!customerName.trim()) {
       toast.error("Vyplňte meno zákazníka");
       return;
     }
-    addCustomer(customerName);
+    await addCustomer(customerName);
     setCustomerName("");
   };
 
-  const handleEditCustomer = (customer: Customer) => {
-    updateCustomer(customer);
+  const handleEditCustomer = async (customer: Customer) => {
+    await updateCustomer(customer);
     setIsEditDialogOpen(false);
   };
 
-  const handleDeleteCustomer = () => {
+  const handleDeleteCustomer = async () => {
     if (deletingCustomerId) {
-      deleteCustomer(deletingCustomerId);
+      await deleteCustomer(deletingCustomerId);
       setDeletingCustomerId(null);
       setIsDeleteDialogOpen(false);
     }
