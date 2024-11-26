@@ -2,18 +2,16 @@ import { Button } from "../../ui/button";
 import { Save } from "lucide-react";
 import { backupAll } from "@/lib/services/backupService";
 import { useItems } from "@/hooks/useItems";
-import { useCompanies } from "@/hooks/useCompanies";
 import { useCustomers } from "@/hooks/useCustomers";
 import { toast } from "sonner";
 
 export const BackupSection = () => {
   const { items } = useItems();
-  const { companies } = useCompanies();
   const { customers } = useCustomers();
 
   const handleBackup = async () => {
     try {
-      await backupAll(items, companies, customers);
+      await backupAll(items, customers);
       toast.success("Záloha systému bola vytvorená");
     } catch (error) {
       toast.error("Chyba pri vytváraní zálohy");
