@@ -7,14 +7,8 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
@@ -27,7 +21,7 @@ interface CreateUserDialogProps {
 export const CreateUserDialog = ({ open, onOpenChange }: CreateUserDialogProps) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("Používateľ");
+  const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const queryClient = useQueryClient();
 
@@ -41,7 +35,7 @@ export const CreateUserDialog = ({ open, onOpenChange }: CreateUserDialogProps) 
         password,
         options: {
           data: {
-            role,
+            is_admin: isAdmin,
           },
         },
       });
@@ -85,17 +79,13 @@ export const CreateUserDialog = ({ open, onOpenChange }: CreateUserDialogProps) 
               required
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="role">Role</Label>
-            <Select value={role} onValueChange={setRole}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Používateľ">Používateľ</SelectItem>
-                <SelectItem value="Administrátor">Administrátor</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="is-admin"
+              checked={isAdmin}
+              onCheckedChange={setIsAdmin}
+            />
+            <Label htmlFor="is-admin">Administrátor</Label>
           </div>
           <div className="flex justify-end space-x-2">
             <Button

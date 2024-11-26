@@ -28,7 +28,7 @@ export const UserManagement = () => {
   });
 
   useEffect(() => {
-    if (currentUser?.role === 'Administrátor') {
+    if (currentUser?.is_admin) {
       setIsAdmin(true);
     }
   }, [currentUser]);

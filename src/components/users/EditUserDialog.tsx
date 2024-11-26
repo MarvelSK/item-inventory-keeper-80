@@ -6,14 +6,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
@@ -25,13 +19,13 @@ interface EditUserDialogProps {
 }
 
 export const EditUserDialog = ({ user, open, onOpenChange }: EditUserDialogProps) => {
-  const [role, setRole] = useState(user?.role || "Používateľ");
+  const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const queryClient = useQueryClient();
 
   useEffect(() => {
     if (user) {
-      setRole(user.role);
+      setIsAdmin(user.is_admin);
     }
   }, [user]);
 
@@ -44,7 +38,7 @@ export const EditUserDialog = ({ user, open, onOpenChange }: EditUserDialogProps
     try {
       const { error } = await supabase
         .from('profiles')
-        .update({ role })
+        .update({ is_admin: isAdmin })
         .eq('id', user.id);
 
       if (error) throw error;
@@ -70,17 +64,13 @@ export const EditUserDialog = ({ user, open, onOpenChange }: EditUserDialogProps
             <Label>Email</Label>
             <p className="text-gray-600">{user?.email}</p>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="role">Role</Label>
-            <Select value={role} onValueChange={setRole}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Používateľ">Používateľ</SelectItem>
-                <SelectItem value="Administrátor">Administrátor</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="is-admin"
+              checked={isAdmin}
+              onCheckedChange={setIsAdmin}
+            />
+            <Label htmlFor="is-admin">Administrátor</Label>
           </div>
           <div className="flex justify-end space-x-2">
             <Button

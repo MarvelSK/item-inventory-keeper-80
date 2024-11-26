@@ -52,7 +52,7 @@ export const Header = () => {
             <CustomerDialog />
             <BackupDialog />
             <StatisticsDialog />
-            {currentUser?.role === 'Administrátor' && (
+            {currentUser?.is_admin && (
               <Button
                 variant="outline"
                 className="flex items-center"
