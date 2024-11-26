@@ -58,7 +58,9 @@ export const InventoryListItem = ({ item, onEdit, onDelete, onPostpone }: Invent
   return (
     <>
       <TableRow 
-        className={`group cursor-pointer ${item.postponed ? 'bg-gray-50' : ''}`} 
+        className={`group cursor-pointer ${
+          item.postponed ? 'bg-yellow-100 hover:bg-yellow-200' : 'hover:bg-gray-50'
+        }`} 
         onClick={handleRowClick}
       >
         <TableCell className="font-medium">{item.code}</TableCell>

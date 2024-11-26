@@ -1,6 +1,4 @@
 import { Item } from "@/lib/types";
-import { Button } from "../ui/button";
-import { Edit2, Trash2 } from "lucide-react";
 import { companies, customers } from "@/lib/inventory";
 import { format } from "date-fns";
 import { Badge } from "../ui/badge";
@@ -26,7 +24,9 @@ export const InventoryGridItem = ({ item, onEdit, onDelete, onPostpone }: Invent
   const statusInfo = STATUS_MAP[item.status];
 
   return (
-    <div className={`p-4 border rounded-lg space-y-2 ${item.postponed ? 'bg-gray-50' : ''}`}>
+    <div className={`p-4 border rounded-lg space-y-2 ${
+      item.postponed ? 'bg-yellow-100 hover:bg-yellow-200' : 'hover:bg-gray-50'
+    }`}>
       <div className="font-medium">{item.code}</div>
       <div className="text-sm text-gray-500">
         <div>Spoločnosť: {company}</div>

@@ -52,7 +52,7 @@ export const InventoryList = () => {
     : [];
 
   const sortedAndFilteredItems = [...filteredItems].sort((a, b) => {
-    // First, sort by postponed status
+    // First, sort by postponed status (postponed items first)
     if (a.postponed && !b.postponed) return -1;
     if (!a.postponed && b.postponed) return 1;
     
