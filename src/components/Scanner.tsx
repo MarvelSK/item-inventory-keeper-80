@@ -115,25 +115,28 @@ export const Scanner = () => {
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-sm">
-      <h2 className="text-xl font-semibold mb-4">Skenovať položky</h2>
+    <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm w-full max-w-lg mx-auto">
+      <h2 className="text-lg sm:text-xl font-semibold mb-4 text-center">Skenovať položky</h2>
       
-      <div className="flex gap-2 mb-4">
+      <div className="flex flex-col sm:flex-row gap-2 mb-4">
         <Button
           variant={scanMode === "naskladnenie" ? "default" : "outline"}
           onClick={() => setScanMode("naskladnenie")}
+          className="w-full sm:w-auto text-sm sm:text-base py-2"
         >
           Naskladnenie
         </Button>
         <Button
           variant={scanMode === "nalozenie" ? "default" : "outline"}
           onClick={() => setScanMode("nalozenie")}
+          className="w-full sm:w-auto text-sm sm:text-base py-2"
         >
           Naloženie
         </Button>
         <Button
           variant={scanMode === "dorucenie" ? "default" : "outline"}
           onClick={() => setScanMode("dorucenie")}
+          className="w-full sm:w-auto text-sm sm:text-base py-2"
         >
           Doručenie
         </Button>
@@ -144,8 +147,8 @@ export const Scanner = () => {
       {scannedCode && scannedItem && (
         <div className="mt-4 space-y-4">
           <div className="text-center">
-            <p className="font-medium">Kód: {scannedCode}</p>
-            <p className="text-lg font-semibold mt-2">
+            <p className="font-medium text-sm sm:text-base">Kód: {scannedCode}</p>
+            <p className="text-base sm:text-lg font-semibold mt-2">
               Status: {scannedItem.status}
             </p>
           </div>
@@ -153,7 +156,7 @@ export const Scanner = () => {
             <Button
               variant="outline"
               onClick={resetScanner}
-              className="text-gray-600 hover:text-gray-800"
+              className="text-gray-600 hover:text-gray-800 text-sm sm:text-base w-full sm:w-auto"
             >
               Skenovať ďalší kód
             </Button>
