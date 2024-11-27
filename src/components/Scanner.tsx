@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { BrowserMultiFormatReader } from "@zxing/browser";
 import { useItems } from "@/hooks/useItems";
 import { useCustomers } from "@/hooks/useCustomers";
-import { playSuccessSound, playErrorSound } from "@/lib/sounds";
 import { Item } from "@/lib/types";
 import { ItemPreview } from "./scanner/ItemPreview";
 import { ScanControls } from "./scanner/ScanControls";
@@ -39,7 +38,6 @@ export const Scanner = () => {
     setScannedItem(item || null);
     
     if (!item) {
-      playErrorSound();
       setScanStatus("error");
       setTimeout(() => setScanStatus("none"), 1000);
       return;
@@ -74,14 +72,11 @@ export const Scanner = () => {
         const updatedItem = { ...item, status: newStatus, updatedAt: new Date() };
         await updateItem(updatedItem);
         setScannedItem(updatedItem);
-        playSuccessSound();
         setScanStatus("success");
       } catch (error) {
-        playErrorSound();
         setScanStatus("error");
       }
     } else {
-      playErrorSound();
       setScanStatus("error");
     }
 
