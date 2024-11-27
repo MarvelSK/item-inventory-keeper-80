@@ -3,8 +3,6 @@ import { MobileMenu } from "./header/MobileMenu";
 import { BackupDialog } from "./header/BackupDialog";
 import { StatisticsDialog } from "./header/StatisticsDialog";
 import { useNavigate } from "react-router-dom";
-import { Button } from "./ui/button";
-import {ChartArea, DatabaseBackup, Logs} from "lucide-react";
 
 export const Header = () => {
   const navigate = useNavigate();
@@ -37,13 +35,6 @@ export const Header = () => {
 
             {/* Desktop Menu */}
             <nav className="hidden md:flex items-center space-x-4">
-              <Button
-                  variant="outline"
-                  onClick={() => navigate("/cenove-ponuky")}
-              >
-                <Logs className="mr-2 h-4 w-4" />
-                Cenové Ponuky
-              </Button>
               <CustomerDialog />
               <StatisticsDialog />
               <BackupDialog />
