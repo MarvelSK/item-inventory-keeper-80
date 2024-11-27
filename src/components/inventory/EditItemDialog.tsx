@@ -19,12 +19,7 @@ import { useState, useEffect } from "react";
 import { Textarea } from "../ui/textarea";
 import { Loader2 } from "lucide-react";
 
-interface EditItemDialogProps {
-  item: Item | null;
-  isOpen: boolean;
-  onOpenChange: (open: boolean) => void;
-  onSave: (item: Item) => Promise<void>;
-}
+const DESCRIPTIONS = ['Příslušenství', 'Plechy', 'Žaluzie', 'Vodící profily', 'Kliky'];
 
 const STATUS_OPTIONS = [
   { value: 'waiting', label: 'Čaká na dovoz' },
@@ -32,6 +27,13 @@ const STATUS_OPTIONS = [
   { value: 'in_transit', label: 'V preprave' },
   { value: 'delivered', label: 'Doručené' }
 ];
+
+interface EditItemDialogProps {
+  item: Item | null;
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSave: (item: Item) => Promise<void>;
+}
 
 export const EditItemDialog = ({ item, isOpen, onOpenChange, onSave }: EditItemDialogProps) => {
   const [editedItem, setEditedItem] = useState<Item | null>(null);
@@ -90,6 +92,22 @@ export const EditItemDialog = ({ item, isOpen, onOpenChange, onSave }: EditItemD
             </SelectContent>
           </Select>
           <Select 
+            value={editedItem.description || ''} 
+            onValueChange={(value) => setEditedItem({ ...editedItem, description: value })}
+            disabled={isLoading}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Vyberte popis" />
+            </SelectTrigger>
+            <SelectContent>
+              {DESCRIPTIONS.map((desc) => (
+                <SelectItem key={desc} value={desc}>
+                  {desc}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select 
             value={editedItem.status} 
             onValueChange={(value: 'waiting' | 'in_stock' | 'in_transit' | 'delivered') => 
               setEditedItem({ ...editedItem, status: value })
@@ -107,14 +125,6 @@ export const EditItemDialog = ({ item, isOpen, onOpenChange, onSave }: EditItemD
               ))}
             </SelectContent>
           </Select>
-          <Textarea
-            placeholder="Popis"
-            value={editedItem.description || ""}
-            onChange={(e) =>
-              setEditedItem({ ...editedItem, description: e.target.value })
-            }
-            disabled={isLoading}
-          />
           <div className="grid grid-cols-3 gap-2">
             <Input
               type="number"
