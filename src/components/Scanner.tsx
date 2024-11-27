@@ -1,17 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { BrowserMultiFormatReader } from "@zxing/browser";
-import { Button } from "./ui/button";
-import { Camera, CameraOff } from "lucide-react";
 import { useItems } from "@/hooks/useItems";
 import { useCustomers } from "@/hooks/useCustomers";
-import { toast } from "sonner";
 import { playSuccessSound, playErrorSound } from "@/lib/sounds";
 import { Item } from "@/lib/types";
 import { ItemPreview } from "./scanner/ItemPreview";
-import { TagBadge } from "./tags/TagBadge";
-
-type ScanMode = "receiving" | "loading" | "delivery";
-type ScanStatus = "none" | "success" | "error";
+import { ScanControls } from "./scanner/ScanControls";
+import { ScanMode, ScanStatus } from "./scanner/types";
 
 export const Scanner = () => {
   const [isScanning, setIsScanning] = useState(false);
@@ -46,12 +41,10 @@ export const Scanner = () => {
     if (!item) {
       playErrorSound();
       setScanStatus("error");
-      toast.error("Položka nebola nájdená");
       setTimeout(() => setScanStatus("none"), 1000);
       return;
     }
 
-    const customer = customers.find(c => c.id === item.customer);
     let newStatus;
     let success = false;
 
@@ -83,31 +76,13 @@ export const Scanner = () => {
         setScannedItem(updatedItem);
         playSuccessSound();
         setScanStatus("success");
-        
-        if (customer?.tags && customer.tags.length > 0) {
-          toast(
-            <div className="space-y-2">
-              <p className="font-medium">{customer.name}</p>
-              <div className="flex flex-wrap gap-1">
-                {customer.tags.map((tag) => (
-                  <TagBadge key={tag.id} tag={tag} />
-                ))}
-              </div>
-            </div>,
-            {
-              duration: 3000,
-            }
-          );
-        }
       } catch (error) {
         playErrorSound();
         setScanStatus("error");
-        toast.error("Chyba pri aktualizácii položky");
       }
     } else {
       playErrorSound();
       setScanStatus("error");
-      toast.error("Nesprávny stav položky pre túto operáciu");
     }
 
     setTimeout(() => setScanStatus("none"), 1000);
@@ -151,14 +126,6 @@ export const Scanner = () => {
     setIsScanning(false);
   };
 
-  const getModeLabel = (mode: ScanMode) => {
-    switch (mode) {
-      case "receiving": return "Naskladnenie";
-      case "loading": return "Naloženie";
-      case "delivery": return "Doručenie";
-    }
-  };
-
   const getScannerBorderColor = () => {
     switch (scanStatus) {
       case "success": return "border-green-500";
@@ -171,35 +138,13 @@ export const Scanner = () => {
     <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm">
       <h2 className="text-xl font-semibold mb-4 text-[#212490]">Skenovanie položiek</h2>
       <div className="space-y-4">
-        <div className="flex flex-wrap gap-2 justify-center">
-          {["receiving", "loading", "delivery"].map((m) => (
-            <Button
-              key={m}
-              onClick={() => setMode(m as ScanMode)}
-              variant={mode === m ? "default" : "outline"}
-            >
-              {getModeLabel(m as ScanMode)}
-            </Button>
-          ))}
-        </div>
-        <div className="flex justify-center">
-          <Button
-            onClick={isScanning ? stopScanning : startScanning}
-            className="w-full sm:w-auto"
-          >
-            {isScanning ? (
-              <>
-                <CameraOff className="mr-2 h-4 w-4" />
-                Stop Scanning
-              </>
-            ) : (
-              <>
-                <Camera className="mr-2 h-4 w-4" />
-                Start Scanning
-              </>
-            )}
-          </Button>
-        </div>
+        <ScanControls
+          mode={mode}
+          setMode={setMode}
+          isScanning={isScanning}
+          onStartScan={startScanning}
+          onStopScan={stopScanning}
+        />
         <div className="relative aspect-video max-w-md mx-auto">
           <video
             ref={videoRef}
