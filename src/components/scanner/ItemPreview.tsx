@@ -40,14 +40,6 @@ export const ItemPreview = ({ item }: ItemPreviewProps) => {
           </p>
         )}
         
-        {(item.height || item.width || item.length) && (
-          <p className="text-sm text-gray-600">
-            Rozmery: {item.height && item.width && item.length
-              ? `V:${item.height}×Š:${item.width}×D:${item.length} cm`
-              : "-"}
-          </p>
-        )}
-        
         {customer?.tags && customer.tags.length > 0 && (
           <div>
             <p className="text-sm text-gray-600 mb-1">Štítky zákazníka:</p>
