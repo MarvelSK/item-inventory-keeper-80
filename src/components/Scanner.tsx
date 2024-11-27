@@ -3,6 +3,10 @@ import { BrowserMultiFormatReader } from "@zxing/browser";
 import { Button } from "./ui/button";
 import { Camera, CameraOff } from "lucide-react";
 import { useItems } from "@/hooks/useItems";
+import { useCustomers } from "@/hooks/useCustomers";
+import { toast } from "sonner";
+import { TagBadge } from "./tags/TagBadge";
+import { playSuccessSound, playErrorSound } from "@/lib/sounds";
 
 type ScanMode = "receiving" | "loading" | "delivery";
 type ScanStatus = "none" | "success" | "error";
@@ -16,6 +20,7 @@ export const Scanner = () => {
   const codeReader = useRef<BrowserMultiFormatReader>();
   const mediaStream = useRef<MediaStream | null>(null);
   const { items, updateItem } = useItems();
+  const { customers } = useCustomers();
 
   useEffect(() => {
     codeReader.current = new BrowserMultiFormatReader();
@@ -34,11 +39,14 @@ export const Scanner = () => {
 
     const item = items.find(item => item.code === code);
     if (!item) {
+      playErrorSound();
       setScanStatus("error");
+      toast.error("Položka nebola nájdená");
       setTimeout(() => setScanStatus("none"), 1000);
       return;
     }
 
+    const customer = customers.find(c => c.id === item.customer);
     let newStatus;
     let success = false;
 
@@ -66,12 +74,33 @@ export const Scanner = () => {
     if (success && newStatus) {
       try {
         await updateItem({ ...item, status: newStatus, updatedAt: new Date() });
+        playSuccessSound();
         setScanStatus("success");
+        
+        if (customer?.tags && customer.tags.length > 0) {
+          toast(
+            <div className="space-y-2">
+              <p className="font-medium">{customer.name}</p>
+              <div className="flex flex-wrap gap-1">
+                {customer.tags.map((tag) => (
+                  <TagBadge key={tag.id} tag={tag} />
+                ))}
+              </div>
+            </div>,
+            {
+              duration: 3000,
+            }
+          );
+        }
       } catch (error) {
+        playErrorSound();
         setScanStatus("error");
+        toast.error("Chyba pri aktualizácii položky");
       }
     } else {
+      playErrorSound();
       setScanStatus("error");
+      toast.error("Nesprávny stav položky pre túto operáciu");
     }
 
     setTimeout(() => setScanStatus("none"), 1000);
