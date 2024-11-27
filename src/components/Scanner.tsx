@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { playSuccessSound, playErrorSound } from "@/lib/sounds";
 import { Item } from "@/lib/types";
 import { ItemPreview } from "./scanner/ItemPreview";
+import { TagBadge } from "./tags/TagBadge";
 
 type ScanMode = "receiving" | "loading" | "delivery";
 type ScanStatus = "none" | "success" | "error";
