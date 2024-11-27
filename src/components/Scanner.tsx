@@ -5,8 +5,9 @@ import { Camera, CameraOff } from "lucide-react";
 import { useItems } from "@/hooks/useItems";
 import { useCustomers } from "@/hooks/useCustomers";
 import { toast } from "sonner";
-import { TagBadge } from "./tags/TagBadge";
 import { playSuccessSound, playErrorSound } from "@/lib/sounds";
+import { Item } from "@/lib/types";
+import { ItemPreview } from "./scanner/ItemPreview";
 
 type ScanMode = "receiving" | "loading" | "delivery";
 type ScanStatus = "none" | "success" | "error";
@@ -16,6 +17,7 @@ export const Scanner = () => {
   const [mode, setMode] = useState<ScanMode>("receiving");
   const [scanStatus, setScanStatus] = useState<ScanStatus>("none");
   const [canScan, setCanScan] = useState(true);
+  const [scannedItem, setScannedItem] = useState<Item | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const codeReader = useRef<BrowserMultiFormatReader>();
   const mediaStream = useRef<MediaStream | null>(null);
@@ -38,6 +40,8 @@ export const Scanner = () => {
     setTimeout(() => setCanScan(true), 1000);
 
     const item = items.find(item => item.code === code);
+    setScannedItem(item || null);
+    
     if (!item) {
       playErrorSound();
       setScanStatus("error");
@@ -73,7 +77,9 @@ export const Scanner = () => {
 
     if (success && newStatus) {
       try {
-        await updateItem({ ...item, status: newStatus, updatedAt: new Date() });
+        const updatedItem = { ...item, status: newStatus, updatedAt: new Date() };
+        await updateItem(updatedItem);
+        setScannedItem(updatedItem);
         playSuccessSound();
         setScanStatus("success");
         
@@ -201,6 +207,7 @@ export const Scanner = () => {
             playsInline
           />
         </div>
+        <ItemPreview item={scannedItem} />
       </div>
     </div>
   );
