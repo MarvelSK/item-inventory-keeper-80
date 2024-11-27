@@ -5,7 +5,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Index from "./pages/Index";
-import CenovePonuky from "./pages/CenovePonuky";
 import { PasswordProtect } from "./components/auth/PasswordProtect";
 import { supabase } from "./integrations/supabase/client";
 
@@ -41,7 +40,6 @@ const App = () => {
           ) : (
             <Routes>
               <Route path="/" element={<Index />} />
-              <Route path="/cenove-ponuky" element={<CenovePonuky />} />
             </Routes>
           )}
           <Toaster />

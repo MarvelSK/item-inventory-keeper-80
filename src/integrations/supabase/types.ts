@@ -186,123 +186,6 @@ export type Database = {
           },
         ]
       }
-      price_offers: {
-        Row: {
-          address: string
-          casing: string
-          color: string
-          color_adv: string
-          control: string
-          count: string
-          created_at: string
-          created_by: string | null
-          deleted: boolean
-          email: string
-          facade: string
-          height: string
-          id: number
-          message: string
-          motor: string
-          motor_acc: string
-          name: string
-          notices: string
-          notification: boolean
-          packet: string
-          phone_number: string
-          place: string
-          plate: string
-          product: string
-          rails: string
-          updated_at: string
-          updated_by: string | null
-          vendor_contact: string
-          vendor_date: string | null
-          vendor_id: number | null
-          width: string
-        }
-        Insert: {
-          address: string
-          casing: string
-          color: string
-          color_adv: string
-          control: string
-          count: string
-          created_at?: string
-          created_by?: string | null
-          deleted?: boolean
-          email: string
-          facade: string
-          height: string
-          id?: number
-          message: string
-          motor?: string
-          motor_acc?: string
-          name: string
-          notices?: string
-          notification?: boolean
-          packet?: string
-          phone_number: string
-          place: string
-          plate: string
-          product: string
-          rails?: string
-          updated_at?: string
-          updated_by?: string | null
-          vendor_contact?: string
-          vendor_date?: string | null
-          vendor_id?: number | null
-          width: string
-        }
-        Update: {
-          address?: string
-          casing?: string
-          color?: string
-          color_adv?: string
-          control?: string
-          count?: string
-          created_at?: string
-          created_by?: string | null
-          deleted?: boolean
-          email?: string
-          facade?: string
-          height?: string
-          id?: number
-          message?: string
-          motor?: string
-          motor_acc?: string
-          name?: string
-          notices?: string
-          notification?: boolean
-          packet?: string
-          phone_number?: string
-          place?: string
-          plate?: string
-          product?: string
-          rails?: string
-          updated_at?: string
-          updated_by?: string | null
-          vendor_contact?: string
-          vendor_date?: string | null
-          vendor_id?: number | null
-          width?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "price_offers_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "price_offers_updated_by_fkey"
-            columns: ["updated_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       profiles: {
         Row: {
           created_at: string
@@ -332,10 +215,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      generate_order_number: {
-        Args: Record<PropertyKey, never>
-        Returns: number
-      }
+      [_ in never]: never
     }
     Enums: {
       region_type: "slovakia" | "hungary" | "romania"
