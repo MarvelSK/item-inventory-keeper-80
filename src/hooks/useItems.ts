@@ -35,10 +35,14 @@ export const useItems = () => {
   });
 
   const updateMutation = useMutation({
-    mutationFn: updateItem,
-    onSuccess: () => {
+    mutationFn: (params: { item: Item, showToast?: boolean }) => {
+      return updateItem(params.item);
+    },
+    onSuccess: (_, { showToast = true }) => {
       queryClient.invalidateQueries({ queryKey: ['items'] });
-      toast.success('Položka bola upravená');
+      if (showToast) {
+        toast.success('Položka bola upravená');
+      }
     },
     onError: (error: Error) => {
       console.error('Error updating item:', error);
@@ -63,7 +67,8 @@ export const useItems = () => {
     isLoading,
     error,
     addItem: addMutation.mutateAsync,
-    updateItem: updateMutation.mutateAsync,
+    updateItem: (item: Item, showToast: boolean = true) => 
+      updateMutation.mutateAsync({ item, showToast }),
     deleteItem: deleteMutation.mutateAsync,
   };
 };

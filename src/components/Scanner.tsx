@@ -32,7 +32,7 @@ export const Scanner = () => {
     if (!canScan) return;
     
     setCanScan(false);
-    setTimeout(() => setCanScan(true), 1000);
+    setTimeout(() => setCanScan(true), 3000); // Increased delay to 3 seconds
 
     const item = items.find(item => item.code === code);
     setScannedItem(item || null);
@@ -70,7 +70,7 @@ export const Scanner = () => {
     if (success && newStatus) {
       try {
         const updatedItem = { ...item, status: newStatus, updatedAt: new Date() };
-        await updateItem(updatedItem);
+        await updateItem(updatedItem, false); // Added false parameter to skip toast notification
         setScannedItem(updatedItem);
         setScanStatus("success");
       } catch (error) {
