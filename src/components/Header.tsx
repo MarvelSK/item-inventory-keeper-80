@@ -1,8 +1,16 @@
 import { CustomerDialog } from "./CustomerDialog";
-import { MobileMenu } from "./header/MobileMenu";
-import { BackupDialog } from "./header/BackupDialog";
 import { StatisticsDialog } from "./header/StatisticsDialog";
+import { BackupDialog } from "./header/BackupDialog";
 import { useNavigate } from "react-router-dom";
+import { Button } from "./ui/button";
+import { Menu } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
 
 export const Header = () => {
   const navigate = useNavigate();
@@ -28,8 +36,32 @@ export const Header = () => {
             </h1>
           </div>
 
-          {/* Menu Items - Always visible but collapsed on mobile */}
-          <nav className="flex items-center space-x-2">
+          {/* Mobile Menu */}
+          <div className="md:hidden">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56" align="end">
+                <DropdownMenuGroup>
+                  <DropdownMenuItem>
+                    <CustomerDialog />
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <StatisticsDialog />
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <BackupDialog />
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
+          {/* Desktop Menu */}
+          <nav className="hidden md:flex items-center space-x-2">
             <CustomerDialog />
             <StatisticsDialog />
             <BackupDialog />
