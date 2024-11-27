@@ -1,7 +1,6 @@
 import { Item } from "./types";
 import { playSuccessSound, playErrorSound } from "./sounds";
 import { toast } from "sonner";
-import { TagBadge } from "@/components/tags/TagBadge";
 import { Customer } from "./types";
 
 export const handleScanResult = async (
@@ -46,20 +45,11 @@ export const handleScanResult = async (
       playSuccessSound();
       
       if (customer?.tags && customer.tags.length > 0) {
-        toast(
-          <div className="space-y-2">
-            <p className="font-medium">Zakázka: {item.code}</p>
-            <p>{customer.name}</p>
-            <div className="flex flex-wrap gap-1">
-              {customer.tags.map((tag) => (
-                <TagBadge key={tag.id} tag={tag} />
-              ))}
-            </div>
-          </div>,
-          {
+        import("@/components/scanner/ScanToastContent").then(({ ScanToastContent }) => {
+          toast(ScanToastContent({ item, customer }), {
             duration: 3000,
-          }
-        );
+          });
+        });
       }
       
       return { success: true, status: "success" as const };
