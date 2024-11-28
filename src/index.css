@@ -74,7 +74,10 @@
     @apply bg-background text-foreground text-[15px];
   }
   select {
-    @apply bg-background !important;
+    @apply bg-background text-foreground !important;
+  }
+  select option {
+    @apply bg-background text-foreground;
   }
 }
 
@@ -85,9 +88,14 @@
     @apply hover:bg-primary/80 hover:text-primary-foreground;
   }
 
-  /* Form input styles */
+  /* Form input and select styles */
   input, select, textarea {
     @apply bg-muted/10 border-border/50;
+  }
+
+  /* Select options in dark mode */
+  select option {
+    @apply bg-background text-foreground;
   }
 
   /* Filter and layout buttons */

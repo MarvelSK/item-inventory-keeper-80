@@ -57,7 +57,7 @@ export default {
           foreground: "#0F172A",
         },
         popover: {
-          DEFAULT: "white",
+          DEFAULT: "hsl(var(--background))",
           foreground: "hsl(var(--foreground))",
         },
       },
