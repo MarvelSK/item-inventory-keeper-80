@@ -1,4 +1,4 @@
-import { Item, DbItem, Tag, Json } from '../types';
+import { Item, DbItem, Tag } from '../types';
 import { supabase } from '@/integrations/supabase/client';
 
 const mapDbItemToItem = (dbItem: DbItem): Item => ({
@@ -9,12 +9,12 @@ const mapDbItemToItem = (dbItem: DbItem): Item => ({
   length: dbItem.length,
   width: dbItem.width,
   height: dbItem.height,
-  status: dbItem.status as Item['status'],
+  status: dbItem.status,
   tags: dbItem.tags || [],
   createdAt: dbItem.created_at,
   updatedAt: dbItem.updated_at,
-  deleted: dbItem.deleted || false,
-  postponed: dbItem.postponed || false,
+  deleted: dbItem.deleted,
+  postponed: dbItem.postponed,
   postponeReason: dbItem.postpone_reason,
   created_by: dbItem.created_by,
   updated_by: dbItem.updated_by
@@ -28,8 +28,8 @@ const mapItemToDb = (item: Item): Omit<DbItem, 'id' | 'created_at' | 'updated_at
   width: item.width,
   height: item.height,
   status: item.status,
-  tags: item.tags || [],
-  deleted: item.deleted || false,
+  tags: item.tags,
+  deleted: item.deleted,
   postponed: item.postponed,
   postpone_reason: item.postponeReason,
   created_by: item.created_by,
@@ -84,10 +84,6 @@ export const addItem = async (item: Item) => {
   if (error) {
     console.error('Error adding item:', error);
     throw error;
-  }
-
-  if (!data) {
-    throw new Error('No data returned from insert');
   }
 
   return mapDbItemToItem(data as DbItem);

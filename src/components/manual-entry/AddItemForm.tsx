@@ -39,18 +39,17 @@ export const AddItemForm = () => {
 
     try {
       const newItem = {
-        id: uuidv4(),
         code,
         description,
         length,
         width,
         height,
-        status,
-        tags: [],
+        status: status as Item['status'],
         customer: selectedCustomer,
-        company: "",
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        tags: [],
+        postponed: false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
         deleted: false
       };
 
