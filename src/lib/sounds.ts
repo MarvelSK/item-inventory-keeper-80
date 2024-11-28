@@ -1,5 +1,5 @@
 export const playSuccessSound = () => {
-  const audio = new Audio('https://jmp.sh/s/kPhiN68xCGWqGYkKfTwF');
+  const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
   audio.play().catch(() => {}); // Ignore errors if sound can't play
 };
 

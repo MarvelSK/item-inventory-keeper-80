@@ -50,7 +50,7 @@ export const Scanner = () => {
       const constraints: MediaStreamConstraints = {
         video: {
           facingMode: "environment",
-          advanced: [{ torch: torchEnabled }] as any // Type assertion to avoid TypeScript error
+          advanced: [{ torch: torchEnabled }]
         }
       };
 
