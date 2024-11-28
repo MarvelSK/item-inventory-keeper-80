@@ -48,9 +48,9 @@ export const AddItemForm = () => {
         status,
         tags: [],
         customer: selectedCustomer,
-        company: "",
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        postponed: false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
         deleted: false
       };
 

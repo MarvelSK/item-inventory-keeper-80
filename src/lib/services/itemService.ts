@@ -17,10 +17,10 @@ const mapDbItemToItem = (dbItem: DbItem): Item => ({
         color: String(tag.color)
       }))
     : [],
-  createdAt: new Date(dbItem.created_at),
-  updatedAt: new Date(dbItem.updated_at),
+  createdAt: dbItem.created_at,
+  updatedAt: dbItem.updated_at,
   deleted: dbItem.deleted,
-  postponed: dbItem.postponed,
+  postponed: dbItem.postponed || false,
   postponeReason: dbItem.postpone_reason,
   created_by: dbItem.created_by,
   updated_by: dbItem.updated_by
@@ -28,14 +28,14 @@ const mapDbItemToItem = (dbItem: DbItem): Item => ({
 
 const mapItemToDb = (item: Item): Omit<DbItem, 'id' | 'created_at' | 'updated_at'> => ({
   code: item.code,
-  customer: item.customer,
+  customer: item.customer || '',
   description: item.description,
   length: item.length,
   width: item.width,
   height: item.height,
   status: item.status,
   tags: item.tags as unknown as Json,
-  deleted: item.deleted,
+  deleted: item.deleted || false,
   postponed: item.postponed,
   postpone_reason: item.postponeReason,
   created_by: item.created_by,
@@ -74,21 +74,17 @@ export const addItem = async (item: Item) => {
 
   const { data, error } = await supabase
     .from('items')
-    .insert(mapItemToDb({
-      ...item,
+    .insert({
+      ...mapItemToDb(item),
       created_by: user.id,
       updated_by: user.id,
-    }))
+    })
     .select()
-    .maybeSingle();
+    .single();
 
   if (error) {
     console.error('Error adding item:', error);
     throw error;
-  }
-
-  if (!data) {
-    throw new Error('No data returned from insert');
   }
 
   return mapDbItemToItem(data as DbItem);
@@ -100,21 +96,17 @@ export const updateItem = async (updatedItem: Item) => {
 
   const { data, error } = await supabase
     .from('items')
-    .update(mapItemToDb({
-      ...updatedItem,
+    .update({
+      ...mapItemToDb(updatedItem),
       updated_by: user.id,
-    }))
+    })
     .eq('id', updatedItem.id)
     .select()
-    .maybeSingle();
+    .single();
 
   if (error) {
     console.error('Error updating item:', error);
     throw error;
-  }
-
-  if (!data) {
-    throw new Error('No data returned from update');
   }
 
   return mapDbItemToItem(data as DbItem);

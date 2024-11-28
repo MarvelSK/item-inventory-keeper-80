@@ -11,6 +11,10 @@ export interface Item {
   length?: number;
   postponed: boolean;
   postponeReason?: string;
+  tags?: Tag[];
+  deleted?: boolean;
+  created_by?: string;
+  updated_by?: string;
 }
 
 export interface Customer {
@@ -36,11 +40,12 @@ export interface Json {
   [key: string]: any;
 }
 
-export interface DbItem extends Omit<Item, 'createdAt' | 'updatedAt'> {
+export interface DbItem extends Omit<Item, 'createdAt' | 'updatedAt' | 'postponeReason'> {
   created_at: string;
   updated_at: string;
   created_by?: string;
   updated_by?: string;
   deleted: boolean;
   tags?: Json;
+  postpone_reason?: string;
 }
