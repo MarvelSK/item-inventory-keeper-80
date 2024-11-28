@@ -7,6 +7,16 @@ import { ItemPreview } from "./scanner/ItemPreview";
 import { ScanControls } from "./scanner/ScanControls";
 import { ScanMode, ScanStatus } from "./scanner/types";
 
+// Extend MediaTrackConstraintSet to include torch
+interface ExtendedTrackConstraints extends MediaTrackConstraints {
+  advanced?: { torch?: boolean }[];
+}
+
+// Extend MediaTrackCapabilities to include torch
+interface ExtendedTrackCapabilities extends MediaTrackCapabilities {
+  torch?: boolean;
+}
+
 export const Scanner = () => {
   const [isScanning, setIsScanning] = useState(false);
   const [mode, setMode] = useState<ScanMode>("receiving");
@@ -59,7 +69,6 @@ export const Scanner = () => {
     let newStatus;
     let success = false;
 
-    // Use current mode value from state
     switch (mode) {
       case "receiving":
         if (item.status === "waiting") {
@@ -101,9 +110,8 @@ export const Scanner = () => {
     if (!mediaStream.current) return;
     
     const track = mediaStream.current.getVideoTracks()[0];
-    const capabilities = track.getCapabilities();
+    const capabilities = track.getCapabilities() as ExtendedTrackCapabilities;
     
-    // Check if torch is supported
     if (!capabilities.torch) {
       console.log('Torch not supported on this device');
       return;
@@ -112,7 +120,7 @@ export const Scanner = () => {
     try {
       await track.applyConstraints({
         advanced: [{ torch: !torchEnabled }]
-      });
+      } as ExtendedTrackConstraints);
       setTorchEnabled(!torchEnabled);
     } catch (err) {
       console.error('Error toggling torch:', err);
@@ -123,11 +131,11 @@ export const Scanner = () => {
     try {
       if (!videoRef.current) return;
 
-      const constraints = {
-        video: { 
+      const constraints: MediaStreamConstraints = {
+        video: {
           facingMode: "environment",
           advanced: [{ torch: torchEnabled }]
-        }
+        } as ExtendedTrackConstraints
       };
 
       mediaStream.current = await navigator.mediaDevices.getUserMedia(constraints);
