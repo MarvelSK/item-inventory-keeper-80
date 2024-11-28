@@ -5,8 +5,11 @@ import { ItemPreview } from "./scanner/ItemPreview";
 import { ScanControls } from "./scanner/ScanControls";
 import { useScanner } from "@/hooks/useScanner";
 import { useTorch } from "@/hooks/useTorch";
+import { useNavigate } from "react-router-dom";
+import { X } from "lucide-react";
 
 export const Scanner = () => {
+  const navigate = useNavigate();
   const { items, updateItem: originalUpdateItem } = useItems();
   const updateItem = async (item: any, showToast?: boolean) => {
     await originalUpdateItem(item, showToast);
@@ -31,10 +34,9 @@ export const Scanner = () => {
 
   useEffect(() => {
     codeReader.current = new BrowserMultiFormatReader();
+    startScanning();
     return () => {
-      if (mediaStream.current) {
-        mediaStream.current.getTracks().forEach(track => track.stop());
-      }
+      stopScanning();
     };
   }, []);
 
@@ -52,6 +54,8 @@ export const Scanner = () => {
       const constraints: MediaStreamConstraints = {
         video: {
           facingMode: "environment",
+          width: { ideal: 1920 },
+          height: { ideal: 1080 },
           advanced: [{ torch: torchEnabled }] as any
         }
       };
@@ -83,6 +87,9 @@ export const Scanner = () => {
       mediaStream.current.getTracks().forEach(track => track.stop());
       mediaStream.current = null;
     }
+    if (codeReader.current) {
+      codeReader.current.reset();
+    }
     setIsScanning(false);
     setTorchEnabled(false);
   };
@@ -105,6 +112,7 @@ export const Scanner = () => {
             className={`w-full h-full object-cover transition-colors ${getScannerBorderColor()}`}
             autoPlay
             playsInline
+            muted
           />
           
           {/* Scanner Overlay */}
@@ -112,11 +120,16 @@ export const Scanner = () => {
             <div className="h-full flex flex-col">
               {/* Top Bar */}
               <div className="p-4 flex justify-between items-center bg-gradient-to-b from-black/50 to-transparent">
-                <div className="w-10 h-10" /> {/* Spacer */}
+                <button
+                  onClick={() => navigate(-1)}
+                  className="w-10 h-10 flex items-center justify-center text-white bg-black/20 rounded-full backdrop-blur-sm pointer-events-auto"
+                >
+                  <X className="w-6 h-6" />
+                </button>
                 <h2 className="text-white font-medium">Skenovanie</h2>
                 <button
                   onClick={toggleTorch}
-                  className="w-10 h-10 flex items-center justify-center text-white bg-black/20 rounded-full backdrop-blur-sm"
+                  className="w-10 h-10 flex items-center justify-center text-white bg-black/20 rounded-full backdrop-blur-sm pointer-events-auto"
                 >
                   {torchEnabled ? "🔦" : "⚡️"}
                 </button>
@@ -133,7 +146,7 @@ export const Scanner = () => {
               </div>
               
               {/* Bottom Controls */}
-              <div className="p-6 bg-gradient-to-t from-black/50 to-transparent">
+              <div className="p-6 bg-gradient-to-t from-black/50 to-transparent pointer-events-auto">
                 <ScanControls
                   mode={mode}
                   setMode={setMode}
