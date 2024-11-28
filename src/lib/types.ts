@@ -1,26 +1,16 @@
 export interface Item {
   id: string;
   code: string;
-  customer: string;
-  description?: string | null;
-  length?: number | null;
-  width?: number | null;
-  height?: number | null;
-  status: 'waiting' | 'in_stock' | 'in_transit' | 'delivered';
-  tags: Tag[];
-  createdAt: Date;
-  updatedAt: Date;
-  deleted: boolean;
-  postponed?: boolean | null;
-  postponeReason?: string | null;
-  created_by?: string | null;
-  updated_by?: string | null;
-}
-
-export interface Tag {
-  id: string;
-  name: string;
-  color: string;
+  description?: string;
+  status: "waiting" | "in_stock" | "in_transit" | "delivered";
+  createdAt: string;
+  updatedAt: string;
+  customer?: string;
+  height?: number;
+  width?: number;
+  length?: number;
+  postponed: boolean;
+  postponeReason?: string;
 }
 
 export interface Customer {
@@ -30,28 +20,27 @@ export interface Customer {
   deleted: boolean;
 }
 
-// Alias Label to Tag for backward compatibility
-export type Label = Tag;
-
-// Database type for items as they come from Supabase
-export interface DbItem {
+export interface Tag {
   id: string;
-  code: string;
-  customer: string;
-  description: string | null;
-  length: number | null;
-  width: number | null;
-  height: number | null;
-  status: string;
-  tags: Json;
-  created_at: string;
-  updated_at: string;
-  deleted: boolean;
-  postponed: boolean | null;
-  postpone_reason: string | null;
-  created_by: string | null;
-  updated_by: string | null;
+  name: string;
+  color: string;
 }
 
-// Helper type for JSON data
-export type Json = string | number | boolean | null | { [key: string]: Json } | Json[];
+export interface Label {
+  id: string;
+  name: string;
+  color: string;
+}
+
+export interface Json {
+  [key: string]: any;
+}
+
+export interface DbItem extends Omit<Item, 'createdAt' | 'updatedAt'> {
+  created_at: string;
+  updated_at: string;
+  created_by?: string;
+  updated_by?: string;
+  deleted: boolean;
+  tags?: Json;
+}
