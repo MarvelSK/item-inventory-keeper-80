@@ -10,7 +10,11 @@ const mapDbItemToItem = (dbItem: DbItem): Item => ({
   width: dbItem.width,
   height: dbItem.height,
   status: dbItem.status,
-  tags: dbItem.tags || [],
+  tags: (dbItem.tags as any[] || []).map(tag => ({
+    id: tag.id,
+    name: tag.name,
+    color: tag.color
+  })),
   createdAt: dbItem.created_at,
   updatedAt: dbItem.updated_at,
   deleted: dbItem.deleted,
@@ -28,7 +32,7 @@ const mapItemToDb = (item: Item): Omit<DbItem, 'id' | 'created_at' | 'updated_at
   width: item.width,
   height: item.height,
   status: item.status,
-  tags: item.tags,
+  tags: item.tags as any,
   deleted: item.deleted,
   postponed: item.postponed,
   postpone_reason: item.postponeReason,
@@ -57,18 +61,19 @@ export const findItemByCode = async (code: string) => {
   }
 };
 
-export const addItem = async (item: Item) => {
+export const addItem = async (item: Omit<Item, 'id' | 'createdAt' | 'updatedAt' | 'deleted'>) => {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('User not authenticated');
 
-  const existingItem = await findItemByCode(item.code);
-  if (existingItem) {
-    throw new Error('Item with this code already exists');
-  }
-
   const now = new Date().toISOString();
   const itemToInsert = {
-    ...mapItemToDb(item),
+    ...mapItemToDb({
+      ...item,
+      id: crypto.randomUUID(),
+      createdAt: now,
+      updatedAt: now,
+      deleted: false
+    }),
     created_at: now,
     updated_at: now,
     created_by: user.id,
@@ -93,23 +98,23 @@ export const updateItem = async (updatedItem: Item) => {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('User not authenticated');
 
+  const now = new Date().toISOString();
+  const itemToUpdate = {
+    ...mapItemToDb(updatedItem),
+    updated_at: now,
+    updated_by: user.id,
+  };
+
   const { data, error } = await supabase
     .from('items')
-    .update(mapItemToDb({
-      ...updatedItem,
-      updated_by: user.id,
-    }))
+    .update(itemToUpdate)
     .eq('id', updatedItem.id)
     .select()
-    .maybeSingle();
+    .single();
 
   if (error) {
     console.error('Error updating item:', error);
     throw error;
-  }
-
-  if (!data) {
-    throw new Error('No data returned from update');
   }
 
   return mapDbItemToItem(data as DbItem);
@@ -144,7 +149,7 @@ export const getAllItems = async () => {
 
     if (!items) return [];
 
-    return (items as DbItem[]).map(mapDbItemToItem);
+    return items.map(item => mapDbItemToItem(item as DbItem));
   } catch (error) {
     console.error('Error in getAllItems:', error);
     throw error;

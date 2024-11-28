@@ -59,7 +59,7 @@ export interface DbItem {
   postpone_reason?: string;
   created_by?: string;
   updated_by?: string;
-  tags: Tag[];
+  tags: Json;
   deleted: boolean;
 }
 
