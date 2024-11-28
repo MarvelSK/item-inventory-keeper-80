@@ -74,7 +74,11 @@ export const Scanner = () => {
 
     if (success && newStatus) {
       try {
-        const updatedItem = { ...item, status: newStatus, updatedAt: new Date().toISOString() };
+        const updatedItem = { 
+          ...item, 
+          status: newStatus, 
+          updatedAt: new Date()  // Changed from string to Date object
+        };
         await updateItem(updatedItem, false);
         setScannedItem(updatedItem);
         setScanStatus("success");
