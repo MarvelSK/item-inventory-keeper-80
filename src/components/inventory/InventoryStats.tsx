@@ -28,7 +28,7 @@ export const InventoryStats = ({ items }: InventoryStatsProps) => {
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
       <Card className="col-span-1">
         <CardContent className="p-2 flex items-center justify-between">
-          <Badge variant="secondary" className="text-xs whitespace-nowrap">
+          <Badge variant="secondary" className="text-xs">
             Celkom
           </Badge>
           <span className="text-xl font-bold text-gray-900 dark:text-gray-100">
@@ -40,7 +40,7 @@ export const InventoryStats = ({ items }: InventoryStatsProps) => {
       {Object.entries(STATUS_MAP).map(([status, info]) => (
         <Card key={status} className="col-span-1">
           <CardContent className="p-2 flex items-center justify-between">
-            <Badge variant={info.variant} className="text-xs whitespace-nowrap">
+            <Badge variant={info.variant} className="text-xs">
               {info.label}
             </Badge>
             <span className="text-xl font-bold text-gray-900 dark:text-gray-100">
