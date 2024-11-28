@@ -14,7 +14,7 @@ const Index = () => {
       
       <main className="container mx-auto px-4 py-8 flex-grow">
         <div className="flex justify-between items-center mb-8">
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-nowrap gap-2 overflow-x-auto">
             <button
               onClick={() => setActiveTab("manual")}
               className={`px-4 py-2 rounded-md transition-colors ${
