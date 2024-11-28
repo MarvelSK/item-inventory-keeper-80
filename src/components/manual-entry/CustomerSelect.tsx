@@ -32,12 +32,16 @@ export const CustomerSelect = ({ value, onChange, onAddNew }: CustomerSelectProp
     <div className="flex items-center space-x-2">
       <div className="flex-1">
         <Select value={value} onValueChange={onChange}>
-          <SelectTrigger className="bg-white">
+          <SelectTrigger className="bg-background border-border dark:bg-muted/10 dark:border-border/50">
             <SelectValue placeholder="Vyberte zákazníka" />
           </SelectTrigger>
-          <SelectContent className="bg-white z-50">
+          <SelectContent className="bg-background border-border dark:bg-card dark:border-border/50">
             {customers.map((customer) => (
-              <SelectItem key={customer.id} value={customer.id}>
+              <SelectItem 
+                key={customer.id} 
+                value={customer.id}
+                className="hover:bg-muted dark:hover:bg-muted/20"
+              >
                 {customer.name}
               </SelectItem>
             ))}
@@ -48,6 +52,7 @@ export const CustomerSelect = ({ value, onChange, onAddNew }: CustomerSelectProp
         type="button"
         variant="outline"
         onClick={onAddNew}
+        className="dark:bg-muted/10 dark:border-border/50 dark:hover:bg-primary/20"
       >
         <Plus className="h-4 w-4" />
       </Button>
