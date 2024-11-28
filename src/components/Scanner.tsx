@@ -7,6 +7,7 @@ import { useScanner } from "@/hooks/useScanner";
 import { useTorch } from "@/hooks/useTorch";
 import { useNavigate } from "react-router-dom";
 import { X } from "lucide-react";
+import { toast } from "sonner";
 
 export const Scanner = () => {
   const navigate = useNavigate();
@@ -49,14 +50,16 @@ export const Scanner = () => {
 
   const startScanning = async () => {
     try {
-      if (!videoRef.current) return;
+      if (!videoRef.current) {
+        toast.error("Camera initialization failed");
+        return;
+      }
 
       const constraints: MediaStreamConstraints = {
         video: {
           facingMode: "environment",
           width: { ideal: 1920 },
-          height: { ideal: 1080 },
-          advanced: [{ torch: torchEnabled }] as any
+          height: { ideal: 1080 }
         }
       };
 
@@ -79,6 +82,7 @@ export const Scanner = () => {
       );
     } catch (error) {
       console.error("Error accessing camera:", error);
+      toast.error("Failed to access camera. Please check permissions.");
     }
   };
 
@@ -88,7 +92,7 @@ export const Scanner = () => {
       mediaStream.current = null;
     }
     if (codeReader.current) {
-      codeReader.current.reset();
+      codeReader.current.stopStreams();
     }
     setIsScanning(false);
     setTorchEnabled(false);

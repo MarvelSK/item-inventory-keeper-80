@@ -62,8 +62,8 @@ export const useScanner = (
 
     if (success && newStatus) {
       try {
-        await updateItem({ ...item, status: newStatus, updatedAt: new Date() }, false);
-        setScannedItem({ ...item, status: newStatus });
+        await updateItem({ ...item, status: newStatus as any, updatedAt: new Date() }, false);
+        setScannedItem({ ...item, status: newStatus as any });
         setScanStatus("success");
         playSuccessSound();
         toast.success("Položka bola úspešne aktualizovaná");
