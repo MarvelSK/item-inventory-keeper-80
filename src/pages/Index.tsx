@@ -52,7 +52,7 @@ const Index = () => {
           {activeTab === "manual" && <ManualEntry />}
           {activeTab === "scanner" && <Scanner />}
           {activeTab === "inventory" && (
-            <div className="bg-white dark:bg-secondary p-4 md:p-6 rounded-lg shadow-sm">
+            <div className="bg-white dark:bg-card p-4 md:p-6 rounded-lg shadow-sm dark:border dark:border-border">
               <h2 className="text-xl font-semibold mb-4 text-[#212490] dark:text-blue-400">Inventár položiek</h2>
               <InventoryList />
             </div>
