@@ -8,7 +8,6 @@ interface ScanControlsProps {
   isScanning: boolean;
   onStartScan: () => void;
   onStopScan: () => void;
-  onModeChange: (newMode: ScanMode) => void;
 }
 
 export const ScanControls = ({
@@ -17,7 +16,6 @@ export const ScanControls = ({
   isScanning,
   onStartScan,
   onStopScan,
-  onModeChange,
 }: ScanControlsProps) => {
   const getModeLabel = (mode: ScanMode) => {
     switch (mode) {
@@ -27,18 +25,13 @@ export const ScanControls = ({
     }
   };
 
-  const handleModeChange = (newMode: ScanMode) => {
-    setMode(newMode);
-    onModeChange(newMode);
-  };
-
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap gap-2 justify-center">
         {["receiving", "loading", "delivery"].map((m) => (
           <Button
             key={m}
-            onClick={() => handleModeChange(m as ScanMode)}
+            onClick={() => setMode(m as ScanMode)}
             variant={mode === m ? "default" : "outline"}
           >
             {getModeLabel(m as ScanMode)}
