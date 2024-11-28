@@ -1,5 +1,4 @@
 import { Button } from "../ui/button";
-import { Camera, CameraOff, Flashlight, FlashlightOff } from "lucide-react";
 import { ScanMode } from "./types";
 
 interface ScanControlsProps {
@@ -18,8 +17,6 @@ export const ScanControls = ({
   isScanning,
   onStartScan,
   onStopScan,
-  onToggleTorch,
-  torchEnabled,
 }: ScanControlsProps) => {
   const getModeLabel = (mode: ScanMode) => {
     switch (mode) {
@@ -31,53 +28,29 @@ export const ScanControls = ({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap gap-2 justify-center">
+      <div className="flex justify-center gap-2">
         {["receiving", "loading", "delivery"].map((m) => (
           <Button
             key={m}
             onClick={() => setMode(m as ScanMode)}
-            variant={mode === m ? "default" : "outline"}
+            variant={mode === m ? "default" : "secondary"}
+            className={`rounded-full px-6 py-2 text-sm font-medium transition-colors ${
+              mode === m 
+                ? "bg-white text-black" 
+                : "bg-black/30 text-white hover:bg-black/40 backdrop-blur-sm"
+            }`}
           >
             {getModeLabel(m as ScanMode)}
           </Button>
         ))}
       </div>
-      <div className="flex justify-center gap-2">
+      <div className="flex justify-center">
         <Button
           onClick={isScanning ? onStopScan : onStartScan}
-          className="w-full sm:w-auto"
+          className="w-16 h-16 rounded-full bg-white text-black hover:bg-white/90 transition-colors"
         >
-          {isScanning ? (
-            <>
-              <CameraOff className="mr-2 h-4 w-4" />
-              Stop Scanning
-            </>
-          ) : (
-            <>
-              <Camera className="mr-2 h-4 w-4" />
-              Start Scanning
-            </>
-          )}
+          {isScanning ? "⏹" : "⏺"}
         </Button>
-        {isScanning && (
-          <Button
-            onClick={onToggleTorch}
-            variant="outline"
-            className="w-full sm:w-auto"
-          >
-            {torchEnabled ? (
-              <>
-                <FlashlightOff className="mr-2 h-4 w-4" />
-                Disable Flash
-              </>
-            ) : (
-              <>
-                <Flashlight className="mr-2 h-4 w-4" />
-                Enable Flash
-              </>
-            )}
-          </Button>
-        )}
       </div>
     </div>
   );

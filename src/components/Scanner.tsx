@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { BrowserMultiFormatReader } from "@zxing/browser";
 import { useItems } from "@/hooks/useItems";
-import { useCustomers } from "@/hooks/useCustomers";
 import { ItemPreview } from "./scanner/ItemPreview";
 import { ScanControls } from "./scanner/ScanControls";
 import { useScanner } from "@/hooks/useScanner";
@@ -9,7 +8,6 @@ import { useTorch } from "@/hooks/useTorch";
 
 export const Scanner = () => {
   const { items, updateItem } = useItems();
-  const { customers } = useCustomers();
   const {
     isScanning,
     setIsScanning,
@@ -50,7 +48,7 @@ export const Scanner = () => {
       const constraints: MediaStreamConstraints = {
         video: {
           facingMode: "environment",
-          advanced: [{ torch: torchEnabled }] as any // Type assertion to avoid TypeScript error
+          advanced: [{ torch: torchEnabled }] as any
         }
       };
 
@@ -87,34 +85,71 @@ export const Scanner = () => {
 
   const getScannerBorderColor = () => {
     switch (scanStatus) {
-      case "success": return "border-success";
-      case "error": return "border-destructive";
-      default: return "border-border";
+      case "success": return "border-success/50";
+      case "error": return "border-destructive/50";
+      default: return "border-transparent";
     }
   };
 
   return (
-    <div className="bg-card p-4 md:p-6 rounded-lg shadow-sm dark:shadow-none">
-      <h2 className="text-xl font-semibold mb-4 text-primary">Skenovanie položiek</h2>
-      <div className="space-y-4">
-        <ScanControls
-          mode={mode}
-          setMode={setMode}
-          isScanning={isScanning}
-          onStartScan={startScanning}
-          onStopScan={stopScanning}
-          onToggleTorch={toggleTorch}
-          torchEnabled={torchEnabled}
-        />
-        <div className="relative aspect-video max-w-md mx-auto">
+    <div className="fixed inset-0 bg-black">
+      <div className="relative h-full flex flex-col">
+        {/* Camera View */}
+        <div className="relative flex-1">
           <video
             ref={videoRef}
-            className={`w-full h-full object-cover rounded-lg border-4 transition-colors ${getScannerBorderColor()}`}
+            className={`w-full h-full object-cover transition-colors ${getScannerBorderColor()}`}
             autoPlay
             playsInline
           />
+          
+          {/* Scanner Overlay */}
+          <div className="absolute inset-0 pointer-events-none">
+            <div className="h-full flex flex-col">
+              {/* Top Bar */}
+              <div className="p-4 flex justify-between items-center bg-gradient-to-b from-black/50 to-transparent">
+                <div className="w-10 h-10" /> {/* Spacer */}
+                <h2 className="text-white font-medium">Skenovanie</h2>
+                <button
+                  onClick={toggleTorch}
+                  className="w-10 h-10 flex items-center justify-center text-white bg-black/20 rounded-full backdrop-blur-sm"
+                >
+                  {torchEnabled ? "🔦" : "⚡️"}
+                </button>
+              </div>
+              
+              {/* Center Scanner Frame */}
+              <div className="flex-1 flex items-center justify-center p-8">
+                <div className="w-full max-w-[280px] aspect-square relative">
+                  <div className="absolute inset-0 border-2 border-white/30 rounded-2xl" />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-48 h-[2px] bg-white/50" />
+                  </div>
+                </div>
+              </div>
+              
+              {/* Bottom Controls */}
+              <div className="p-6 bg-gradient-to-t from-black/50 to-transparent">
+                <ScanControls
+                  mode={mode}
+                  setMode={setMode}
+                  isScanning={isScanning}
+                  onStartScan={startScanning}
+                  onStopScan={stopScanning}
+                  onToggleTorch={toggleTorch}
+                  torchEnabled={torchEnabled}
+                />
+              </div>
+            </div>
+          </div>
         </div>
-        <ItemPreview item={scannedItem} />
+        
+        {/* Scanned Item Preview */}
+        <div className="absolute bottom-0 left-0 right-0 p-4 pointer-events-none">
+          <div className="pointer-events-auto">
+            <ItemPreview item={scannedItem} />
+          </div>
+        </div>
       </div>
     </div>
   );

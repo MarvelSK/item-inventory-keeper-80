@@ -9,7 +9,7 @@ interface ItemPreviewProps {
 }
 
 const STATUS_MAP = {
-  waiting: { label: 'Čaká na dovoz', variant: 'secondary' },
+  waiting: { label: 'Čaká na dovoz', variant: 'warning' },
   in_stock: { label: 'Na sklade', variant: 'success' },
   in_transit: { label: 'V preprave', variant: 'warning' },
   delivered: { label: 'Doručené', variant: 'default' }
@@ -24,28 +24,37 @@ export const ItemPreview = ({ item }: ItemPreviewProps) => {
   const statusInfo = STATUS_MAP[item.status];
 
   return (
-    <Card className="p-4 mt-4 animate-fade-in">
-      <div className="space-y-2">
+    <Card className="bg-black/40 backdrop-blur-sm border-0 text-white animate-fade-in">
+      <div className="p-4 space-y-2">
         <div className="flex justify-between items-start">
           <div>
-            <h3 className="font-medium">Kód: {item.code}</h3>
-            <p className="text-sm text-gray-500">Zákazník: {customer?.name || "Unknown"}</p>
+            <h3 className="font-medium text-white/90">Kód: {item.code}</h3>
+            <p className="text-sm text-white/70">Zákazník: {customer?.name || "Unknown"}</p>
           </div>
-          <Badge variant={statusInfo.variant as any}>{statusInfo.label}</Badge>
+          <Badge 
+            variant={statusInfo.variant as any}
+            className="bg-white/10 backdrop-blur-sm text-white"
+          >
+            {statusInfo.label}
+          </Badge>
         </div>
         
         {item.description && (
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-white/70">
             Popis: {item.description}
           </p>
         )}
         
         {customer?.tags && customer.tags.length > 0 && (
           <div>
-            <p className="text-sm text-gray-600 mb-1">Štítky zákazníka:</p>
+            <p className="text-sm text-white/70 mb-1">Štítky zákazníka:</p>
             <div className="flex flex-wrap gap-1">
               {customer.tags.map((tag) => (
-                <TagBadge key={tag.id} tag={tag} />
+                <TagBadge 
+                  key={tag.id} 
+                  tag={tag}
+                  className="bg-white/10 text-white backdrop-blur-sm" 
+                />
               ))}
             </div>
           </div>
