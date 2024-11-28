@@ -10,17 +10,11 @@ const mapDbItemToItem = (dbItem: DbItem): Item => ({
   width: dbItem.width,
   height: dbItem.height,
   status: dbItem.status as Item['status'],
-  tags: Array.isArray(dbItem.tags) 
-    ? (dbItem.tags as unknown as Tag[]).map(tag => ({
-        id: String(tag.id),
-        name: String(tag.name),
-        color: String(tag.color)
-      }))
-    : [],
-  createdAt: new Date(dbItem.created_at),
-  updatedAt: new Date(dbItem.updated_at),
-  deleted: dbItem.deleted,
-  postponed: dbItem.postponed,
+  tags: dbItem.tags || [],
+  createdAt: dbItem.created_at,
+  updatedAt: dbItem.updated_at,
+  deleted: dbItem.deleted || false,
+  postponed: dbItem.postponed || false,
   postponeReason: dbItem.postpone_reason,
   created_by: dbItem.created_by,
   updated_by: dbItem.updated_by
@@ -28,14 +22,14 @@ const mapDbItemToItem = (dbItem: DbItem): Item => ({
 
 const mapItemToDb = (item: Item): Omit<DbItem, 'id' | 'created_at' | 'updated_at'> => ({
   code: item.code,
-  customer: item.customer,
+  customer: item.customer || '',
   description: item.description,
   length: item.length,
   width: item.width,
   height: item.height,
   status: item.status,
-  tags: item.tags as unknown as Json,
-  deleted: item.deleted,
+  tags: item.tags || [],
+  deleted: item.deleted || false,
   postponed: item.postponed,
   postpone_reason: item.postponeReason,
   created_by: item.created_by,
@@ -72,15 +66,20 @@ export const addItem = async (item: Item) => {
     throw new Error('Item with this code already exists');
   }
 
+  const now = new Date().toISOString();
+  const itemToInsert = {
+    ...mapItemToDb(item),
+    created_at: now,
+    updated_at: now,
+    created_by: user.id,
+    updated_by: user.id,
+  };
+
   const { data, error } = await supabase
     .from('items')
-    .insert(mapItemToDb({
-      ...item,
-      created_by: user.id,
-      updated_by: user.id,
-    }))
+    .insert(itemToInsert)
     .select()
-    .maybeSingle();
+    .single();
 
   if (error) {
     console.error('Error adding item:', error);

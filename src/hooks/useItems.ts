@@ -14,13 +14,15 @@ export const useItems = () => {
 
   const addMutation = useMutation({
     mutationFn: (newItem: Omit<Item, 'id' | 'createdAt' | 'updatedAt' | 'deleted'>) => {
+      const now = new Date().toISOString();
       const fullItem: Item = {
         ...newItem,
         id: crypto.randomUUID(),
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: now,
+        updatedAt: now,
         deleted: false,
-        tags: newItem.tags || []
+        tags: [],
+        postponed: false
       };
       return addItem(fullItem);
     },
