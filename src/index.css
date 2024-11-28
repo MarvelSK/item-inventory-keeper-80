@@ -87,6 +87,16 @@ button {
   @apply bg-[#47acc9] text-white;
 }
 
+/* Accordion trigger button dark mode */
+.dark .accordion-trigger {
+  @apply hover:bg-muted/10;
+}
+
+/* Dialog trigger button dark mode */
+.dark [role="dialog"] button {
+  @apply hover:bg-muted/20 hover:text-primary;
+}
+
 /* Preserve logo color in dark mode */
 .logo {
   @apply dark:brightness-100 dark:filter-none;
