@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { BrowserMultiFormatReader } from "@zxing/browser";
 import { useItems } from "@/hooks/useItems";
 import { ItemPreview } from "./scanner/ItemPreview";
@@ -7,10 +7,14 @@ import { useScanner } from "@/hooks/useScanner";
 import { useTorch } from "@/hooks/useTorch";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Flashlight, FlashlightOff, SwitchCamera } from "lucide-react";
+import { ScanHistory } from "./scanner/ScanHistory";
+import { Item } from "@/lib/types";
 
 export const Scanner = () => {
   const navigate = useNavigate();
   const { items, updateItem: originalUpdateItem } = useItems();
+  const [scanHistory, setScanHistory] = useState<Item[]>([]);
+  
   const updateItem = async (item: any, showToast?: boolean) => {
     await originalUpdateItem(item, showToast);
   };
@@ -27,12 +31,19 @@ export const Scanner = () => {
     videoRef,
     codeReader,
     mediaStream,
-    handleScannedCode,
+    handleScannedCode: originalHandleScannedCode,
     facingMode,
     setFacingMode
   } = useScanner(items, updateItem);
 
   const { toggleTorch } = useTorch(mediaStream, torchEnabled, setTorchEnabled);
+
+  const handleScannedCode = async (code: string) => {
+    await originalHandleScannedCode(code);
+    if (scannedItem) {
+      setScanHistory(prev => [scannedItem, ...prev]);
+    }
+  };
 
   useEffect(() => {
     codeReader.current = new BrowserMultiFormatReader();
@@ -89,7 +100,7 @@ export const Scanner = () => {
       mediaStream.current = null;
     }
     if (codeReader.current) {
-      codeReader.current.stopStreams();
+      codeReader.current.reset();
     }
     setIsScanning(false);
     setTorchEnabled(false);
@@ -110,15 +121,8 @@ export const Scanner = () => {
   return (
     <div className="fixed inset-0 bg-black">
       <div className="relative h-full flex flex-col">
-        {/* Scanned Item Preview */}
-        <div className="absolute top-0 left-0 right-0 p-4 z-10 pointer-events-none">
-          <div className="pointer-events-auto">
-            <ItemPreview item={scannedItem} />
-          </div>
-        </div>
-
-        {/* Camera View */}
-        <div className="relative flex-1">
+        {/* Top Half - Scanner */}
+        <div className="h-1/2 relative">
           <video
             ref={videoRef}
             className={`w-full h-full object-cover transition-colors ${getScannerBorderColor()}`}
@@ -164,20 +168,34 @@ export const Scanner = () => {
                   </div>
                 </div>
               </div>
-              
-              {/* Bottom Controls */}
-              <div className="p-6 bg-gradient-to-t from-black/50 to-transparent pointer-events-auto">
-                <ScanControls
-                  mode={mode}
-                  setMode={setMode}
-                  isScanning={isScanning}
-                  onStartScan={startScanning}
-                  onStopScan={stopScanning}
-                  onToggleTorch={toggleTorch}
-                  torchEnabled={torchEnabled}
-                />
-              </div>
             </div>
+          </div>
+
+          {/* Scanned Item Preview */}
+          <div className="absolute top-16 left-0 right-0 p-4 z-10 pointer-events-none">
+            <div className="pointer-events-auto">
+              <ItemPreview item={scannedItem} />
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom Half - Scan History and Controls */}
+        <div className="h-1/2 flex flex-col bg-black/90">
+          <div className="flex-1 overflow-hidden">
+            <ScanHistory items={scanHistory} />
+          </div>
+          
+          {/* Bottom Controls */}
+          <div className="p-6 bg-gradient-to-t from-black/50 to-transparent pointer-events-auto">
+            <ScanControls
+              mode={mode}
+              setMode={setMode}
+              isScanning={isScanning}
+              onStartScan={startScanning}
+              onStopScan={stopScanning}
+              onToggleTorch={toggleTorch}
+              torchEnabled={torchEnabled}
+            />
           </div>
         </div>
       </div>

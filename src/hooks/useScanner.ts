@@ -26,7 +26,6 @@ export const useScanner = (
     setTimeout(() => setCanScan(true), 4000);
 
     const item = items.find(item => item.code === code);
-    setScannedItem(item || null);
     
     if (!item) {
       setScanStatus("error");
@@ -61,8 +60,9 @@ export const useScanner = (
 
     if (success && newStatus) {
       try {
-        await updateItem({ ...item, status: newStatus as any, updatedAt: new Date() }, false);
-        setScannedItem({ ...item, status: newStatus as any });
+        const updatedItem = { ...item, status: newStatus as any, updatedAt: new Date() };
+        await updateItem(updatedItem, false);
+        setScannedItem(updatedItem);
         setScanStatus("success");
         playSuccessSound();
       } catch (error) {
