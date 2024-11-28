@@ -99,6 +99,12 @@
   .filter-button[data-state="on"], .layout-button[data-state="on"] {
     @apply bg-primary/90 text-primary-foreground;
   }
+
+  /* Enhanced dropdown and popover styles */
+  .dropdown-content,
+  [data-radix-popper-content-wrapper] {
+    @apply bg-card border-border/50;
+  }
 }
 
 /* Preserve logo color in dark mode */

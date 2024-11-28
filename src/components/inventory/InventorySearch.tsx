@@ -36,7 +36,7 @@ export const InventorySearch = ({
           variant="outline"
           size="icon"
           onClick={() => setViewMode("list")}
-          className={viewMode === "list" ? "bg-accent" : ""}
+          className={`layout-button ${viewMode === "list" ? "bg-accent" : ""}`}
         >
           <List className="h-4 w-4" />
         </Button>
@@ -44,7 +44,7 @@ export const InventorySearch = ({
           variant="outline"
           size="icon"
           onClick={() => setViewMode("grid")}
-          className={viewMode === "grid" ? "bg-accent" : ""}
+          className={`layout-button ${viewMode === "grid" ? "bg-accent" : ""}`}
         >
           <Grid className="h-4 w-4" />
         </Button>
