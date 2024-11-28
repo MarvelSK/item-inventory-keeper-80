@@ -78,23 +78,27 @@
   }
 }
 
-/* Button styles */
-button {
-  @apply transition-colors duration-200;
-}
+/* Button and form styles */
+.dark {
+  /* Enhanced button styles */
+  button:not(.bg-destructive):not([role="combobox"]) {
+    @apply hover:bg-primary/80 hover:text-primary-foreground;
+  }
 
-.dark button:not(.bg-destructive):hover {
-  @apply bg-[#47acc9] text-white;
-}
+  /* Form input styles */
+  input, select, textarea {
+    @apply bg-muted/10 border-border/50;
+  }
 
-/* Accordion trigger button dark mode */
-.dark .accordion-trigger {
-  @apply hover:bg-muted/10;
-}
+  /* Filter and layout buttons */
+  .filter-button, .layout-button {
+    @apply bg-muted/10 hover:bg-primary/80 text-muted-foreground hover:text-primary-foreground;
+  }
 
-/* Dialog trigger button dark mode */
-.dark [role="dialog"] button {
-  @apply hover:bg-muted/20 hover:text-primary;
+  /* Active state for filter and layout buttons */
+  .filter-button[data-state="on"], .layout-button[data-state="on"] {
+    @apply bg-primary/90 text-primary-foreground;
+  }
 }
 
 /* Preserve logo color in dark mode */
@@ -119,19 +123,6 @@ button {
 
 .card {
   @apply bg-card text-card-foreground shadow-sm dark:shadow-none;
-}
-
-/* Table enhancements for dark mode */
-table {
-  @apply bg-background;
-}
-
-thead {
-  @apply bg-muted/50 dark:bg-muted/10;
-}
-
-tbody tr {
-  @apply hover:bg-muted/50 dark:hover:bg-muted/10;
 }
 
 /* Scrollbar customization */

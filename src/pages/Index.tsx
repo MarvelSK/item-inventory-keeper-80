@@ -14,13 +14,13 @@ const Index = () => {
       
       <main className="container mx-auto px-4 py-8 flex-grow">
         <div className="flex justify-between items-center mb-8">
-          <div className="flex space-x-4">
+          <div className="flex flex-wrap gap-2">
             <button
               onClick={() => setActiveTab("manual")}
               className={`px-4 py-2 rounded-md transition-colors ${
                 activeTab === "manual"
-                  ? "bg-[#212490] text-white"
-                  : "bg-white text-gray-600 hover:bg-[#47acc9] hover:text-white dark:bg-secondary dark:text-secondary-foreground dark:hover:bg-[#47acc9] dark:hover:text-white"
+                  ? "bg-primary text-primary-foreground dark:bg-primary/90 dark:text-primary-foreground"
+                  : "bg-card text-card-foreground hover:bg-primary/90 hover:text-primary-foreground dark:bg-muted/10 dark:text-muted-foreground dark:hover:bg-primary/80 dark:hover:text-primary-foreground"
               }`}
             >
               Manuálne pridanie
@@ -29,8 +29,8 @@ const Index = () => {
               onClick={() => setActiveTab("scanner")}
               className={`px-4 py-2 rounded-md transition-colors ${
                 activeTab === "scanner"
-                  ? "bg-[#212490] text-white"
-                  : "bg-white text-gray-600 hover:bg-[#47acc9] hover:text-white dark:bg-secondary dark:text-secondary-foreground dark:hover:bg-[#47acc9] dark:hover:text-white"
+                  ? "bg-primary text-primary-foreground dark:bg-primary/90 dark:text-primary-foreground"
+                  : "bg-card text-card-foreground hover:bg-primary/90 hover:text-primary-foreground dark:bg-muted/10 dark:text-muted-foreground dark:hover:bg-primary/80 dark:hover:text-primary-foreground"
               }`}
             >
               Skener
@@ -39,8 +39,8 @@ const Index = () => {
               onClick={() => setActiveTab("inventory")}
               className={`px-4 py-2 rounded-md transition-colors ${
                 activeTab === "inventory"
-                  ? "bg-[#212490] text-white"
-                  : "bg-white text-gray-600 hover:bg-[#47acc9] hover:text-white dark:bg-secondary dark:text-secondary-foreground dark:hover:bg-[#47acc9] dark:hover:text-white"
+                  ? "bg-primary text-primary-foreground dark:bg-primary/90 dark:text-primary-foreground"
+                  : "bg-card text-card-foreground hover:bg-primary/90 hover:text-primary-foreground dark:bg-muted/10 dark:text-muted-foreground dark:hover:bg-primary/80 dark:hover:text-primary-foreground"
               }`}
             >
               Inventár
@@ -52,8 +52,8 @@ const Index = () => {
           {activeTab === "manual" && <ManualEntry />}
           {activeTab === "scanner" && <Scanner />}
           {activeTab === "inventory" && (
-            <div className="bg-white dark:bg-card p-4 md:p-6 rounded-lg shadow-sm dark:border dark:border-border">
-              <h2 className="text-xl font-semibold mb-4 text-[#212490] dark:text-blue-400">Inventár položiek</h2>
+            <div className="bg-card dark:bg-card/40 p-4 md:p-6 rounded-lg shadow-sm dark:shadow-none dark:border dark:border-border">
+              <h2 className="text-xl font-semibold mb-4 text-primary dark:text-primary/90">Inventár položiek</h2>
               <InventoryList />
             </div>
           )}
