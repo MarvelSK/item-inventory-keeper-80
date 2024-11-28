@@ -123,15 +123,15 @@ export const Scanner = () => {
 
   const getScannerBorderColor = () => {
     switch (scanStatus) {
-      case "success": return "border-green-500";
-      case "error": return "border-red-500";
-      default: return "border-gray-200";
+      case "success": return "border-success";
+      case "error": return "border-destructive";
+      default: return "border-border";
     }
   };
 
   return (
-    <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm">
-      <h2 className="text-xl font-semibold mb-4 text-[#212490]">Skenovanie položiek</h2>
+    <div className="bg-card p-4 md:p-6 rounded-lg shadow-sm dark:shadow-none">
+      <h2 className="text-xl font-semibold mb-4 text-primary">Skenovanie položiek</h2>
       <div className="space-y-4">
         <ScanControls
           mode={mode}

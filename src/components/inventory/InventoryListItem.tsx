@@ -55,21 +55,16 @@ export const InventoryListItem = ({ item, onEdit, onDelete, onPostpone }: Invent
     }
   };
 
-  const formatDimensions = (item: Item) => {
-    if (item.height && item.width && item.length) {
-      return `V:${item.height}×Š:${item.width}×D:${item.length}`;
-    }
-    return "-";
-  };
-
   return (
     <>
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
             <TableRow 
-              className={`group cursor-pointer ${
-                item.postponed ? 'bg-yellow-100 hover:bg-yellow-200' : 'hover:bg-gray-50'
+              className={`group cursor-pointer transition-colors ${
+                item.postponed 
+                  ? 'bg-yellow-50 hover:bg-yellow-100 dark:bg-yellow-900/20 dark:hover:bg-yellow-900/30' 
+                  : 'hover:bg-gray-50 dark:hover:bg-muted/10'
               }`} 
               onClick={handleRowClick}
             >
@@ -87,7 +82,9 @@ export const InventoryListItem = ({ item, onEdit, onDelete, onPostpone }: Invent
               </TableCell>
               <TableCell className="hidden lg:table-cell">{item.description || "-"}</TableCell>
               <TableCell className="hidden lg:table-cell">
-                {formatDimensions(item)}
+                {item.height && item.width && item.length
+                  ? `V:${item.height}×Š:${item.width}×D:${item.length}`
+                  : "-"}
               </TableCell>
               <TableCell className="hidden sm:table-cell">
                 {format(new Date(item.createdAt), "dd.MM.yyyy HH:mm")}
@@ -105,7 +102,7 @@ export const InventoryListItem = ({ item, onEdit, onDelete, onPostpone }: Invent
             </TableRow>
           </TooltipTrigger>
           {item.postponed && item.postponeReason && (
-            <TooltipContent>
+            <TooltipContent className="bg-card border-border">
               <p>Dôvod odloženia: {item.postponeReason}</p>
             </TooltipContent>
           )}
@@ -134,7 +131,10 @@ export const InventoryListItem = ({ item, onEdit, onDelete, onPostpone }: Invent
                   </div>
                 )}
                 <p><strong>Popis:</strong> {item.description || "-"}</p>
-                <p><strong>Rozmery:</strong> {formatDimensions(item)} cm</p>
+                <p><strong>Rozmery:</strong> {item.height && item.width && item.length
+                  ? `${item.length}×${item.width}×${item.height} cm`
+                  : "-"}
+                </p>
                 <p><strong>Vytvorené:</strong> {format(new Date(item.createdAt), "dd.MM.yyyy HH:mm")}</p>
                 <p><strong>Vytvoril:</strong> {item.created_by || "-"}</p>
                 <p><strong>Naposledy upravil:</strong> {item.updated_by || "-"}</p>

@@ -26,22 +26,28 @@ export const ItemActionsDropdown = ({
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          className="h-8 w-8 p-0 hover:bg-muted"
+          className="h-8 w-8 p-0 hover:bg-muted dark:hover:bg-muted/20"
         >
           <MoreVertical className="h-4 w-4" />
           <span className="sr-only">Open menu</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => onEdit(item)}>
+      <DropdownMenuContent align="end" className="bg-card border-border">
+        <DropdownMenuItem 
+          onClick={() => onEdit(item)}
+          className="cursor-pointer hover:bg-muted dark:hover:bg-muted/20"
+        >
           Upraviť
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => onPostpone(item)}>
-          Označiť ako odložené
+        <DropdownMenuItem 
+          onClick={() => onPostpone(item)}
+          className="cursor-pointer hover:bg-muted dark:hover:bg-muted/20"
+        >
+          {item.postponed ? 'Zrušiť odloženie' : 'Označiť ako odložené'}
         </DropdownMenuItem>
         <DropdownMenuItem 
           onClick={() => onDelete(item.id)}
-          className="text-red-600"
+          className="cursor-pointer text-destructive hover:bg-destructive/10 dark:hover:bg-destructive/20"
         >
           Vymazať
         </DropdownMenuItem>

@@ -83,26 +83,35 @@ export const AddItemForm = () => {
         value={code}
         onChange={(e) => setCode(e.target.value)}
         required
+        className="bg-background border-border"
       />
       <Select value={description} onValueChange={setDescription}>
-        <SelectTrigger>
+        <SelectTrigger className="bg-background border-border">
           <SelectValue placeholder="Vyberte popis" />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent className="bg-card border-border">
           {DESCRIPTIONS.map((desc) => (
-            <SelectItem key={desc} value={desc}>
+            <SelectItem 
+              key={desc} 
+              value={desc}
+              className="hover:bg-muted dark:hover:bg-muted/20"
+            >
               {desc}
             </SelectItem>
           ))}
         </SelectContent>
       </Select>
       <Select value={status} onValueChange={(value: 'waiting' | 'in_stock' | 'in_transit' | 'delivered') => setStatus(value)}>
-        <SelectTrigger>
+        <SelectTrigger className="bg-background border-border">
           <SelectValue placeholder="Vyberte stav" />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent className="bg-card border-border">
           {STATUS_OPTIONS.map((option) => (
-            <SelectItem key={option.value} value={option.value}>
+            <SelectItem 
+              key={option.value} 
+              value={option.value}
+              className="hover:bg-muted dark:hover:bg-muted/20"
+            >
               {option.label}
             </SelectItem>
           ))}
@@ -114,24 +123,27 @@ export const AddItemForm = () => {
           placeholder="Délka (cm)"
           value={length ?? ""}
           onChange={(e) => setLength(e.target.value ? Number(e.target.value) : undefined)}
+          className="bg-background border-border"
         />
         <Input
           type="number"
           placeholder="Šířka (cm)"
           value={width ?? ""}
           onChange={(e) => setWidth(e.target.value ? Number(e.target.value) : undefined)}
+          className="bg-background border-border"
         />
         <Input
           type="number"
           placeholder="Výška (cm)"
           value={height ?? ""}
           onChange={(e) => setHeight(e.target.value ? Number(e.target.value) : undefined)}
+          className="bg-background border-border"
         />
       </div>
       <CustomerSelect value={selectedCustomer} onChange={setSelectedCustomer} onAddNew={() => {}} />
       <Button 
         type="submit" 
-        className="w-full bg-[#212490] hover:bg-[#47acc9]"
+        className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
         disabled={isSubmitting}
       >
         {isSubmitting ? (
