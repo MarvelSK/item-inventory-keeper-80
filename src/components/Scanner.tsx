@@ -1,33 +1,31 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect } from "react";
 import { BrowserMultiFormatReader } from "@zxing/browser";
 import { useItems } from "@/hooks/useItems";
 import { useCustomers } from "@/hooks/useCustomers";
-import { Item } from "@/lib/types";
 import { ItemPreview } from "./scanner/ItemPreview";
 import { ScanControls } from "./scanner/ScanControls";
-import { ScanMode, ScanStatus } from "./scanner/types";
-
-// Define custom types for torch functionality
-type TorchConstraint = {
-  torch: boolean;
-};
-
-interface ExtendedMediaTrackCapabilities extends MediaTrackCapabilities {
-  torch?: boolean;
-}
+import { useScanner } from "@/hooks/useScanner";
+import { useTorch } from "@/hooks/useTorch";
 
 export const Scanner = () => {
-  const [isScanning, setIsScanning] = useState(false);
-  const [mode, setMode] = useState<ScanMode>("receiving");
-  const [scanStatus, setScanStatus] = useState<ScanStatus>("none");
-  const [canScan, setCanScan] = useState(true);
-  const [scannedItem, setScannedItem] = useState<Item | null>(null);
-  const [torchEnabled, setTorchEnabled] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const codeReader = useRef<BrowserMultiFormatReader>();
-  const mediaStream = useRef<MediaStream | null>(null);
   const { items, updateItem } = useItems();
   const { customers } = useCustomers();
+  const {
+    isScanning,
+    setIsScanning,
+    mode,
+    setMode,
+    scanStatus,
+    scannedItem,
+    torchEnabled,
+    setTorchEnabled,
+    videoRef,
+    codeReader,
+    mediaStream,
+    handleScannedCode
+  } = useScanner(items, updateItem);
+
+  const { toggleTorch } = useTorch(mediaStream, torchEnabled, setTorchEnabled);
 
   useEffect(() => {
     codeReader.current = new BrowserMultiFormatReader();
@@ -42,88 +40,8 @@ export const Scanner = () => {
     if (isScanning) {
       stopScanning();
       startScanning();
-      setScannedItem(null);
-      setScanStatus("none");
-      setCanScan(true);
     }
   }, [mode]);
-
-  const handleScannedCode = async (code: string) => {
-    if (!canScan) return;
-    
-    setCanScan(false);
-    setTimeout(() => setCanScan(true), 4000);
-
-    const item = items.find(item => item.code === code);
-    setScannedItem(item || null);
-    
-    if (!item) {
-      setScanStatus("error");
-      setTimeout(() => setScanStatus("none"), 1000);
-      return;
-    }
-
-    let newStatus;
-    let success = false;
-
-    switch (mode) {
-      case "receiving":
-        if (item.status === "waiting") {
-          newStatus = "in_stock";
-          success = true;
-        }
-        break;
-      case "loading":
-        if (item.status === "in_stock") {
-          newStatus = "in_transit";
-          success = true;
-        }
-        break;
-      case "delivery":
-        if (item.status === "in_transit") {
-          newStatus = "delivered";
-          success = true;
-        }
-        break;
-    }
-
-    if (success && newStatus) {
-      try {
-        const updatedItem = { ...item, status: newStatus, updatedAt: new Date() };
-        await updateItem(updatedItem, false);
-        setScannedItem(updatedItem);
-        setScanStatus("success");
-      } catch (error) {
-        setScanStatus("error");
-      }
-    } else {
-      setScanStatus("error");
-    }
-
-    setTimeout(() => setScanStatus("none"), 1000);
-  };
-
-  const toggleTorch = async () => {
-    if (!mediaStream.current) return;
-    
-    const track = mediaStream.current.getVideoTracks()[0];
-    const capabilities = track.getCapabilities() as ExtendedMediaTrackCapabilities;
-    
-    if (!capabilities.torch) {
-      console.log('Torch not supported on this device');
-      return;
-    }
-
-    try {
-      const constraints: MediaTrackConstraints = {
-        advanced: [{ torch: !torchEnabled } as TorchConstraint]
-      };
-      await track.applyConstraints(constraints);
-      setTorchEnabled(!torchEnabled);
-    } catch (err) {
-      console.error('Error toggling torch:', err);
-    }
-  };
 
   const startScanning = async () => {
     try {
@@ -132,7 +50,7 @@ export const Scanner = () => {
       const constraints: MediaStreamConstraints = {
         video: {
           facingMode: "environment",
-          advanced: [{ torch: torchEnabled } as TorchConstraint]
+          advanced: [{ torch: torchEnabled }]
         }
       };
 
