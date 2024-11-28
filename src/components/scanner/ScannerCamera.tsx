@@ -19,17 +19,16 @@ export const ScannerCamera = ({ isScanning, onScan, scanStatus }: ScannerCameraP
     }
   };
 
-  const handleScan = (result: any) => {
-    if (result?.getText()) {
-      onScan(result.getText());
-    }
-  };
-
   return (
     <div className="relative aspect-video max-w-md mx-auto">
       {isScanning ? (
-        // @ts-ignore - The types for react-barcode-scanner are incorrect
-        <BarcodeScanner onScan={handleScan}>
+        <BarcodeScanner
+          onResult={(result) => {
+            if (result?.getText()) {
+              onScan(result.getText());
+            }
+          }}
+        >
           <video
             ref={videoRef}
             className={`w-full h-full object-cover rounded-lg border-4 transition-colors ${getScannerBorderColor()}`}

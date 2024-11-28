@@ -97,7 +97,7 @@ const convertToSupabaseItems = (items: Item[]): Omit<SupabaseItem, 'created_at' 
   return items.map(item => ({
     id: item.id,
     code: item.code,
-    customer: item.customer || '',  // Ensure customer is never undefined
+    customer: item.customer,
     description: item.description,
     length: item.length,
     width: item.width,
@@ -167,10 +167,9 @@ export const importMassItems = async (
           height: item.height,
           status: 'waiting',
           tags: [],
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          deleted: false,
-          postponed: false
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          deleted: false
         };
         
         batchItems.push(newItem);
