@@ -83,25 +83,8 @@ button {
   @apply transition-colors duration-200;
 }
 
-/* Enhanced dark mode button styles */
-.dark button:not(.bg-destructive) {
-  @apply bg-secondary/10 hover:bg-secondary/20 text-secondary-foreground border-secondary/20;
-}
-
-.dark button[variant="outline"] {
-  @apply hover:bg-secondary/20 hover:text-secondary-foreground border-secondary/20;
-}
-
-.dark button[variant="default"] {
-  @apply bg-primary hover:bg-primary/90 text-primary-foreground;
-}
-
-.dark button[variant="secondary"] {
-  @apply bg-secondary/10 hover:bg-secondary/20 text-secondary-foreground;
-}
-
-.dark button[variant="destructive"] {
-  @apply bg-destructive hover:bg-destructive/90 text-destructive-foreground;
+.dark button:not(.bg-destructive):hover {
+  @apply bg-[#47acc9] text-white;
 }
 
 /* Preserve logo color in dark mode */
