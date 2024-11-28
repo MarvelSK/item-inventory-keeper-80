@@ -7,13 +7,12 @@ import { ItemPreview } from "./scanner/ItemPreview";
 import { ScanControls } from "./scanner/ScanControls";
 import { ScanMode, ScanStatus } from "./scanner/types";
 
-// Extend MediaTrackConstraintSet to include torch
-interface ExtendedTrackConstraints extends MediaTrackConstraints {
-  advanced?: { torch?: boolean }[];
-}
+// Define custom types for torch functionality
+type TorchConstraint = {
+  torch: boolean;
+};
 
-// Extend MediaTrackCapabilities to include torch
-interface ExtendedTrackCapabilities extends MediaTrackCapabilities {
+interface ExtendedMediaTrackCapabilities extends MediaTrackCapabilities {
   torch?: boolean;
 }
 
@@ -43,7 +42,6 @@ export const Scanner = () => {
     if (isScanning) {
       stopScanning();
       startScanning();
-      // Reset state when mode changes
       setScannedItem(null);
       setScanStatus("none");
       setCanScan(true);
@@ -54,7 +52,6 @@ export const Scanner = () => {
     if (!canScan) return;
     
     setCanScan(false);
-    // Set 4 second pause between scans
     setTimeout(() => setCanScan(true), 4000);
 
     const item = items.find(item => item.code === code);
@@ -110,7 +107,7 @@ export const Scanner = () => {
     if (!mediaStream.current) return;
     
     const track = mediaStream.current.getVideoTracks()[0];
-    const capabilities = track.getCapabilities() as ExtendedTrackCapabilities;
+    const capabilities = track.getCapabilities() as ExtendedMediaTrackCapabilities;
     
     if (!capabilities.torch) {
       console.log('Torch not supported on this device');
@@ -118,9 +115,10 @@ export const Scanner = () => {
     }
 
     try {
-      await track.applyConstraints({
-        advanced: [{ torch: !torchEnabled }]
-      } as ExtendedTrackConstraints);
+      const constraints: MediaTrackConstraints = {
+        advanced: [{ torch: !torchEnabled } as TorchConstraint]
+      };
+      await track.applyConstraints(constraints);
       setTorchEnabled(!torchEnabled);
     } catch (err) {
       console.error('Error toggling torch:', err);
@@ -134,8 +132,8 @@ export const Scanner = () => {
       const constraints: MediaStreamConstraints = {
         video: {
           facingMode: "environment",
-          advanced: [{ torch: torchEnabled }]
-        } as ExtendedTrackConstraints
+          advanced: [{ torch: torchEnabled } as TorchConstraint]
+        }
       };
 
       mediaStream.current = await navigator.mediaDevices.getUserMedia(constraints);
