@@ -13,6 +13,7 @@ export const Scanner = () => {
   const [scanStatus, setScanStatus] = useState<ScanStatus>("none");
   const [canScan, setCanScan] = useState(true);
   const [scannedItem, setScannedItem] = useState<Item | null>(null);
+  const [torchEnabled, setTorchEnabled] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const codeReader = useRef<BrowserMultiFormatReader>();
   const mediaStream = useRef<MediaStream | null>(null);
@@ -28,7 +29,6 @@ export const Scanner = () => {
     };
   }, []);
 
-  // Add effect to restart scanning when mode changes
   useEffect(() => {
     if (isScanning) {
       stopScanning();
@@ -44,7 +44,8 @@ export const Scanner = () => {
     if (!canScan) return;
     
     setCanScan(false);
-    setTimeout(() => setCanScan(true), 3000);
+    // Set 4 second pause between scans
+    setTimeout(() => setCanScan(true), 4000);
 
     const item = items.find(item => item.code === code);
     setScannedItem(item || null);
@@ -96,12 +97,37 @@ export const Scanner = () => {
     setTimeout(() => setScanStatus("none"), 1000);
   };
 
+  const toggleTorch = async () => {
+    if (!mediaStream.current) return;
+    
+    const track = mediaStream.current.getVideoTracks()[0];
+    const capabilities = track.getCapabilities();
+    
+    // Check if torch is supported
+    if (!capabilities.torch) {
+      console.log('Torch not supported on this device');
+      return;
+    }
+
+    try {
+      await track.applyConstraints({
+        advanced: [{ torch: !torchEnabled }]
+      });
+      setTorchEnabled(!torchEnabled);
+    } catch (err) {
+      console.error('Error toggling torch:', err);
+    }
+  };
+
   const startScanning = async () => {
     try {
       if (!videoRef.current) return;
 
       const constraints = {
-        video: { facingMode: "environment" }
+        video: { 
+          facingMode: "environment",
+          advanced: [{ torch: torchEnabled }]
+        }
       };
 
       mediaStream.current = await navigator.mediaDevices.getUserMedia(constraints);
@@ -132,6 +158,7 @@ export const Scanner = () => {
       mediaStream.current = null;
     }
     setIsScanning(false);
+    setTorchEnabled(false);
   };
 
   const getScannerBorderColor = () => {
@@ -152,6 +179,8 @@ export const Scanner = () => {
           isScanning={isScanning}
           onStartScan={startScanning}
           onStopScan={stopScanning}
+          onToggleTorch={toggleTorch}
+          torchEnabled={torchEnabled}
         />
         <div className="relative aspect-video max-w-md mx-auto">
           <video

@@ -1,5 +1,5 @@
 import { Button } from "../ui/button";
-import { Camera, CameraOff } from "lucide-react";
+import { Camera, CameraOff, Flashlight, FlashlightOff } from "lucide-react";
 import { ScanMode } from "./types";
 
 interface ScanControlsProps {
@@ -8,6 +8,8 @@ interface ScanControlsProps {
   isScanning: boolean;
   onStartScan: () => void;
   onStopScan: () => void;
+  onToggleTorch: () => void;
+  torchEnabled: boolean;
 }
 
 export const ScanControls = ({
@@ -16,6 +18,8 @@ export const ScanControls = ({
   isScanning,
   onStartScan,
   onStopScan,
+  onToggleTorch,
+  torchEnabled,
 }: ScanControlsProps) => {
   const getModeLabel = (mode: ScanMode) => {
     switch (mode) {
@@ -38,7 +42,7 @@ export const ScanControls = ({
           </Button>
         ))}
       </div>
-      <div className="flex justify-center">
+      <div className="flex justify-center gap-2">
         <Button
           onClick={isScanning ? onStopScan : onStartScan}
           className="w-full sm:w-auto"
@@ -55,6 +59,25 @@ export const ScanControls = ({
             </>
           )}
         </Button>
+        {isScanning && (
+          <Button
+            onClick={onToggleTorch}
+            variant="outline"
+            className="w-full sm:w-auto"
+          >
+            {torchEnabled ? (
+              <>
+                <FlashlightOff className="mr-2 h-4 w-4" />
+                Disable Flash
+              </>
+            ) : (
+              <>
+                <Flashlight className="mr-2 h-4 w-4" />
+                Enable Flash
+              </>
+            )}
+          </Button>
+        )}
       </div>
     </div>
   );
