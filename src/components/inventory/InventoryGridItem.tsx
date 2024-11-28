@@ -34,10 +34,12 @@ export const InventoryGridItem = ({ item, onEdit, onDelete, onPostpone }: Invent
       <Tooltip>
         <TooltipTrigger asChild>
           <div className={`p-4 border rounded-lg space-y-2 ${
-            item.postponed ? 'bg-yellow-100 hover:bg-yellow-200' : 'hover:bg-gray-50'
+            item.postponed 
+              ? 'bg-yellow-50 hover:bg-yellow-100 dark:bg-yellow-900/20 dark:hover:bg-yellow-900/30' 
+              : 'hover:bg-gray-50 dark:hover:bg-muted/10'
           }`}>
             <div className="font-medium">{item.code}</div>
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-gray-500 dark:text-gray-400">
               <div>Zákazník: {customer}</div>
               <div>Popis: {item.description || "-"}</div>
               <div>Rozmery: {item.height && item.width && item.length
