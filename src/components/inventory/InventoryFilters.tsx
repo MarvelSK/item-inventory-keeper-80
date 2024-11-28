@@ -48,23 +48,23 @@ export const InventoryFilters = ({ onFilterChange }: InventoryFiltersProps) => {
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
-        <Button variant="outline" className="ml-2">
+        <Button variant="outline" className="ml-2 dark:hover:bg-muted/30">
           <Filter className="h-4 w-4 mr-2" />
           Filtre
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 p-4 bg-popover border-border">
+      <PopoverContent className="w-80 p-4 bg-background border-border dark:bg-card dark:border-border/50">
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label>Stav</Label>
+            <Label className="dark:text-foreground">Stav</Label>
             <Select
               value={filters.status}
               onValueChange={(value) => handleFilterChange({ status: value })}
             >
-              <SelectTrigger>
+              <SelectTrigger className="dark:bg-muted/10 dark:border-border/50">
                 <SelectValue placeholder="Všetky stavy" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="dark:bg-card dark:border-border/50">
                 <SelectItem value="all">Všetky stavy</SelectItem>
                 <SelectItem value="waiting">Čaká na dovoz</SelectItem>
                 <SelectItem value="in_stock">Na sklade</SelectItem>
