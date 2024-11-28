@@ -1,4 +1,4 @@
-import { Item, DbItem, Tag } from '../types';
+import { Item, DbItem, Tag, Json } from '../types';
 import { supabase } from '@/integrations/supabase/client';
 
 const mapDbItemToItem = (dbItem: DbItem): Item => ({
@@ -9,14 +9,16 @@ const mapDbItemToItem = (dbItem: DbItem): Item => ({
   length: dbItem.length,
   width: dbItem.width,
   height: dbItem.height,
-  status: dbItem.status,
-  tags: (dbItem.tags as any[] || []).map(tag => ({
-    id: tag.id,
-    name: tag.name,
-    color: tag.color
-  })),
-  createdAt: dbItem.created_at,
-  updatedAt: dbItem.updated_at,
+  status: dbItem.status as Item['status'],
+  tags: Array.isArray(dbItem.tags) 
+    ? (dbItem.tags as unknown as Tag[]).map(tag => ({
+        id: String(tag.id),
+        name: String(tag.name),
+        color: String(tag.color)
+      }))
+    : [],
+  createdAt: new Date(dbItem.created_at),
+  updatedAt: new Date(dbItem.updated_at),
   deleted: dbItem.deleted,
   postponed: dbItem.postponed,
   postponeReason: dbItem.postpone_reason,
@@ -26,13 +28,13 @@ const mapDbItemToItem = (dbItem: DbItem): Item => ({
 
 const mapItemToDb = (item: Item): Omit<DbItem, 'id' | 'created_at' | 'updated_at'> => ({
   code: item.code,
-  customer: item.customer || '',
+  customer: item.customer,
   description: item.description,
   length: item.length,
   width: item.width,
   height: item.height,
   status: item.status,
-  tags: item.tags as any,
+  tags: item.tags as unknown as Json,
   deleted: item.deleted,
   postponed: item.postponed,
   postpone_reason: item.postponeReason,
@@ -61,34 +63,32 @@ export const findItemByCode = async (code: string) => {
   }
 };
 
-export const addItem = async (item: Omit<Item, 'id' | 'createdAt' | 'updatedAt' | 'deleted'>) => {
+export const addItem = async (item: Item) => {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('User not authenticated');
 
-  const now = new Date().toISOString();
-  const itemToInsert = {
-    ...mapItemToDb({
-      ...item,
-      id: crypto.randomUUID(),
-      createdAt: now,
-      updatedAt: now,
-      deleted: false
-    }),
-    created_at: now,
-    updated_at: now,
-    created_by: user.id,
-    updated_by: user.id,
-  };
+  const existingItem = await findItemByCode(item.code);
+  if (existingItem) {
+    throw new Error('Item with this code already exists');
+  }
 
   const { data, error } = await supabase
     .from('items')
-    .insert(itemToInsert)
+    .insert(mapItemToDb({
+      ...item,
+      created_by: user.id,
+      updated_by: user.id,
+    }))
     .select()
-    .single();
+    .maybeSingle();
 
   if (error) {
     console.error('Error adding item:', error);
     throw error;
+  }
+
+  if (!data) {
+    throw new Error('No data returned from insert');
   }
 
   return mapDbItemToItem(data as DbItem);
@@ -98,23 +98,23 @@ export const updateItem = async (updatedItem: Item) => {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('User not authenticated');
 
-  const now = new Date().toISOString();
-  const itemToUpdate = {
-    ...mapItemToDb(updatedItem),
-    updated_at: now,
-    updated_by: user.id,
-  };
-
   const { data, error } = await supabase
     .from('items')
-    .update(itemToUpdate)
+    .update(mapItemToDb({
+      ...updatedItem,
+      updated_by: user.id,
+    }))
     .eq('id', updatedItem.id)
     .select()
-    .single();
+    .maybeSingle();
 
   if (error) {
     console.error('Error updating item:', error);
     throw error;
+  }
+
+  if (!data) {
+    throw new Error('No data returned from update');
   }
 
   return mapDbItemToItem(data as DbItem);
@@ -149,7 +149,7 @@ export const getAllItems = async () => {
 
     if (!items) return [];
 
-    return items.map(item => mapDbItemToItem(item as DbItem));
+    return (items as DbItem[]).map(mapDbItemToItem);
   } catch (error) {
     console.error('Error in getAllItems:', error);
     throw error;

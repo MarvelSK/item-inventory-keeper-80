@@ -8,7 +8,7 @@ import {
   DialogTrigger,
 } from "../ui/dialog";
 import { Textarea } from "../ui/textarea";
-import { importItems } from "@/lib/services/massImportService";
+import { importMassItems } from "@/lib/services/massImportService";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { Progress } from "../ui/progress";
@@ -28,28 +28,19 @@ export const MassImportDialog = () => {
       setProgress(0);
       setStage("");
       
-      let items;
-      try {
-        items = JSON.parse(data);
-        if (!Array.isArray(items)) {
-          throw new Error("Data must be an array of items");
-        }
-      } catch (e) {
-        toast.error("Invalid JSON format");
-        return;
-      }
-
-      await importItems(items);
+      await importMassItems(data, (currentStage, currentProgress) => {
+        setStage(currentStage);
+        setProgress(currentProgress);
+      });
       
       // Refresh inventory list after successful import
       await queryClient.invalidateQueries({ queryKey: ['items'] });
       
       setIsOpen(false);
       setData("");
-      toast.success("Import completed successfully");
     } catch (error) {
       console.error('Import failed:', error);
-      toast.error("Error importing items");
+      toast.error("Chyba pri importe položiek");
     } finally {
       setIsLoading(false);
       setProgress(0);

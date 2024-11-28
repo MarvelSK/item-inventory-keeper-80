@@ -2,11 +2,11 @@ import { useState } from "react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { CustomerSelect } from "./CustomerSelect";
+import { v4 as uuidv4 } from 'uuid';
 import { useItems } from "@/hooks/useItems";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
-import { Item } from "@/lib/types";
 
 const DESCRIPTIONS = ['Příslušenství', 'Plechy', 'Žaluzie', 'Vodící profily', 'Kliky'];
 
@@ -39,16 +39,19 @@ export const AddItemForm = () => {
 
     try {
       const newItem = {
+        id: uuidv4(),
         code,
         description,
         length,
         width,
         height,
-        status: status as Item['status'],
-        customer: selectedCustomer,
+        status,
         tags: [],
-        postponed: false,
-        postponeReason: undefined,
+        customer: selectedCustomer,
+        company: "",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        deleted: false
       };
 
       await addItem(newItem);
