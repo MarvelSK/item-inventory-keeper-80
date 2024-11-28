@@ -1,13 +1,5 @@
 import { useCallback } from 'react';
 
-interface ExtendedMediaTrackCapabilities extends MediaTrackCapabilities {
-  torch?: boolean;
-}
-
-interface ExtendedMediaTrackConstraintSet extends MediaTrackConstraintSet {
-  torch?: boolean;
-}
-
 export const useTorch = (
   mediaStream: React.MutableRefObject<MediaStream | null>,
   torchEnabled: boolean,
@@ -21,7 +13,7 @@ export const useTorch = (
 
     try {
       // Check if torch is supported
-      const capabilities = track.getCapabilities() as ExtendedMediaTrackCapabilities;
+      const capabilities = track.getCapabilities();
       if (!capabilities.torch) {
         console.log('Torch not supported on this device');
         return;
@@ -30,7 +22,7 @@ export const useTorch = (
       // Toggle torch
       const newTorchState = !torchEnabled;
       await track.applyConstraints({
-        advanced: [{ torch: newTorchState } as ExtendedMediaTrackConstraintSet]
+        advanced: [{ torch: newTorchState }]
       });
       setTorchEnabled(newTorchState);
     } catch (err) {

@@ -1,19 +1,15 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { BrowserMultiFormatReader } from "@zxing/browser";
 import { useItems } from "@/hooks/useItems";
+import { useCustomers } from "@/hooks/useCustomers";
+import { ItemPreview } from "./scanner/ItemPreview";
+import { ScanControls } from "./scanner/ScanControls";
 import { useScanner } from "@/hooks/useScanner";
 import { useTorch } from "@/hooks/useTorch";
-import { Item } from "@/lib/types";
-import { ScannerLayout } from "./scanner/ScannerLayout";
 
 export const Scanner = () => {
-  const { items, updateItem: originalUpdateItem } = useItems();
-  const [scanHistory, setScanHistory] = useState<Item[]>([]);
-  
-  const updateItem = async (item: any, showToast?: boolean) => {
-    await originalUpdateItem(item, showToast);
-  };
-  
+  const { items, updateItem } = useItems();
+  const { customers } = useCustomers();
   const {
     isScanning,
     setIsScanning,
@@ -26,25 +22,17 @@ export const Scanner = () => {
     videoRef,
     codeReader,
     mediaStream,
-    handleScannedCode: originalHandleScannedCode,
-    facingMode,
-    setFacingMode
+    handleScannedCode
   } = useScanner(items, updateItem);
 
   const { toggleTorch } = useTorch(mediaStream, torchEnabled, setTorchEnabled);
 
-  const handleScannedCode = async (code: string) => {
-    await originalHandleScannedCode(code);
-    if (scannedItem) {
-      setScanHistory(prev => [scannedItem, ...prev]);
-    }
-  };
-
   useEffect(() => {
     codeReader.current = new BrowserMultiFormatReader();
-    startScanning();
     return () => {
-      stopScanning();
+      if (mediaStream.current) {
+        mediaStream.current.getTracks().forEach(track => track.stop());
+      }
     };
   }, []);
 
@@ -53,7 +41,7 @@ export const Scanner = () => {
       stopScanning();
       startScanning();
     }
-  }, [mode, facingMode]);
+  }, [mode]);
 
   const startScanning = async () => {
     try {
@@ -61,9 +49,8 @@ export const Scanner = () => {
 
       const constraints: MediaStreamConstraints = {
         video: {
-          facingMode: facingMode,
-          width: { ideal: 1920 },
-          height: { ideal: 1080 }
+          facingMode: "environment",
+          advanced: [{ torch: torchEnabled }] as any // Type assertion to avoid TypeScript error
         }
       };
 
@@ -94,29 +81,41 @@ export const Scanner = () => {
       mediaStream.current.getTracks().forEach(track => track.stop());
       mediaStream.current = null;
     }
-    codeReader.current?.reset();
     setIsScanning(false);
     setTorchEnabled(false);
   };
 
-  const toggleCamera = () => {
-    setFacingMode(prev => prev === "environment" ? "user" : "environment");
+  const getScannerBorderColor = () => {
+    switch (scanStatus) {
+      case "success": return "border-success";
+      case "error": return "border-destructive";
+      default: return "border-border";
+    }
   };
 
   return (
-    <ScannerLayout
-      videoRef={videoRef}
-      isScanning={isScanning}
-      mode={mode}
-      setMode={setMode}
-      scanStatus={scanStatus}
-      scannedItem={scannedItem}
-      torchEnabled={torchEnabled}
-      toggleTorch={toggleTorch}
-      toggleCamera={toggleCamera}
-      startScanning={startScanning}
-      stopScanning={stopScanning}
-      scanHistory={scanHistory}
-    />
+    <div className="bg-card p-4 md:p-6 rounded-lg shadow-sm dark:shadow-none">
+      <h2 className="text-xl font-semibold mb-4 text-primary">Skenovanie položiek</h2>
+      <div className="space-y-4">
+        <ScanControls
+          mode={mode}
+          setMode={setMode}
+          isScanning={isScanning}
+          onStartScan={startScanning}
+          onStopScan={stopScanning}
+          onToggleTorch={toggleTorch}
+          torchEnabled={torchEnabled}
+        />
+        <div className="relative aspect-video max-w-md mx-auto">
+          <video
+            ref={videoRef}
+            className={`w-full h-full object-cover rounded-lg border-4 transition-colors ${getScannerBorderColor()}`}
+            autoPlay
+            playsInline
+          />
+        </div>
+        <ItemPreview item={scannedItem} />
+      </div>
+    </div>
   );
 };

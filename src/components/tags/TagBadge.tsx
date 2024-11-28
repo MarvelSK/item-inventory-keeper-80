@@ -1,18 +1,16 @@
 import { Tag } from "@/lib/types";
 import { Badge } from "../ui/badge";
-import { cn } from "@/lib/utils";
 
 interface TagBadgeProps {
   tag: Tag;
   onRemove?: () => void;
-  className?: string;
 }
 
-export const TagBadge = ({ tag, onRemove, className }: TagBadgeProps) => {
+export const TagBadge = ({ tag, onRemove }: TagBadgeProps) => {
   return (
     <Badge
       style={{ backgroundColor: tag.color }}
-      className={cn("mr-1 mb-1", className)}
+      className="mr-1 mb-1"
       variant="secondary"
     >
       {tag.name}

@@ -14,7 +14,6 @@ export const useScanner = (
   const [canScan, setCanScan] = useState(true);
   const [scannedItem, setScannedItem] = useState<Item | null>(null);
   const [torchEnabled, setTorchEnabled] = useState(false);
-  const [facingMode, setFacingMode] = useState<"environment" | "user">("environment");
   const videoRef = useRef<HTMLVideoElement>(null);
   const codeReader = useRef<BrowserMultiFormatReader>();
   const mediaStream = useRef<MediaStream | null>(null);
@@ -26,6 +25,7 @@ export const useScanner = (
     setTimeout(() => setCanScan(true), 4000);
 
     const item = items.find(item => item.code === code);
+    setScannedItem(item || null);
     
     if (!item) {
       setScanStatus("error");
@@ -60,7 +60,7 @@ export const useScanner = (
 
     if (success && newStatus) {
       try {
-        const updatedItem = { ...item, status: newStatus as any, updatedAt: new Date() };
+        const updatedItem = { ...item, status: newStatus, updatedAt: new Date() };
         await updateItem(updatedItem, false);
         setScannedItem(updatedItem);
         setScanStatus("success");
@@ -90,8 +90,6 @@ export const useScanner = (
     setScannedItem,
     torchEnabled,
     setTorchEnabled,
-    facingMode,
-    setFacingMode,
     videoRef,
     codeReader,
     mediaStream,
