@@ -101,12 +101,17 @@ export const InventoryListLogic = ({
 
   const handlePostpone = async (item: Item) => {
     const updatedItem = item.postponed
-      ? { ...item, postponed: false, postponeReason: undefined, updatedAt: new Date() }
+      ? { 
+          ...item, 
+          postponed: false, 
+          postponeReason: undefined, 
+          updatedAt: new Date().toISOString() 
+        }
       : {
           ...item,
           postponed: true,
           postponeReason: prompt("Zadajte dôvod odloženia položky:") || undefined,
-          updatedAt: new Date()
+          updatedAt: new Date().toISOString()
         };
 
     if (updatedItem.postponed && !updatedItem.postponeReason) return;

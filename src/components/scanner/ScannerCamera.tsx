@@ -19,16 +19,16 @@ export const ScannerCamera = ({ isScanning, onScan, scanStatus }: ScannerCameraP
     }
   };
 
+  const handleScan = (result: any) => {
+    if (result?.getText()) {
+      onScan(result.getText());
+    }
+  };
+
   return (
     <div className="relative aspect-video max-w-md mx-auto">
       {isScanning ? (
-        <BarcodeScanner
-          onResult={(result) => {
-            if (result?.getText()) {
-              onScan(result.getText());
-            }
-          }}
-        >
+        <BarcodeScanner onScan={handleScan}>
           <video
             ref={videoRef}
             className={`w-full h-full object-cover rounded-lg border-4 transition-colors ${getScannerBorderColor()}`}

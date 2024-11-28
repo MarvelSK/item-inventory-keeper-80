@@ -72,13 +72,16 @@ export const addItem = async (item: Item) => {
     throw new Error('Item with this code already exists');
   }
 
+  const dbItem = {
+    ...mapItemToDb(item),
+    created_by: user.id,
+    updated_by: user.id,
+    customer: item.customer || ''  // Ensure customer is never undefined
+  };
+
   const { data, error } = await supabase
     .from('items')
-    .insert({
-      ...mapItemToDb(item),
-      created_by: user.id,
-      updated_by: user.id,
-    })
+    .insert(dbItem)
     .select()
     .single();
 

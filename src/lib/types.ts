@@ -40,12 +40,21 @@ export interface Json {
   [key: string]: any;
 }
 
-export interface DbItem extends Omit<Item, 'createdAt' | 'updatedAt' | 'postponeReason'> {
+export interface DbItem {
+  id: string;
+  code: string;
+  customer: string;
+  description?: string;
+  length?: number;
+  width?: number;
+  height?: number;
+  status: string;
+  tags?: Json;
   created_at: string;
   updated_at: string;
   created_by?: string;
   updated_by?: string;
   deleted: boolean;
-  tags?: Json;
+  postponed: boolean;
   postpone_reason?: string;
 }
