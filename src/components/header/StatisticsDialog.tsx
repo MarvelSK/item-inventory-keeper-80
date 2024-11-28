@@ -7,7 +7,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {BarChart, ChartArea, DatabaseBackup} from "lucide-react";
+import { ChartArea } from "lucide-react";
 import { useItems } from "@/hooks/useItems";
 import { useCustomers } from "@/hooks/useCustomers";
 import { Badge } from "../ui/badge";
@@ -58,10 +58,10 @@ export const StatisticsDialog = ({ open, onOpenChange, trigger }: StatisticsDial
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
         {trigger || (
-            <Button variant="outline" className="hover:text-[#47acc9] w-full md:w-auto">
-              <ChartArea className="mr-2 h-4 w-4" />
-              Štatistiky zakázok
-            </Button>
+          <Button variant="outline" className="hover:text-[#47acc9] w-full md:w-auto">
+            <ChartArea className="mr-2 h-4 w-4" />
+            Štatistiky zakázok
+          </Button>
         )}
       </DialogTrigger>
       <DialogContent className="w-[95vw] max-w-2xl h-[90vh] md:h-[80vh]">
@@ -92,9 +92,9 @@ export const StatisticsDialog = ({ open, onOpenChange, trigger }: StatisticsDial
                   <AccordionItem 
                     key={customer.id} 
                     value={customer.id}
-                    className="border rounded-lg bg-white"
+                    className="border rounded-lg bg-card dark:bg-card"
                   >
-                    <AccordionTrigger className="hover:no-underline px-3 py-2">
+                    <AccordionTrigger className="hover:no-underline px-3 py-2 dark:text-foreground">
                       <div className="flex flex-col items-center md:items-start space-y-1 w-full">
                         <div className="flex items-center justify-between w-full">
                           <h3 className="text-base font-medium">{customer.name}</h3>
@@ -116,17 +116,17 @@ export const StatisticsDialog = ({ open, onOpenChange, trigger }: StatisticsDial
                       <div className="px-3 pb-3 space-y-2">
                         <div className="space-y-2">
                           {items.map((item) => (
-                            <div key={item.id} className="border rounded p-2 bg-gray-50 text-sm">
+                            <div key={item.id} className="border rounded p-2 bg-muted/50 dark:bg-muted/10 text-sm">
                               <div className="flex flex-col md:flex-row justify-between items-center md:items-start gap-2">
                                 <div className="space-y-0.5 text-center md:text-left">
                                   <p className="font-medium">{item.code}</p>
-                                  <p className="text-gray-600 text-xs">{item.description || "-"}</p>
+                                  <p className="text-muted-foreground text-xs">{item.description || "-"}</p>
                                   <p className="text-xs">
                                     Rozmery: {item.length && item.width && item.height
                                       ? `${item.length}×${item.width}×${item.height} cm`
                                       : "-"}
                                   </p>
-                                  <p className="text-xs text-gray-500">
+                                  <p className="text-xs text-muted-foreground">
                                     {format(new Date(item.createdAt), "dd.MM.yyyy HH:mm")}
                                   </p>
                                 </div>
