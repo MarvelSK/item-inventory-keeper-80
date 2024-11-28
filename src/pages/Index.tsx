@@ -9,7 +9,7 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState<"manual" | "scanner" | "inventory">("inventory");
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col">
       <Header />
       
       <main className="container mx-auto px-4 py-8 flex-grow">
@@ -20,7 +20,7 @@ const Index = () => {
               className={`px-4 py-2 rounded-md transition-colors ${
                 activeTab === "manual"
                   ? "bg-[#212490] text-white"
-                  : "bg-white text-gray-600 hover:bg-[#47acc9] hover:text-white"
+                  : "bg-white text-gray-600 hover:bg-[#47acc9] hover:text-white dark:bg-secondary dark:text-secondary-foreground dark:hover:bg-[#47acc9] dark:hover:text-white"
               }`}
             >
               Manuálne pridanie
@@ -30,7 +30,7 @@ const Index = () => {
               className={`px-4 py-2 rounded-md transition-colors ${
                 activeTab === "scanner"
                   ? "bg-[#212490] text-white"
-                  : "bg-white text-gray-600 hover:bg-[#47acc9] hover:text-white"
+                  : "bg-white text-gray-600 hover:bg-[#47acc9] hover:text-white dark:bg-secondary dark:text-secondary-foreground dark:hover:bg-[#47acc9] dark:hover:text-white"
               }`}
             >
               Skener
@@ -40,7 +40,7 @@ const Index = () => {
               className={`px-4 py-2 rounded-md transition-colors ${
                 activeTab === "inventory"
                   ? "bg-[#212490] text-white"
-                  : "bg-white text-gray-600 hover:bg-[#47acc9] hover:text-white"
+                  : "bg-white text-gray-600 hover:bg-[#47acc9] hover:text-white dark:bg-secondary dark:text-secondary-foreground dark:hover:bg-[#47acc9] dark:hover:text-white"
               }`}
             >
               Inventár
@@ -52,8 +52,8 @@ const Index = () => {
           {activeTab === "manual" && <ManualEntry />}
           {activeTab === "scanner" && <Scanner />}
           {activeTab === "inventory" && (
-            <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm">
-              <h2 className="text-xl font-semibold mb-4 text-[#212490]">Inventár položiek</h2>
+            <div className="bg-white dark:bg-secondary p-4 md:p-6 rounded-lg shadow-sm">
+              <h2 className="text-xl font-semibold mb-4 text-[#212490] dark:text-blue-400">Inventár položiek</h2>
               <InventoryList />
             </div>
           )}
