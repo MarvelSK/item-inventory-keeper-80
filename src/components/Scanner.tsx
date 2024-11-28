@@ -6,6 +6,7 @@ import { Item } from "@/lib/types";
 import { ItemPreview } from "./scanner/ItemPreview";
 import { ScanControls } from "./scanner/ScanControls";
 import { ScanMode, ScanStatus } from "./scanner/types";
+import { toast } from "sonner";
 
 export const Scanner = () => {
   const [isScanning, setIsScanning] = useState(false);
@@ -32,14 +33,18 @@ export const Scanner = () => {
     if (!canScan) return;
     
     setCanScan(false);
-    setTimeout(() => setCanScan(true), 3000); // Increased delay to 3 seconds
 
     const item = items.find(item => item.code === code);
     setScannedItem(item || null);
     
     if (!item) {
       setScanStatus("error");
-      setTimeout(() => setScanStatus("none"), 1000);
+      toast.error("Položka nebola nájdená");
+      // Allow next scan after 1 second if item not found
+      setTimeout(() => {
+        setScanStatus("none");
+        setCanScan(true);
+      }, 1000);
       return;
     }
 
@@ -69,18 +74,25 @@ export const Scanner = () => {
 
     if (success && newStatus) {
       try {
-        const updatedItem = { ...item, status: newStatus, updatedAt: new Date() };
-        await updateItem(updatedItem, false); // Added false parameter to skip toast notification
+        const updatedItem = { ...item, status: newStatus, updatedAt: new Date().toISOString() };
+        await updateItem(updatedItem, false);
         setScannedItem(updatedItem);
         setScanStatus("success");
+        toast.success("Stav položky bol úspešne zmenený");
       } catch (error) {
         setScanStatus("error");
+        toast.error("Chyba pri zmene stavu položky");
       }
     } else {
       setScanStatus("error");
+      toast.error("Položku nie je možné spracovať v tomto režime");
     }
 
-    setTimeout(() => setScanStatus("none"), 1000);
+    // Allow next scan after 5 seconds
+    setTimeout(() => {
+      setScanStatus("none");
+      setCanScan(true);
+    }, 5000);
   };
 
   const startScanning = async () => {
@@ -110,6 +122,7 @@ export const Scanner = () => {
       );
     } catch (error) {
       console.error("Error accessing camera:", error);
+      toast.error("Chyba pri prístupe ku kamere");
     }
   };
 
