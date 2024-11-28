@@ -7,7 +7,7 @@ interface InventoryStatsProps {
 }
 
 const STATUS_MAP = {
-  waiting: { label: 'Čaká na dovoz', variant: 'secondary' },
+  waiting: { label: 'Čaká na dovoz', variant: 'warning' },
   in_stock: { label: 'Na sklade', variant: 'success' },
   in_transit: { label: 'V preprave', variant: 'warning' },
   delivered: { label: 'Doručené', variant: 'default' }
@@ -28,10 +28,10 @@ export const InventoryStats = ({ items }: InventoryStatsProps) => {
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
       <Card className="col-span-1">
         <CardContent className="p-2 flex items-center justify-between">
-          <Badge variant="secondary" className="text-xs">
+          <Badge variant="success" className="text-xs">
             Celkom
           </Badge>
-          <span className="text-xl font-bold text-gray-900">
+          <span className="text-xl font-bold text-gray-900 dark:text-gray-100">
             {totalItems}
           </span>
         </CardContent>
@@ -43,7 +43,7 @@ export const InventoryStats = ({ items }: InventoryStatsProps) => {
             <Badge variant={info.variant as any} className="text-xs">
               {info.label}
             </Badge>
-            <span className="text-xl font-bold text-gray-900">
+            <span className="text-xl font-bold text-gray-900 dark:text-gray-100">
               {statusCounts[status] || 0}
             </span>
           </CardContent>

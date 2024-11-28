@@ -40,6 +40,10 @@ export default {
           DEFAULT: "#22C55E",
           foreground: "#FFFFFF",
         },
+        warning: {
+          DEFAULT: "#F59E0B",
+          foreground: "#FFFFFF",
+        },
         destructive: {
           DEFAULT: "#EF4444",
           foreground: "#FFFFFF",

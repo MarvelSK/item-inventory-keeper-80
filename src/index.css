@@ -13,7 +13,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
  
-    --primary: 222.2 47.4% 11.2%;
+    --primary: 199 95% 49%;
     --primary-foreground: 210 40% 98%;
  
     --secondary: 210 40% 96.1%;
@@ -45,7 +45,7 @@
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
  
-    --primary: 210 40% 98%;
+    --primary: 199 95% 49%;
     --primary-foreground: 222.2 47.4% 11.2%;
  
     --secondary: 217.2 32.6% 17.5%;
@@ -78,6 +78,15 @@
   }
 }
 
+/* Button styles */
+button {
+  @apply transition-colors duration-200;
+}
+
+.dark button:not(.bg-destructive):hover {
+  @apply bg-[#47acc9] text-white;
+}
+
 /* Preserve logo color in dark mode */
 .logo {
   @apply dark:brightness-100 dark:filter-none;
@@ -102,23 +111,6 @@
   @apply bg-card text-card-foreground shadow-sm dark:shadow-none;
 }
 
-.radix-dialog-content {
-  @apply bg-background border-border !important;
-}
-
-@media (max-width: 640px) {
-  .radix-dialog-content {
-    width: 95vw !important;
-    max-height: 80vh !important;
-    padding: 1rem !important;
-  }
-}
-
-.dropdown-menu-content {
-  z-index: 999 !important;
-  @apply bg-popover border-border;
-}
-
 /* Table enhancements for dark mode */
 table {
   @apply bg-background;
@@ -132,7 +124,7 @@ tbody tr {
   @apply hover:bg-muted/50 dark:hover:bg-muted/10;
 }
 
-/* Scrollbar customization for dark mode */
+/* Scrollbar customization */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
