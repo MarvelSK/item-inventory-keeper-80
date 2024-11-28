@@ -3,7 +3,6 @@ import { BrowserMultiFormatReader } from "@zxing/browser";
 import { Item } from "@/lib/types";
 import { ScanMode, ScanStatus } from "@/components/scanner/types";
 import { playSuccessSound, playErrorSound } from '@/lib/sounds';
-import { toast } from "sonner";
 
 export const useScanner = (
   items: Item[],
@@ -31,7 +30,6 @@ export const useScanner = (
     if (!item) {
       setScanStatus("error");
       playErrorSound();
-      toast.error("Položka nebola nájdená");
       setTimeout(() => setScanStatus("none"), 1000);
       return;
     }
@@ -66,16 +64,13 @@ export const useScanner = (
         setScannedItem({ ...item, status: newStatus as any });
         setScanStatus("success");
         playSuccessSound();
-        toast.success("Položka bola úspešne aktualizovaná");
       } catch (error) {
         setScanStatus("error");
         playErrorSound();
-        toast.error("Nastala chyba pri aktualizácii položky");
       }
     } else {
       setScanStatus("error");
       playErrorSound();
-      toast.error("Nesprávny stav položky pre túto operáciu");
     }
 
     setTimeout(() => setScanStatus("none"), 1000);

@@ -6,8 +6,7 @@ import { ScanControls } from "./scanner/ScanControls";
 import { useScanner } from "@/hooks/useScanner";
 import { useTorch } from "@/hooks/useTorch";
 import { useNavigate } from "react-router-dom";
-import { X } from "lucide-react";
-import { toast } from "sonner";
+import { ArrowLeft, Flashlight, FlashlightOff } from "lucide-react";
 
 export const Scanner = () => {
   const navigate = useNavigate();
@@ -50,10 +49,7 @@ export const Scanner = () => {
 
   const startScanning = async () => {
     try {
-      if (!videoRef.current) {
-        toast.error("Camera initialization failed");
-        return;
-      }
+      if (!videoRef.current) return;
 
       const constraints: MediaStreamConstraints = {
         video: {
@@ -82,7 +78,6 @@ export const Scanner = () => {
       );
     } catch (error) {
       console.error("Error accessing camera:", error);
-      toast.error("Failed to access camera. Please check permissions.");
     }
   };
 
@@ -92,7 +87,7 @@ export const Scanner = () => {
       mediaStream.current = null;
     }
     if (codeReader.current) {
-      codeReader.current.stopStreams();
+      codeReader.current.reset();
     }
     setIsScanning(false);
     setTorchEnabled(false);
@@ -109,6 +104,13 @@ export const Scanner = () => {
   return (
     <div className="fixed inset-0 bg-black">
       <div className="relative h-full flex flex-col">
+        {/* Scanned Item Preview - Now at the top */}
+        <div className="absolute top-0 left-0 right-0 p-4 z-10 pointer-events-none">
+          <div className="pointer-events-auto">
+            <ItemPreview item={scannedItem} />
+          </div>
+        </div>
+
         {/* Camera View */}
         <div className="relative flex-1">
           <video
@@ -128,14 +130,14 @@ export const Scanner = () => {
                   onClick={() => navigate(-1)}
                   className="w-10 h-10 flex items-center justify-center text-white bg-black/20 rounded-full backdrop-blur-sm pointer-events-auto"
                 >
-                  <X className="w-6 h-6" />
+                  <ArrowLeft className="w-6 h-6" />
                 </button>
                 <h2 className="text-white font-medium">Skenovanie</h2>
                 <button
                   onClick={toggleTorch}
                   className="w-10 h-10 flex items-center justify-center text-white bg-black/20 rounded-full backdrop-blur-sm pointer-events-auto"
                 >
-                  {torchEnabled ? "🔦" : "⚡️"}
+                  {torchEnabled ? <FlashlightOff className="w-6 h-6" /> : <Flashlight className="w-6 h-6" />}
                 </button>
               </div>
               
@@ -162,13 +164,6 @@ export const Scanner = () => {
                 />
               </div>
             </div>
-          </div>
-        </div>
-        
-        {/* Scanned Item Preview */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 pointer-events-none">
-          <div className="pointer-events-auto">
-            <ItemPreview item={scannedItem} />
           </div>
         </div>
       </div>
