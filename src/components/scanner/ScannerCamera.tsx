@@ -28,7 +28,7 @@ export const ScannerCamera = ({ isScanning, onScan, scanStatus }: ScannerCameraP
   return (
     <div className="relative aspect-video max-w-md mx-auto">
       {isScanning ? (
-        <BarcodeScanner onScan={handleScan}>
+        <BarcodeScanner onResult={handleScan}>
           <video
             ref={videoRef}
             className={`w-full h-full object-cover rounded-lg border-4 transition-colors ${getScannerBorderColor()}`}
