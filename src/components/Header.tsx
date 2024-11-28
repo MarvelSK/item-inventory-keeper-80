@@ -4,6 +4,7 @@ import { BackupDialog } from "./header/BackupDialog";
 import { useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
 import { Menu } from "lucide-react";
+import { ThemeToggle } from "./ThemeToggle";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,7 +21,7 @@ export const Header = () => {
   };
 
   return (
-    <header className="bg-white shadow-sm sticky top-0 z-50">
+    <header className="bg-background border-b sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between flex-wrap gap-4">
           {/* Logo and Title */}
@@ -28,16 +29,17 @@ export const Header = () => {
             <img
               src="https://www.somfy.cz/common/img/library//logo_neva.png"
               alt="NEVA Logo"
-              className="h-8 cursor-pointer"
+              className="h-8 cursor-pointer dark:invert"
               onClick={handleLogoClick}
             />
-            <h1 className="text-xl font-bold text-[#212490] hidden md:block">
+            <h1 className="text-xl font-bold text-[#212490] dark:text-blue-400 hidden md:block">
               ZÁVOZOVÝ SYSTÉM
             </h1>
           </div>
 
           {/* Mobile Menu */}
-          <div className="md:hidden">
+          <div className="md:hidden flex items-center space-x-2">
+            <ThemeToggle />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="icon">
@@ -65,6 +67,7 @@ export const Header = () => {
             <CustomerDialog />
             <StatisticsDialog />
             <BackupDialog />
+            <ThemeToggle />
           </nav>
         </div>
       </div>
