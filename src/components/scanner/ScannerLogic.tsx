@@ -12,11 +12,22 @@ export const useScannerLogic = () => {
   const [scannedItem, setScannedItem] = useState<Item | null>(null);
   const { items, updateItem } = useItems();
 
+  const resetScannerState = (newMode: ScanMode) => {
+    setMode(newMode);
+    setScanStatus("none");
+    setScannedItem(null);
+    setCanScan(true);
+    if (isScanning) {
+      setIsScanning(false);
+      setTimeout(() => setIsScanning(true), 100); // Brief delay to reset camera
+    }
+  };
+
   const handleScannedCode = async (code: string) => {
     if (!canScan) return;
     
     setCanScan(false);
-    setTimeout(() => setCanScan(true), 3000);
+    setTimeout(() => setCanScan(true), 5000); // 5 second delay between scans
 
     const item = items.find(item => item.code === code);
     setScannedItem(item || null);
@@ -57,7 +68,7 @@ export const useScannerLogic = () => {
         const updatedItem = { 
           ...item, 
           status: newStatus, 
-          updatedAt: new Date().toISOString() 
+          updatedAt: new Date() 
         };
         await updateItem(updatedItem, false);
         setScannedItem(updatedItem);
@@ -83,5 +94,6 @@ export const useScannerLogic = () => {
     scanStatus,
     scannedItem,
     handleScannedCode,
+    resetScannerState,
   };
 };

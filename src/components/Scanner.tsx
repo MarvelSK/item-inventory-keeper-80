@@ -12,6 +12,7 @@ export const Scanner = () => {
     scanStatus,
     scannedItem,
     handleScannedCode,
+    resetScannerState,
   } = useScannerLogic();
 
   return (
@@ -24,6 +25,7 @@ export const Scanner = () => {
           isScanning={isScanning}
           onStartScan={() => setIsScanning(true)}
           onStopScan={() => setIsScanning(false)}
+          onModeChange={resetScannerState}
         />
         <ScannerCamera
           isScanning={isScanning}
