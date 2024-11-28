@@ -13,6 +13,34 @@ export interface Item {
   postponeReason?: string;
 }
 
-export interface BarcodeDetector {
-  detect(image: HTMLVideoElement): Promise<Array<{ rawValue: string }>>;
+export interface Customer {
+  id: string;
+  name: string;
+  tags: Tag[];
+  deleted: boolean;
+}
+
+export interface Tag {
+  id: string;
+  name: string;
+  color: string;
+}
+
+export interface Label {
+  id: string;
+  name: string;
+  color: string;
+}
+
+export interface Json {
+  [key: string]: any;
+}
+
+export interface DbItem extends Omit<Item, 'createdAt' | 'updatedAt'> {
+  created_at: string;
+  updated_at: string;
+  created_by?: string;
+  updated_by?: string;
+  deleted: boolean;
+  tags?: Json;
 }

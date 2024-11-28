@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useItems } from "@/hooks/useItems";
 import { Item } from "@/lib/types";
 import { ScanMode, ScanStatus } from "./types";
+import { toast } from "sonner";
 
 export const useScannerLogic = () => {
   const [isScanning, setIsScanning] = useState(false);
@@ -22,11 +23,12 @@ export const useScannerLogic = () => {
     
     if (!item) {
       setScanStatus("error");
+      toast.error("Item not found");
       setTimeout(() => setScanStatus("none"), 1000);
       return;
     }
 
-    let newStatus;
+    let newStatus: Item["status"] | undefined;
     let success = false;
 
     switch (mode) {
@@ -52,15 +54,22 @@ export const useScannerLogic = () => {
 
     if (success && newStatus) {
       try {
-        const updatedItem = { ...item, status: newStatus, updatedAt: new Date() };
+        const updatedItem = { 
+          ...item, 
+          status: newStatus, 
+          updatedAt: new Date().toISOString() 
+        };
         await updateItem(updatedItem, false);
         setScannedItem(updatedItem);
         setScanStatus("success");
+        toast.success("Item status updated successfully");
       } catch (error) {
         setScanStatus("error");
+        toast.error("Failed to update item status");
       }
     } else {
       setScanStatus("error");
+      toast.error("Invalid status transition for current mode");
     }
 
     setTimeout(() => setScanStatus("none"), 1000);
