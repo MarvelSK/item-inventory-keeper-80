@@ -14,6 +14,7 @@ export const useScanner = (
   const [canScan, setCanScan] = useState(true);
   const [scannedItem, setScannedItem] = useState<Item | null>(null);
   const [torchEnabled, setTorchEnabled] = useState(false);
+  const [facingMode, setFacingMode] = useState<"environment" | "user">("environment");
   const videoRef = useRef<HTMLVideoElement>(null);
   const codeReader = useRef<BrowserMultiFormatReader>();
   const mediaStream = useRef<MediaStream | null>(null);
@@ -89,6 +90,8 @@ export const useScanner = (
     setScannedItem,
     torchEnabled,
     setTorchEnabled,
+    facingMode,
+    setFacingMode,
     videoRef,
     codeReader,
     mediaStream,

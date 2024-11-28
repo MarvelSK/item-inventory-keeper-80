@@ -6,7 +6,7 @@ import { ScanControls } from "./scanner/ScanControls";
 import { useScanner } from "@/hooks/useScanner";
 import { useTorch } from "@/hooks/useTorch";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Flashlight, FlashlightOff } from "lucide-react";
+import { ArrowLeft, Flashlight, FlashlightOff, SwitchCamera } from "lucide-react";
 
 export const Scanner = () => {
   const navigate = useNavigate();
@@ -27,7 +27,9 @@ export const Scanner = () => {
     videoRef,
     codeReader,
     mediaStream,
-    handleScannedCode
+    handleScannedCode,
+    facingMode,
+    setFacingMode
   } = useScanner(items, updateItem);
 
   const { toggleTorch } = useTorch(mediaStream, torchEnabled, setTorchEnabled);
@@ -45,7 +47,7 @@ export const Scanner = () => {
       stopScanning();
       startScanning();
     }
-  }, [mode]);
+  }, [mode, facingMode]);
 
   const startScanning = async () => {
     try {
@@ -53,7 +55,7 @@ export const Scanner = () => {
 
       const constraints: MediaStreamConstraints = {
         video: {
-          facingMode: "environment",
+          facingMode: facingMode,
           width: { ideal: 1920 },
           height: { ideal: 1080 }
         }
@@ -87,10 +89,14 @@ export const Scanner = () => {
       mediaStream.current = null;
     }
     if (codeReader.current) {
-      codeReader.current.reset();
+      codeReader.current.stopStreams();
     }
     setIsScanning(false);
     setTorchEnabled(false);
+  };
+
+  const toggleCamera = () => {
+    setFacingMode(prev => prev === "environment" ? "user" : "environment");
   };
 
   const getScannerBorderColor = () => {
@@ -104,7 +110,7 @@ export const Scanner = () => {
   return (
     <div className="fixed inset-0 bg-black">
       <div className="relative h-full flex flex-col">
-        {/* Scanned Item Preview - Now at the top */}
+        {/* Scanned Item Preview */}
         <div className="absolute top-0 left-0 right-0 p-4 z-10 pointer-events-none">
           <div className="pointer-events-auto">
             <ItemPreview item={scannedItem} />
@@ -133,12 +139,20 @@ export const Scanner = () => {
                   <ArrowLeft className="w-6 h-6" />
                 </button>
                 <h2 className="text-white font-medium">Skenovanie</h2>
-                <button
-                  onClick={toggleTorch}
-                  className="w-10 h-10 flex items-center justify-center text-white bg-black/20 rounded-full backdrop-blur-sm pointer-events-auto"
-                >
-                  {torchEnabled ? <FlashlightOff className="w-6 h-6" /> : <Flashlight className="w-6 h-6" />}
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={toggleCamera}
+                    className="w-10 h-10 flex items-center justify-center text-white bg-black/20 rounded-full backdrop-blur-sm pointer-events-auto"
+                  >
+                    <SwitchCamera className="w-6 h-6" />
+                  </button>
+                  <button
+                    onClick={toggleTorch}
+                    className="w-10 h-10 flex items-center justify-center text-white bg-black/20 rounded-full backdrop-blur-sm pointer-events-auto"
+                  >
+                    {torchEnabled ? <FlashlightOff className="w-6 h-6" /> : <Flashlight className="w-6 h-6" />}
+                  </button>
+                </div>
               </div>
               
               {/* Center Scanner Frame */}
