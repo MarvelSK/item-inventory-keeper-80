@@ -78,6 +78,30 @@
   }
 }
 
+/* Preserve logo color in dark mode */
+.logo {
+  @apply dark:brightness-100 dark:filter-none;
+}
+
+/* Enhanced dark mode styles */
+.dialog-content,
+.dropdown-content,
+.floating-element {
+  @apply bg-background border-border;
+}
+
+.list-item {
+  @apply hover:bg-muted/50 dark:hover:bg-muted/20;
+}
+
+.glass-morphism {
+  @apply dark:bg-background/80 dark:backdrop-blur-lg;
+}
+
+.card {
+  @apply bg-card text-card-foreground shadow-sm dark:shadow-none;
+}
+
 .radix-dialog-content {
   @apply bg-background border-border !important;
 }
@@ -92,4 +116,40 @@
 
 .dropdown-menu-content {
   z-index: 999 !important;
+  @apply bg-popover border-border;
+}
+
+/* Table enhancements for dark mode */
+table {
+  @apply bg-background;
+}
+
+thead {
+  @apply bg-muted/50 dark:bg-muted/10;
+}
+
+tbody tr {
+  @apply hover:bg-muted/50 dark:hover:bg-muted/10;
+}
+
+/* Scrollbar customization for dark mode */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-muted/30;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-muted-foreground/30 rounded-full hover:bg-muted-foreground/50;
+}
+
+.dark ::-webkit-scrollbar-track {
+  @apply bg-muted/10;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  @apply bg-muted-foreground/20 hover:bg-muted-foreground/30;
 }

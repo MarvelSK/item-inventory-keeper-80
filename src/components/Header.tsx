@@ -29,7 +29,7 @@ export const Header = () => {
             <img
               src="https://www.somfy.cz/common/img/library//logo_neva.png"
               alt="NEVA Logo"
-              className="h-8 cursor-pointer dark:invert"
+              className="h-8 cursor-pointer logo"
               onClick={handleLogoClick}
             />
             <h1 className="text-xl font-bold text-[#212490] dark:text-blue-400 hidden md:block">
