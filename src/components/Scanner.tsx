@@ -1,11 +1,19 @@
 import { useEffect, useRef, useState } from "react";
-import { BrowserMultiFormatReader } from "@zxing/browser";
 import { useItems } from "@/hooks/useItems";
 import { useCustomers } from "@/hooks/useCustomers";
 import { Item } from "@/lib/types";
 import { ItemPreview } from "./scanner/ItemPreview";
 import { ScanControls } from "./scanner/ScanControls";
 import { ScanMode, ScanStatus } from "./scanner/types";
+import { BarcodeDetector } from "@/lib/types";
+
+declare global {
+  interface Window {
+    BarcodeDetector?: {
+      new(): BarcodeDetector;
+    };
+  }
+}
 
 export const Scanner = () => {
   const [isScanning, setIsScanning] = useState(false);
@@ -14,16 +22,23 @@ export const Scanner = () => {
   const [canScan, setCanScan] = useState(true);
   const [scannedItem, setScannedItem] = useState<Item | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const codeReader = useRef<BrowserMultiFormatReader>();
   const mediaStream = useRef<MediaStream | null>(null);
   const { items, updateItem } = useItems();
   const { customers } = useCustomers();
+  const detector = useRef<BarcodeDetector | null>(null);
+  const animationFrame = useRef<number>();
 
   useEffect(() => {
-    codeReader.current = new BrowserMultiFormatReader();
+    if (window.BarcodeDetector) {
+      detector.current = new window.BarcodeDetector();
+    }
+    
     return () => {
       if (mediaStream.current) {
         mediaStream.current.getTracks().forEach(track => track.stop());
+      }
+      if (animationFrame.current) {
+        cancelAnimationFrame(animationFrame.current);
       }
     };
   }, []);
@@ -32,7 +47,7 @@ export const Scanner = () => {
     if (!canScan) return;
     
     setCanScan(false);
-    setTimeout(() => setCanScan(true), 3000); // Increased delay to 3 seconds
+    setTimeout(() => setCanScan(true), 3000);
 
     const item = items.find(item => item.code === code);
     setScannedItem(item || null);
@@ -70,7 +85,7 @@ export const Scanner = () => {
     if (success && newStatus) {
       try {
         const updatedItem = { ...item, status: newStatus, updatedAt: new Date() };
-        await updateItem(updatedItem, false); // Added false parameter to skip toast notification
+        await updateItem(updatedItem, false);
         setScannedItem(updatedItem);
         setScanStatus("success");
       } catch (error) {
@@ -83,33 +98,64 @@ export const Scanner = () => {
     setTimeout(() => setScanStatus("none"), 1000);
   };
 
+  const scanFrame = async () => {
+    if (!videoRef.current || !detector.current) return;
+
+    try {
+      const barcodes = await detector.current.detect(videoRef.current);
+      for (const barcode of barcodes) {
+        if (barcode.rawValue) {
+          await handleScannedCode(barcode.rawValue);
+          return;
+        }
+      }
+    } catch (error) {
+      console.error("Barcode detection error:", error);
+    }
+
+    if (isScanning) {
+      animationFrame.current = requestAnimationFrame(scanFrame);
+    }
+  };
+
   const startScanning = async () => {
     try {
       if (!videoRef.current) return;
+      if (!window.BarcodeDetector) {
+        console.error("Barcode detection not supported");
+        return;
+      }
 
       const constraints = {
-        video: { facingMode: "environment" }
+        video: {
+          facingMode: { exact: "environment" },
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        }
       };
 
       mediaStream.current = await navigator.mediaDevices.getUserMedia(constraints);
       videoRef.current.srcObject = mediaStream.current;
-      
       setIsScanning(true);
-
-      await codeReader.current?.decodeFromVideoDevice(
-        undefined,
-        videoRef.current,
-        (result, error) => {
-          if (result) {
-            handleScannedCode(result.getText());
-          }
-          if (error && !(error instanceof TypeError)) {
-            console.error(error);
-          }
-        }
-      );
+      animationFrame.current = requestAnimationFrame(scanFrame);
     } catch (error) {
       console.error("Error accessing camera:", error);
+      // If exact environment mode fails, try without exact constraint
+      try {
+        const fallbackConstraints = {
+          video: {
+            facingMode: "environment",
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          }
+        };
+        mediaStream.current = await navigator.mediaDevices.getUserMedia(fallbackConstraints);
+        videoRef.current!.srcObject = mediaStream.current;
+        setIsScanning(true);
+        animationFrame.current = requestAnimationFrame(scanFrame);
+      } catch (fallbackError) {
+        console.error("Error accessing camera with fallback:", fallbackError);
+      }
     }
   };
 
@@ -117,6 +163,9 @@ export const Scanner = () => {
     if (mediaStream.current) {
       mediaStream.current.getTracks().forEach(track => track.stop());
       mediaStream.current = null;
+    }
+    if (animationFrame.current) {
+      cancelAnimationFrame(animationFrame.current);
     }
     setIsScanning(false);
   };
