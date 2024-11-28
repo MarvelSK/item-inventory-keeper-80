@@ -28,7 +28,17 @@ export const MassImportDialog = () => {
       setProgress(0);
       setStage("");
       
-      const items = JSON.parse(data);
+      let items;
+      try {
+        items = JSON.parse(data);
+        if (!Array.isArray(items)) {
+          throw new Error("Data must be an array of items");
+        }
+      } catch (e) {
+        toast.error("Invalid JSON format");
+        return;
+      }
+
       await importItems(items);
       
       // Refresh inventory list after successful import

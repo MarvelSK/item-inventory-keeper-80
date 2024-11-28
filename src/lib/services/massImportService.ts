@@ -6,15 +6,14 @@ export const importItems = async (items: any[]) => {
   
   const formattedItems = items.map(item => ({
     ...item,
-    createdAt: now,
-    updatedAt: now,
+    created_at: now,
+    updated_at: now,
     deleted: false,
     tags: item.tags || [],
     postponed: false,
-    postponeReason: undefined,
+    postpone_reason: undefined,
   }));
 
-  // Insert each formatted item into the database
   const { data, error } = await supabase
     .from('items')
     .insert(formattedItems)
