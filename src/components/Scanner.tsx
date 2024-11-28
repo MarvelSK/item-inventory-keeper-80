@@ -28,11 +28,19 @@ export const Scanner = () => {
     };
   }, []);
 
+  // Add effect to restart scanning when mode changes
+  useEffect(() => {
+    if (isScanning) {
+      stopScanning();
+      startScanning();
+    }
+  }, [mode]);
+
   const handleScannedCode = async (code: string) => {
     if (!canScan) return;
     
     setCanScan(false);
-    setTimeout(() => setCanScan(true), 3000); // Increased delay to 3 seconds
+    setTimeout(() => setCanScan(true), 3000);
 
     const item = items.find(item => item.code === code);
     setScannedItem(item || null);
@@ -70,7 +78,7 @@ export const Scanner = () => {
     if (success && newStatus) {
       try {
         const updatedItem = { ...item, status: newStatus, updatedAt: new Date() };
-        await updateItem(updatedItem, false); // Added false parameter to skip toast notification
+        await updateItem(updatedItem, false);
         setScannedItem(updatedItem);
         setScanStatus("success");
       } catch (error) {
