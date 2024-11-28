@@ -33,6 +33,10 @@ export const Scanner = () => {
     if (isScanning) {
       stopScanning();
       startScanning();
+      // Reset state when mode changes
+      setScannedItem(null);
+      setScanStatus("none");
+      setCanScan(true);
     }
   }, [mode]);
 
@@ -54,6 +58,7 @@ export const Scanner = () => {
     let newStatus;
     let success = false;
 
+    // Use current mode value from state
     switch (mode) {
       case "receiving":
         if (item.status === "waiting") {
