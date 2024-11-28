@@ -7,7 +7,11 @@ import { useScanner } from "@/hooks/useScanner";
 import { useTorch } from "@/hooks/useTorch";
 
 export const Scanner = () => {
-  const { items, updateItem } = useItems();
+  const { items, updateItem: originalUpdateItem } = useItems();
+  const updateItem = async (item: any, showToast?: boolean) => {
+    await originalUpdateItem(item, showToast);
+  };
+  
   const {
     isScanning,
     setIsScanning,
