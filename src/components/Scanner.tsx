@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { BrowserMultiFormatReader, IScannerControls } from "@zxing/browser";
+import { BrowserMultiFormatReader } from "@zxing/browser";
 import { useItems } from "@/hooks/useItems";
 import { useCustomers } from "@/hooks/useCustomers";
 import { ItemPreview } from "./scanner/ItemPreview";
@@ -29,6 +29,13 @@ export const Scanner = () => {
 
   useEffect(() => {
     codeReader.current = new BrowserMultiFormatReader();
+    // Set hints for faster decoding
+    if (codeReader.current.hints) {
+      codeReader.current.hints.set(2, true); // Enable faster decoding mode
+      codeReader.current.hints.set(3, true); // Enable quick scanning
+      codeReader.current.hints.set(6, true); // Enable aggressive scanning
+    }
+    
     return () => {
       if (mediaStream.current) {
         mediaStream.current.getTracks().forEach(track => track.stop());
@@ -47,11 +54,9 @@ export const Scanner = () => {
     try {
       if (!videoRef.current) return;
 
-      // Get list of available video devices
       const devices = await navigator.mediaDevices.enumerateDevices();
       const videoDevices = devices.filter(device => device.kind === 'videoinput');
       
-      // Try to find a back camera
       const backCamera = videoDevices.find(device => 
         device.label.toLowerCase().includes('back') || 
         device.label.toLowerCase().includes('rear')
@@ -63,23 +68,28 @@ export const Scanner = () => {
           facingMode: backCamera ? undefined : "environment",
           width: { ideal: 1920 },
           height: { ideal: 1080 },
-          aspectRatio: { ideal: 1.7777777778 },
-          focusMode: 'continuous',
-          zoom: 1
+          frameRate: { ideal: 30 }, // Optimize frame rate
+          aspectRatio: { ideal: 1.7777777778 }
         }
       };
 
       mediaStream.current = await navigator.mediaDevices.getUserMedia(constraints);
       videoRef.current.srcObject = mediaStream.current;
       
-      // Apply optimal track settings
       const videoTrack = mediaStream.current.getVideoTracks()[0];
-      await videoTrack.applyConstraints({
-        advanced: [
-          { focusMode: "continuous" },
-          { exposureMode: "continuous" }
-        ]
-      });
+      if (videoTrack) {
+        try {
+          await videoTrack.applyConstraints({
+            advanced: [{
+              autoFocus: "continuous",
+              brightness: { ideal: 128 },
+              contrast: { ideal: 128 }
+            }]
+          });
+        } catch (err) {
+          console.warn('Could not apply advanced constraints:', err);
+        }
+      }
       
       setIsScanning(true);
 
@@ -91,8 +101,14 @@ export const Scanner = () => {
             handleScannedCode(result.getText());
           }
           if (error && !(error instanceof TypeError)) {
+            // Only log actual errors, not timeouts
             console.error("Scanning error:", error);
           }
+        },
+        // Add hints for faster decoding
+        {
+          tryHarder: true,
+          possibleFormats: ["CODE_128", "CODE_39", "EAN_13", "EAN_8", "UPC_A", "UPC_E"]
         }
       );
     } catch (error) {
