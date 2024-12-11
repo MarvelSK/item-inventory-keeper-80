@@ -50,12 +50,12 @@ export const ScanControls = ({
           {isScanning ? (
             <>
               <CameraOff className="mr-2 h-4 w-4" />
-              Stop Scanning
+              Zastaviť skenovanie
             </>
           ) : (
             <>
               <Camera className="mr-2 h-4 w-4" />
-              Start Scanning
+              Spustiť skenovanie
             </>
           )}
         </Button>
@@ -68,12 +68,12 @@ export const ScanControls = ({
             {torchEnabled ? (
               <>
                 <FlashlightOff className="mr-2 h-4 w-4" />
-                Disable Flash
+                Vypnúť blesk
               </>
             ) : (
               <>
                 <Flashlight className="mr-2 h-4 w-4" />
-                Enable Flash
+                Zapnúť blesk
               </>
             )}
           </Button>
