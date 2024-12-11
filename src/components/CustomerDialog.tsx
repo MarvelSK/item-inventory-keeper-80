@@ -36,6 +36,7 @@ interface CustomerDialogProps {
 
 export const CustomerDialog = ({ open, onOpenChange }: CustomerDialogProps) => {
   const [customerName, setCustomerName] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
   const [editingCustomer, setEditingCustomer] = useState<null | Customer>(null);
   const [deletingCustomerId, setDeletingCustomerId] = useState<string | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -69,6 +70,10 @@ export const CustomerDialog = ({ open, onOpenChange }: CustomerDialogProps) => {
     }
   };
 
+  const filteredCustomers = customers.filter(customer => 
+    customer.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-4">
@@ -99,6 +104,12 @@ export const CustomerDialog = ({ open, onOpenChange }: CustomerDialogProps) => {
             <div className="space-y-4 p-1">
               <div className="flex flex-col md:flex-row gap-2">
                 <Input
+                  placeholder="Vyhľadať zakázku..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="flex-1"
+                />
+                <Input
                   placeholder="Názov zakázky"
                   value={customerName}
                   onChange={(e) => setCustomerName(e.target.value)}
@@ -121,7 +132,7 @@ export const CustomerDialog = ({ open, onOpenChange }: CustomerDialogProps) => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {customers.map((customer) => (
+                    {filteredCustomers.map((customer) => (
                       <TableRow key={customer.id}>
                         <TableCell className="font-medium text-center md:text-left">{customer.name}</TableCell>
                         <TableCell className="text-center md:text-left">
