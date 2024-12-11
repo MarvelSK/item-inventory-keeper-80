@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import { BrowserMultiFormatReader } from "@zxing/browser";
 import { Item } from "@/lib/types";
 import { ScanMode, ScanStatus } from "@/components/scanner/types";
-import { playSuccessSound, playErrorSound } from '@/lib/sounds';
+import { playSuccessSound } from '@/lib/sounds';
 
 export const useScanner = (
   items: Item[],
@@ -29,7 +29,6 @@ export const useScanner = (
     
     if (!item) {
       setScanStatus("error");
-      playErrorSound();
       setTimeout(() => setScanStatus("none"), 1000);
       return;
     }
@@ -64,14 +63,12 @@ export const useScanner = (
         await updateItem(updatedItem, false);
         setScannedItem(updatedItem);
         setScanStatus("success");
-        playSuccessSound();
+        playSuccessSound(); // Play sound on successful scan
       } catch (error) {
         setScanStatus("error");
-        playErrorSound();
       }
     } else {
       setScanStatus("error");
-      playErrorSound();
     }
 
     setTimeout(() => setScanStatus("none"), 1000);

@@ -7,6 +7,7 @@ import { useScanner } from "@/hooks/useScanner";
 import { useTorch } from "@/hooks/useTorch";
 import { ScannedItemsList } from "./scanner/ScannedItemsList";
 import { Item } from "@/lib/types";
+import { playSuccessSound } from "@/lib/sounds";
 
 export const Scanner = () => {
   const { items, updateItem } = useItems();
@@ -31,6 +32,7 @@ export const Scanner = () => {
     setScannedItems(prev => {
       const exists = prev.some(existingItem => existingItem.id === item.id);
       if (exists) return prev;
+      playSuccessSound(); // Play sound when successfully adding new item
       return [item, ...prev].slice(0, 50); // Keep last 50 items
     });
   });
