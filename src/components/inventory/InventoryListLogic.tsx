@@ -61,6 +61,12 @@ export const InventoryListLogic = ({
       const aValue = a[sortField];
       const bValue = b[sortField];
       
+      if (sortField === "createdAt") {
+        const aDate = new Date(aValue as string | number | Date).getTime();
+        const bDate = new Date(bValue as string | number | Date).getTime();
+        return sortDirection === "asc" ? aDate - bDate : bDate - aDate;
+      }
+      
       if (typeof aValue === 'string' && typeof bValue === 'string') {
         return sortDirection === "asc"
           ? aValue.localeCompare(bValue)

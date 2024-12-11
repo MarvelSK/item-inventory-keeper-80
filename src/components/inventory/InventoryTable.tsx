@@ -81,7 +81,18 @@ export const InventoryTable = ({
             <TableHead className="hidden lg:table-cell min-w-[200px]">
               Rozmery (D×Š×V cm)
             </TableHead>
-            <TableHead className="hidden sm:table-cell">Vytvorené</TableHead>
+            <TableHead 
+              className="hidden sm:table-cell cursor-pointer hover:text-[#47acc9]"
+              onClick={() => toggleSort("createdAt")}
+            >
+              Vytvorené
+              {sortField === "createdAt" &&
+                (sortDirection === "asc" ? (
+                  <ArrowUp className="inline ml-1 h-4 w-4" />
+                ) : (
+                  <ArrowDown className="inline ml-1 h-4 w-4" />
+                ))}
+            </TableHead>
             <TableHead className="w-[100px] text-right sm:text-left">Akcie</TableHead>
           </TableRow>
         </TableHeader>
