@@ -1,5 +1,15 @@
 import { MutableRefObject } from "react";
 
+// Extend MediaTrackCapabilities to include torch
+declare global {
+  interface MediaTrackCapabilities {
+    torch?: boolean;
+  }
+  interface MediaTrackConstraintSet {
+    torch?: boolean;
+  }
+}
+
 export const useTorch = (
   mediaStream: MutableRefObject<MediaStream | null>,
   torchEnabled: boolean,
