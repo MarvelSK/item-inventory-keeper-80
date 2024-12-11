@@ -28,12 +28,11 @@ export const Scanner = () => {
     handleScannedCode
   } = useScanner(items, async (item: Item, showToast?: boolean) => {
     await updateItem(item, showToast);
-    // Only add item to scanned list if it's not already there
     setScannedItems(prev => {
       const exists = prev.some(existingItem => existingItem.id === item.id);
       if (exists) return prev;
-      playSuccessSound(); // Play sound when successfully adding new item
-      return [item, ...prev].slice(0, 50); // Keep last 50 items
+      playSuccessSound();
+      return [item, ...prev].slice(0, 50);
     });
   });
 
@@ -124,10 +123,10 @@ export const Scanner = () => {
   };
 
   return (
-    <div className="bg-card p-4 md:p-6 rounded-lg shadow-sm dark:shadow-none space-y-4">
+    <div className="bg-card p-4 md:p-6 rounded-lg shadow-sm dark:shadow-none space-y-4 mb-8">
       <h2 className="text-xl font-semibold text-primary">Skenovanie položiek</h2>
       
-      <div className="grid grid-rows-[auto_1fr] gap-4 h-[calc(100vh-12rem)]">
+      <div className="grid grid-rows-[auto_1fr] gap-4">
         <div className="space-y-4">
           <ScanControls
             mode={mode}
