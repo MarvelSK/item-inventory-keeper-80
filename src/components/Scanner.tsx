@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { BrowserMultiFormatReader } from "@zxing/browser";
 import { useItems } from "@/hooks/useItems";
 import { useCustomers } from "@/hooks/useCustomers";
-import { ItemPreview } from "./scanner/ItemPreview";
 import { ScanControls } from "./scanner/ScanControls";
 import { useScanner } from "@/hooks/useScanner";
 import { useTorch } from "@/hooks/useTorch";
@@ -20,17 +19,20 @@ export const Scanner = () => {
     mode,
     setMode,
     scanStatus,
-    scannedItem,
     torchEnabled,
     setTorchEnabled,
     videoRef,
     codeReader,
     mediaStream,
     handleScannedCode
-  } = useScanner(items, async (item: Item) => {
-    const updated = await updateItem(item);
-    setScannedItems(prev => [updated, ...prev].slice(0, 50)); // Keep last 50 items
-    return updated;
+  } = useScanner(items, async (item: Item, showToast?: boolean) => {
+    await updateItem(item, showToast);
+    // Only add item to scanned list if it's not already there
+    setScannedItems(prev => {
+      const exists = prev.some(existingItem => existingItem.id === item.id);
+      if (exists) return prev;
+      return [item, ...prev].slice(0, 50); // Keep last 50 items
+    });
   });
 
   const { toggleTorch } = useTorch(mediaStream, torchEnabled, setTorchEnabled);
@@ -82,20 +84,6 @@ export const Scanner = () => {
 
       mediaStream.current = await navigator.mediaDevices.getUserMedia(constraints);
       videoRef.current.srcObject = mediaStream.current;
-      
-      const videoTrack = mediaStream.current.getVideoTracks()[0];
-      if (videoTrack) {
-        try {
-          await videoTrack.applyConstraints({
-            advanced: [{
-              brightness: { ideal: 128 },
-              contrast: { ideal: 128 }
-            }]
-          });
-        } catch (err) {
-          console.warn('Could not apply advanced constraints:', err);
-        }
-      }
       
       setIsScanning(true);
 
@@ -157,8 +145,6 @@ export const Scanner = () => {
               playsInline
             />
           </div>
-          
-          <ItemPreview item={scannedItem} />
         </div>
 
         <div className="mt-4">

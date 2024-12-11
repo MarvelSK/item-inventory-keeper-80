@@ -1,16 +1,23 @@
 import { Item } from "@/lib/types";
 import { ScrollArea } from "../ui/scroll-area";
-import { format } from "date-fns";
+import { Badge } from "../ui/badge";
 
 interface ScannedItemsListProps {
   items: Item[];
 }
 
+const STATUS_MAP = {
+  waiting: { label: 'Čaká na dovoz', variant: 'warning' as const },
+  in_stock: { label: 'Na sklade', variant: 'success' as const },
+  in_transit: { label: 'V preprave', variant: 'warning' as const },
+  delivered: { label: 'Doručené', variant: 'default' as const }
+};
+
 export const ScannedItemsList = ({ items }: ScannedItemsListProps) => {
   if (!items.length) {
     return (
       <div className="text-center text-muted-foreground p-4">
-        No items scanned yet
+        Zatiaľ neboli naskenované žiadne položky
       </div>
     );
   }
@@ -23,15 +30,10 @@ export const ScannedItemsList = ({ items }: ScannedItemsListProps) => {
             key={item.id}
             className="flex items-center justify-between bg-card rounded-lg p-3 shadow-sm"
           >
-            <div>
-              <p className="font-medium">{item.code}</p>
-              <p className="text-sm text-muted-foreground">
-                Status: {item.status}
-              </p>
-            </div>
-            <div className="text-right text-sm text-muted-foreground">
-              {format(new Date(item.updatedAt), "HH:mm:ss")}
-            </div>
+            <div className="font-medium">{item.code}</div>
+            <Badge variant={STATUS_MAP[item.status].variant}>
+              {STATUS_MAP[item.status].label}
+            </Badge>
           </div>
         ))}
       </div>

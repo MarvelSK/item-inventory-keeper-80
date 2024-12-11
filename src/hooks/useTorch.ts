@@ -1,8 +1,7 @@
-import { useCallback } from "react";
-import { RefObject } from "react";
+import { MutableRefObject, useCallback } from "react";
 
 export const useTorch = (
-  mediaStream: RefObject<MediaStream | null>,
+  mediaStream: MutableRefObject<MediaStream | null>,
   torchEnabled: boolean,
   setTorchEnabled: (enabled: boolean) => void
 ) => {
@@ -13,14 +12,14 @@ export const useTorch = (
     if (!track) return;
 
     try {
-      // @ts-ignore - torch is a valid constraint but TypeScript doesn't know about it
-      await track.applyConstraints({
-        advanced: [{ torch: !torchEnabled }]
-      });
+      if ('imageCaptureEnabled' in track) {
+        await track.applyConstraints({
+          advanced: [{ manual_torch: !torchEnabled }]
+        });
+      }
       setTorchEnabled(!torchEnabled);
     } catch (err) {
-      console.error('Error toggling torch:', err);
-      setTorchEnabled(false);
+      console.warn('Torch control not supported:', err);
     }
   }, [mediaStream, torchEnabled, setTorchEnabled]);
 
