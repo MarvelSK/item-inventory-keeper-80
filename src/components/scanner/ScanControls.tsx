@@ -35,15 +35,10 @@ export const ScanControls = ({
         {["receiving", "loading", "delivery"].map((m) => (
           <Button
             key={m}
+            onClick={() => setMode(m as ScanMode)}
             variant={mode === m ? "default" : "outline"}
-            asChild
           >
-            <a 
-              href={`/?mode=${m}`}
-              onClick={() => setMode(m as ScanMode)}
-            >
-              {getModeLabel(m as ScanMode)}
-            </a>
+            {getModeLabel(m as ScanMode)}
           </Button>
         ))}
       </div>
