@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { BrowserMultiFormatReader } from "@zxing/browser";
 import { useItems } from "@/hooks/useItems";
 import { useCustomers } from "@/hooks/useCustomers";
@@ -6,10 +6,14 @@ import { ItemPreview } from "./scanner/ItemPreview";
 import { ScanControls } from "./scanner/ScanControls";
 import { useScanner } from "@/hooks/useScanner";
 import { useTorch } from "@/hooks/useTorch";
+import { ScannedItemsList } from "./scanner/ScannedItemsList";
+import { Item } from "@/lib/types";
 
 export const Scanner = () => {
   const { items, updateItem } = useItems();
   const { customers } = useCustomers();
+  const [scannedItems, setScannedItems] = useState<Item[]>([]);
+  
   const {
     isScanning,
     setIsScanning,
@@ -23,17 +27,20 @@ export const Scanner = () => {
     codeReader,
     mediaStream,
     handleScannedCode
-  } = useScanner(items, updateItem);
+  } = useScanner(items, async (item: Item) => {
+    const updated = await updateItem(item);
+    setScannedItems(prev => [updated, ...prev].slice(0, 50)); // Keep last 50 items
+    return updated;
+  });
 
   const { toggleTorch } = useTorch(mediaStream, torchEnabled, setTorchEnabled);
 
   useEffect(() => {
     codeReader.current = new BrowserMultiFormatReader();
-    // Set hints for faster decoding
     if (codeReader.current.hints) {
-      codeReader.current.hints.set(2, true); // Enable faster decoding mode
-      codeReader.current.hints.set(3, true); // Enable quick scanning
-      codeReader.current.hints.set(6, true); // Enable aggressive scanning
+      codeReader.current.hints.set(2, true);
+      codeReader.current.hints.set(3, true);
+      codeReader.current.hints.set(6, true);
     }
     
     return () => {
@@ -68,7 +75,7 @@ export const Scanner = () => {
           facingMode: backCamera ? undefined : "environment",
           width: { ideal: 1920 },
           height: { ideal: 1080 },
-          frameRate: { ideal: 30 }, // Optimize frame rate
+          frameRate: { ideal: 30 },
           aspectRatio: { ideal: 1.7777777778 }
         }
       };
@@ -81,7 +88,6 @@ export const Scanner = () => {
         try {
           await videoTrack.applyConstraints({
             advanced: [{
-              autoFocus: "continuous",
               brightness: { ideal: 128 },
               contrast: { ideal: 128 }
             }]
@@ -101,14 +107,8 @@ export const Scanner = () => {
             handleScannedCode(result.getText());
           }
           if (error && !(error instanceof TypeError)) {
-            // Only log actual errors, not timeouts
             console.error("Scanning error:", error);
           }
-        },
-        // Add hints for faster decoding
-        {
-          tryHarder: true,
-          possibleFormats: ["CODE_128", "CODE_39", "EAN_13", "EAN_8", "UPC_A", "UPC_E"]
         }
       );
     } catch (error) {
@@ -134,27 +134,37 @@ export const Scanner = () => {
   };
 
   return (
-    <div className="bg-card p-4 md:p-6 rounded-lg shadow-sm dark:shadow-none">
-      <h2 className="text-xl font-semibold mb-4 text-primary">Skenovanie položiek</h2>
-      <div className="space-y-4">
-        <ScanControls
-          mode={mode}
-          setMode={setMode}
-          isScanning={isScanning}
-          onStartScan={startScanning}
-          onStopScan={stopScanning}
-          onToggleTorch={toggleTorch}
-          torchEnabled={torchEnabled}
-        />
-        <div className="relative aspect-[16/9] w-full max-w-3xl mx-auto">
-          <video
-            ref={videoRef}
-            className={`w-full h-full object-cover rounded-lg border-4 transition-colors ${getScannerBorderColor()}`}
-            autoPlay
-            playsInline
+    <div className="bg-card p-4 md:p-6 rounded-lg shadow-sm dark:shadow-none space-y-4">
+      <h2 className="text-xl font-semibold text-primary">Skenovanie položiek</h2>
+      
+      <div className="grid grid-rows-[auto_1fr] gap-4 h-[calc(100vh-12rem)]">
+        <div className="space-y-4">
+          <ScanControls
+            mode={mode}
+            setMode={setMode}
+            isScanning={isScanning}
+            onStartScan={startScanning}
+            onStopScan={stopScanning}
+            onToggleTorch={toggleTorch}
+            torchEnabled={torchEnabled}
           />
+          
+          <div className="relative aspect-[16/9] w-full max-w-3xl mx-auto">
+            <video
+              ref={videoRef}
+              className={`w-full h-full object-cover rounded-lg border-4 transition-colors ${getScannerBorderColor()}`}
+              autoPlay
+              playsInline
+            />
+          </div>
+          
+          <ItemPreview item={scannedItem} />
         </div>
-        <ItemPreview item={scannedItem} />
+
+        <div className="mt-4">
+          <h3 className="text-lg font-medium mb-2">Naskenované položky</h3>
+          <ScannedItemsList items={scannedItems} />
+        </div>
       </div>
     </div>
   );

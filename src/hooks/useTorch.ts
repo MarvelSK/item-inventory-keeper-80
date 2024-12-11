@@ -13,20 +13,11 @@ export const useTorch = (
     if (!track) return;
 
     try {
-      const capabilities = track.getCapabilities();
-      if (!capabilities.torch) {
-        console.log('Torch not supported on this device');
-        return;
-      }
-
-      const newTorchState = !torchEnabled;
+      // @ts-ignore - torch is a valid constraint but TypeScript doesn't know about it
       await track.applyConstraints({
-        advanced: [{ 
-          // @ts-ignore - torch is a valid constraint but TypeScript doesn't know about it
-          torch: newTorchState 
-        }]
+        advanced: [{ torch: !torchEnabled }]
       });
-      setTorchEnabled(newTorchState);
+      setTorchEnabled(!torchEnabled);
     } catch (err) {
       console.error('Error toggling torch:', err);
       setTorchEnabled(false);
