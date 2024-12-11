@@ -19,15 +19,13 @@ import {
   AlertDialogTitle,
 } from "./ui/alert-dialog";
 import { Input } from "./ui/input";
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "./ui/table";
-import {Trash2, Edit2, DatabaseBackup, SlidersVertical} from "lucide-react";
+import { SlidersVertical, Loader2 } from "lucide-react";
 import { EditCustomerForm } from "./EditCustomerForm";
 import { toast } from "sonner";
 import { ScrollArea } from "./ui/scroll-area";
 import { Customer } from "@/lib/types";
-import { LabelBadge } from "./labels/LabelBadge";
 import { useCustomers } from "@/hooks/useCustomers";
-import { Loader2 } from "lucide-react";
+import { CustomerTable } from "./customers/CustomerTable";
 
 interface CustomerDialogProps {
   open?: boolean;
@@ -36,7 +34,6 @@ interface CustomerDialogProps {
 
 export const CustomerDialog = ({ open, onOpenChange }: CustomerDialogProps) => {
   const [customerName, setCustomerName] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
   const [editingCustomer, setEditingCustomer] = useState<null | Customer>(null);
   const [deletingCustomerId, setDeletingCustomerId] = useState<string | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -70,10 +67,6 @@ export const CustomerDialog = ({ open, onOpenChange }: CustomerDialogProps) => {
     }
   };
 
-  const filteredCustomers = customers.filter(customer => 
-    customer.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-4">
@@ -104,12 +97,6 @@ export const CustomerDialog = ({ open, onOpenChange }: CustomerDialogProps) => {
             <div className="space-y-4 p-1">
               <div className="flex flex-col md:flex-row gap-2">
                 <Input
-                  placeholder="Vyhľadať zakázku..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="flex-1"
-                />
-                <Input
                   placeholder="Názov zakázky"
                   value={customerName}
                   onChange={(e) => setCustomerName(e.target.value)}
@@ -122,57 +109,17 @@ export const CustomerDialog = ({ open, onOpenChange }: CustomerDialogProps) => {
                   Pridať
                 </Button>
               </div>
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="text-center md:text-left">Meno</TableHead>
-                      <TableHead className="text-center md:text-left">Štítky</TableHead>
-                      <TableHead className="text-center md:text-left w-[100px]">Akcie</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredCustomers.map((customer) => (
-                      <TableRow key={customer.id}>
-                        <TableCell className="font-medium text-center md:text-left">{customer.name}</TableCell>
-                        <TableCell className="text-center md:text-left">
-                          <div className="flex flex-wrap gap-1 justify-center md:justify-start">
-                            {customer.tags?.map((tag) => (
-                              <LabelBadge key={tag.id} label={tag} />
-                            ))}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex space-x-2 justify-center md:justify-start">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="hover:text-[#47acc9]"
-                              onClick={() => {
-                                setEditingCustomer(customer);
-                                setIsEditDialogOpen(true);
-                              }}
-                            >
-                              <Edit2 className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="hover:text-red-500"
-                              onClick={() => {
-                                setDeletingCustomerId(customer.id);
-                                setIsDeleteDialogOpen(true);
-                              }}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+              <CustomerTable 
+                customers={customers}
+                onEdit={(customer) => {
+                  setEditingCustomer(customer);
+                  setIsEditDialogOpen(true);
+                }}
+                onDelete={(id) => {
+                  setDeletingCustomerId(id);
+                  setIsDeleteDialogOpen(true);
+                }}
+              />
             </div>
           </ScrollArea>
         </DialogContent>
