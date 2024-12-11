@@ -33,7 +33,7 @@ interface CustomerDialogProps {
 }
 
 export const CustomerDialog = ({ open, onOpenChange }: CustomerDialogProps) => {
-  const [customerName, setCustomerName] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
   const [editingCustomer, setEditingCustomer] = useState<null | Customer>(null);
   const [deletingCustomerId, setDeletingCustomerId] = useState<string | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -46,12 +46,12 @@ export const CustomerDialog = ({ open, onOpenChange }: CustomerDialogProps) => {
   const handleOpenChange = onOpenChange || setIsMainDialogOpen;
 
   const handleAddCustomer = async () => {
-    if (!customerName.trim()) {
+    if (!searchTerm.trim()) {
       toast.error("Vyplňte názov zakázky");
       return;
     }
-    await addCustomer(customerName);
-    setCustomerName("");
+    await addCustomer(searchTerm);
+    setSearchTerm("");
   };
 
   const handleEditCustomer = async (customer: Customer) => {
@@ -66,6 +66,10 @@ export const CustomerDialog = ({ open, onOpenChange }: CustomerDialogProps) => {
       setIsDeleteDialogOpen(false);
     }
   };
+
+  const filteredCustomers = customers.filter(customer =>
+    customer.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   if (isLoading) {
     return (
@@ -97,9 +101,9 @@ export const CustomerDialog = ({ open, onOpenChange }: CustomerDialogProps) => {
             <div className="space-y-4 p-1">
               <div className="flex flex-col md:flex-row gap-2">
                 <Input
-                  placeholder="Názov zakázky"
-                  value={customerName}
-                  onChange={(e) => setCustomerName(e.target.value)}
+                  placeholder="Vyhľadať alebo pridať zakázku"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                   className="flex-1"
                 />
                 <Button 
@@ -110,7 +114,7 @@ export const CustomerDialog = ({ open, onOpenChange }: CustomerDialogProps) => {
                 </Button>
               </div>
               <CustomerTable 
-                customers={customers}
+                customers={filteredCustomers}
                 onEdit={(customer) => {
                   setEditingCustomer(customer);
                   setIsEditDialogOpen(true);
