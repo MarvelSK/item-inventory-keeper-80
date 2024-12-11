@@ -61,13 +61,25 @@ export const Scanner = () => {
         video: {
           deviceId: backCamera ? { exact: backCamera.deviceId } : undefined,
           facingMode: backCamera ? undefined : "environment",
-          width: { ideal: 1280 },
-          height: { ideal: 720 }
+          width: { ideal: 1920 },
+          height: { ideal: 1080 },
+          aspectRatio: { ideal: 1.7777777778 },
+          focusMode: 'continuous',
+          zoom: 1
         }
       };
 
       mediaStream.current = await navigator.mediaDevices.getUserMedia(constraints);
       videoRef.current.srcObject = mediaStream.current;
+      
+      // Apply optimal track settings
+      const videoTrack = mediaStream.current.getVideoTracks()[0];
+      await videoTrack.applyConstraints({
+        advanced: [
+          { focusMode: "continuous" },
+          { exposureMode: "continuous" }
+        ]
+      });
       
       setIsScanning(true);
 
@@ -118,7 +130,7 @@ export const Scanner = () => {
           onToggleTorch={toggleTorch}
           torchEnabled={torchEnabled}
         />
-        <div className="relative aspect-video max-w-md mx-auto">
+        <div className="relative aspect-[16/9] w-full max-w-3xl mx-auto">
           <video
             ref={videoRef}
             className={`w-full h-full object-cover rounded-lg border-4 transition-colors ${getScannerBorderColor()}`}

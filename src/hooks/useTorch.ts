@@ -14,7 +14,6 @@ export const useTorch = (
 
     try {
       const capabilities = track.getCapabilities();
-      // Only proceed if torch is supported
       if (!capabilities.torch) {
         console.log('Torch not supported on this device');
         return;
@@ -22,7 +21,10 @@ export const useTorch = (
 
       const newTorchState = !torchEnabled;
       await track.applyConstraints({
-        advanced: [{ torch: newTorchState }]
+        advanced: [{ 
+          // @ts-ignore - torch is a valid constraint but TypeScript doesn't know about it
+          torch: newTorchState 
+        }]
       });
       setTorchEnabled(newTorchState);
     } catch (err) {
