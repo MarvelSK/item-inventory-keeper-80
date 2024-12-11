@@ -1,32 +1,33 @@
-import { useCallback } from 'react';
-
-interface ExtendedMediaTrackCapabilities extends MediaTrackCapabilities {
-  torch?: boolean;
-}
+import { useCallback } from "react";
+import { RefObject } from "react";
 
 export const useTorch = (
-  mediaStream: React.MutableRefObject<MediaStream | null>,
+  mediaStream: RefObject<MediaStream | null>,
   torchEnabled: boolean,
   setTorchEnabled: (enabled: boolean) => void
 ) => {
   const toggleTorch = useCallback(async () => {
     if (!mediaStream.current) return;
-    
+
     const track = mediaStream.current.getVideoTracks()[0];
-    const capabilities = track.getCapabilities() as ExtendedMediaTrackCapabilities;
-    
-    if (!capabilities.torch) {
-      console.log('Torch not supported on this device');
-      return;
-    }
+    if (!track) return;
 
     try {
+      const capabilities = track.getCapabilities();
+      // Only proceed if torch is supported
+      if (!capabilities.torch) {
+        console.log('Torch not supported on this device');
+        return;
+      }
+
+      const newTorchState = !torchEnabled;
       await track.applyConstraints({
-        advanced: [{ torch: !torchEnabled }]
+        advanced: [{ torch: newTorchState }]
       });
-      setTorchEnabled(!torchEnabled);
+      setTorchEnabled(newTorchState);
     } catch (err) {
       console.error('Error toggling torch:', err);
+      setTorchEnabled(false);
     }
   }, [mediaStream, torchEnabled, setTorchEnabled]);
 

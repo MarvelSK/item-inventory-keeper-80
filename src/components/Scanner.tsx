@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { BrowserMultiFormatReader } from "@zxing/browser";
+import { BrowserMultiFormatReader, IScannerControls } from "@zxing/browser";
 import { useItems } from "@/hooks/useItems";
 import { useCustomers } from "@/hooks/useCustomers";
 import { ItemPreview } from "./scanner/ItemPreview";
@@ -47,10 +47,22 @@ export const Scanner = () => {
     try {
       if (!videoRef.current) return;
 
+      // Get list of available video devices
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const videoDevices = devices.filter(device => device.kind === 'videoinput');
+      
+      // Try to find a back camera
+      const backCamera = videoDevices.find(device => 
+        device.label.toLowerCase().includes('back') || 
+        device.label.toLowerCase().includes('rear')
+      );
+
       const constraints: MediaStreamConstraints = {
         video: {
-          facingMode: "environment",
-          advanced: [{ torch: torchEnabled }]
+          deviceId: backCamera ? { exact: backCamera.deviceId } : undefined,
+          facingMode: backCamera ? undefined : "environment",
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
         }
       };
 
@@ -60,14 +72,14 @@ export const Scanner = () => {
       setIsScanning(true);
 
       await codeReader.current?.decodeFromVideoDevice(
-        undefined,
+        backCamera?.deviceId || undefined,
         videoRef.current,
         (result, error) => {
           if (result) {
             handleScannedCode(result.getText());
           }
           if (error && !(error instanceof TypeError)) {
-            console.error(error);
+            console.error("Scanning error:", error);
           }
         }
       );
