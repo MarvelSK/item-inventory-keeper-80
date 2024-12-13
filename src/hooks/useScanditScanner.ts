@@ -13,13 +13,11 @@ import {
   BarcodeCaptureSettings,
   BarcodeCaptureOverlay,
 } from '@scandit/web-datacapture-barcode';
-import { ScanMode } from '@/components/scanner/types';
 import { supabase } from '@/integrations/supabase/client';
 
 export const useScanditScanner = (
   onScan: (code: string) => void,
   isScanning: boolean,
-  mode: ScanMode,
   torchEnabled: boolean
 ) => {
   const context = useRef<DataCaptureContext>();
@@ -32,17 +30,12 @@ export const useScanditScanner = (
   useEffect(() => {
     const initializeScandit = async () => {
       try {
-        // Get license key from Supabase Edge Function
         const { data: { key }, error: keyError } = await supabase.functions.invoke('get-scandit-key');
         if (keyError) throw new Error('Failed to get Scandit license key');
 
-        // Configure Scandit license
         await configure(key);
-
-        // Create DataCaptureContext
         context.current = await DataCaptureContext.create();
 
-        // Setup camera
         camera.current = Camera.default;
         if (camera.current) {
           const cameraSettings = new CameraSettings();
@@ -51,10 +44,7 @@ export const useScanditScanner = (
           context.current.setFrameSource(camera.current);
         }
 
-        // Configure barcode capture settings
         const settings = new BarcodeCaptureSettings();
-
-        // Enable all supported symbologies
         settings.enableSymbologies([
           Symbology.QR,
           Symbology.EAN13UPCA,
@@ -63,16 +53,11 @@ export const useScanditScanner = (
           Symbology.Code39,
         ]);
 
-        // Create barcode capture instance
         barcodeCapture.current = BarcodeCapture.forContext(context.current, settings);
-
-        // Create data capture view
         view.current = await DataCaptureView.forContext(context.current);
-
-        // Add capture overlay
+        
         await BarcodeCaptureOverlay.withBarcodeCapture(barcodeCapture.current);
 
-        // Handle scanned barcodes
         barcodeCapture.current.addListener({
           didScan: (_, session) => {
             const barcode = session.newlyRecognizedBarcodes[0];
@@ -83,7 +68,6 @@ export const useScanditScanner = (
           },
         });
 
-        // Add the view to the DOM
         const viewElement = document.getElementById('scandit-view');
         if (viewElement) {
           viewElement.replaceChildren(view.current.htmlElement);
@@ -97,7 +81,7 @@ export const useScanditScanner = (
 
     if (isScanning) {
       initializeScandit();
-      scannedBarcodes.current.clear(); // Clear scanned barcodes when starting new scan session
+      scannedBarcodes.current.clear();
     }
 
     return () => {
@@ -109,16 +93,14 @@ export const useScanditScanner = (
       }
       scannedBarcodes.current.clear();
     };
-  }, [isScanning]);
+  }, [isScanning, onScan]);
 
-  // Handle torch state
   useEffect(() => {
     if (camera.current && camera.current.desiredTorchState !== undefined) {
       camera.current.desiredTorchState = torchEnabled;
     }
   }, [torchEnabled]);
 
-  // Handle scanning state
   useEffect(() => {
     if (camera.current && isScanning) {
       camera.current.switchToDesiredState(FrameSourceState.On);

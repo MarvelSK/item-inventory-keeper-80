@@ -9,6 +9,7 @@ import { ScanMode } from "./scanner/types";
 import { useScanditScanner } from "@/hooks/useScanditScanner";
 import { ItemPreview } from "./scanner/ItemPreview";
 import { toast } from "sonner";
+import { Card } from "./ui/card";
 
 export const Scanner = () => {
   const { items, updateItem } = useItems();
@@ -28,10 +29,9 @@ export const Scanner = () => {
       return;
     }
 
-    // Check if the item was already scanned
     const alreadyScanned = scannedItems.some(scannedItem => scannedItem.id === item.id);
     if (alreadyScanned) {
-      return; // Skip if already scanned
+      return;
     }
 
     let newStatus;
@@ -79,12 +79,7 @@ export const Scanner = () => {
     }
   };
 
-  const { error } = useScanditScanner(
-    handleScannedCode,
-    isScanning,
-    mode,
-    torchEnabled
-  );
+  const { error } = useScanditScanner(handleScannedCode, isScanning, torchEnabled);
 
   if (error) {
     return (
@@ -95,10 +90,12 @@ export const Scanner = () => {
   }
 
   return (
-    <div className="bg-card p-4 md:p-6 rounded-lg shadow-sm dark:shadow-none space-y-4 mb-8">
-      <h2 className="text-xl font-semibold text-primary">Skenovanie položiek</h2>
+    <Card className="p-4 md:p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-semibold text-primary">Skenovanie položiek</h2>
+      </div>
       
-      <div className="grid grid-rows-[auto_1fr] gap-4">
+      <div className="grid gap-6">
         <div className="space-y-4">
           <ScanControls
             mode={mode}
@@ -113,21 +110,21 @@ export const Scanner = () => {
             torchEnabled={torchEnabled}
           />
           
-          <div className="relative w-full max-w-md mx-auto">
+          <div className="relative w-full max-w-2xl mx-auto">
             <div
               id="scandit-view"
-              className="w-full aspect-[4/3] rounded-lg border-4 border-border overflow-hidden"
+              className="w-full aspect-[4/3] rounded-lg border-2 border-border overflow-hidden bg-muted/10"
             />
           </div>
 
           <ItemPreview item={previewItem} />
         </div>
 
-        <div className="mt-4">
-          <h3 className="text-lg font-medium mb-2">Naskenované položky</h3>
+        <div>
+          <h3 className="text-lg font-medium mb-3">Naskenované položky</h3>
           <ScannedItemsList items={scannedItems} />
         </div>
       </div>
-    </div>
+    </Card>
   );
 };

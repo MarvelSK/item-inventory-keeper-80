@@ -37,42 +37,49 @@ export const ScanControls = ({
             key={m}
             onClick={() => setMode(m as ScanMode)}
             variant={mode === m ? "default" : "outline"}
+            size="lg"
+            className="min-w-[120px]"
           >
             {getModeLabel(m as ScanMode)}
           </Button>
         ))}
       </div>
-      <div className="flex justify-center gap-2">
+      
+      <div className="flex justify-center gap-3">
         <Button
           onClick={isScanning ? onStopScan : onStartScan}
-          className="w-full sm:w-auto"
+          size="lg"
+          variant={isScanning ? "destructive" : "default"}
+          className="min-w-[200px]"
         >
           {isScanning ? (
             <>
-              <CameraOff className="mr-2 h-4 w-4" />
+              <CameraOff className="mr-2 h-5 w-5" />
               Zastaviť skenovanie
             </>
           ) : (
             <>
-              <Camera className="mr-2 h-4 w-4" />
+              <Camera className="mr-2 h-5 w-5" />
               Spustiť skenovanie
             </>
           )}
         </Button>
+        
         {isScanning && (
           <Button
             onClick={onToggleTorch}
             variant="outline"
-            className="w-full sm:w-auto"
+            size="lg"
+            className="min-w-[160px]"
           >
             {torchEnabled ? (
               <>
-                <FlashlightOff className="mr-2 h-4 w-4" />
+                <FlashlightOff className="mr-2 h-5 w-5" />
                 Vypnúť blesk
               </>
             ) : (
               <>
-                <Flashlight className="mr-2 h-4 w-4" />
+                <Flashlight className="mr-2 h-5 w-5" />
                 Zapnúť blesk
               </>
             )}
