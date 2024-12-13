@@ -10,6 +10,15 @@ import { ScannedItemsList } from "./scanner/ScannedItemsList";
 import { Item } from "@/lib/types";
 import { playSuccessSound } from "@/lib/sounds";
 
+// Extend MediaTrackConstraintSet interface to include additional properties
+declare global {
+  interface MediaTrackConstraintSet {
+    focusMode?: ConstrainDOMString;
+    exposureMode?: ConstrainDOMString;
+    whiteBalanceMode?: ConstrainDOMString;
+  }
+}
+
 export const Scanner = () => {
   const { items, updateItem } = useItems();
   const { customers } = useCustomers();
@@ -48,19 +57,17 @@ export const Scanner = () => {
         BarcodeFormat.EAN_13,
         BarcodeFormat.EAN_8,
         BarcodeFormat.CODE_39,
-        BarcodeFormat.QR_CODE, // Added for better format support
-        BarcodeFormat.DATA_MATRIX // Added for better format support
+        BarcodeFormat.QR_CODE,
+        BarcodeFormat.DATA_MATRIX
       ]);
       
       // Optimize for better detection
       codeReader.current.hints.set(DecodeHintType.TRY_HARDER, true);
       codeReader.current.hints.set(DecodeHintType.CHARACTER_SET, "UTF-8");
-      codeReader.current.hints.set(DecodeHintType.PURE_BARCODE, true); // Helps with noisy backgrounds
-      codeReader.current.hints.set(DecodeHintType.ASSUME_GS1, false); // Disable GS1 assumption for better general detection
-      
-      // Add these hints for better performance
+      codeReader.current.hints.set(DecodeHintType.PURE_BARCODE, true);
+      codeReader.current.hints.set(DecodeHintType.ASSUME_GS1, false);
       codeReader.current.hints.set(DecodeHintType.NEED_RESULT_POINT_CALLBACK, true);
-      codeReader.current.hints.set(DecodeHintType.ALLOWED_LENGTHS, [6, 7, 8, 9, 10, 11, 12, 13, 14]); // Common barcode lengths
+      codeReader.current.hints.set(DecodeHintType.ALLOWED_LENGTHS, [6, 7, 8, 9, 10, 11, 12, 13, 14]);
     }
     
     return () => {
@@ -93,10 +100,9 @@ export const Scanner = () => {
         video: {
           deviceId: backCamera ? { exact: backCamera.deviceId } : undefined,
           facingMode: backCamera ? undefined : "environment",
-          width: { ideal: 1920 }, // Increased for better resolution
-          height: { ideal: 1080 }, // Increased for better resolution
+          width: { ideal: 1920 },
+          height: { ideal: 1080 },
           frameRate: { ideal: 30 },
-          // Advanced constraints for better image quality
           advanced: [{
             focusMode: "continuous",
             exposureMode: "continuous",
@@ -110,14 +116,17 @@ export const Scanner = () => {
       // Apply optimal settings for video track
       const videoTrack = mediaStream.current.getVideoTracks()[0];
       if (videoTrack) {
-        const capabilities = videoTrack.getCapabilities();
-        const settings: MediaTrackSettings = {};
-        
-        if (capabilities.brightness) settings.brightness = capabilities.brightness.max;
-        if (capabilities.contrast) settings.contrast = capabilities.contrast.max;
-        if (capabilities.sharpness) settings.sharpness = capabilities.sharpness.max;
-        
-        await videoTrack.applyConstraints(settings);
+        try {
+          await videoTrack.applyConstraints({
+            advanced: [{
+              focusMode: "continuous",
+              exposureMode: "continuous",
+              whiteBalanceMode: "continuous"
+            }]
+          });
+        } catch (error) {
+          console.warn("Could not apply advanced video constraints:", error);
+        }
       }
       
       videoRef.current.srcObject = mediaStream.current;
