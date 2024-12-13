@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { BrowserMultiFormatReader, DecodeHintType } from "@zxing/browser";
+import { BrowserMultiFormatReader } from "@zxing/browser";
+import { DecodeHintType, BarcodeFormat } from "@zxing/library";
 import { useItems } from "@/hooks/useItems";
 import { useCustomers } from "@/hooks/useCustomers";
 import { ScanControls } from "./scanner/ScanControls";
@@ -42,7 +43,12 @@ export const Scanner = () => {
     codeReader.current = new BrowserMultiFormatReader();
     if (codeReader.current.hints) {
       // Optimize for barcode scanning
-      codeReader.current.hints.set(DecodeHintType.POSSIBLE_FORMATS, ["CODE_128", "EAN_13", "EAN_8", "CODE_39"]);
+      codeReader.current.hints.set(DecodeHintType.POSSIBLE_FORMATS, [
+        BarcodeFormat.CODE_128,
+        BarcodeFormat.EAN_13,
+        BarcodeFormat.EAN_8,
+        BarcodeFormat.CODE_39
+      ]);
       codeReader.current.hints.set(DecodeHintType.TRY_HARDER, true);
       codeReader.current.hints.set(DecodeHintType.CHARACTER_SET, "UTF-8");
     }
