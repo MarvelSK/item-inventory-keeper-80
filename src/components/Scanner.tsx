@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { BrowserMultiFormatReader } from "@zxing/browser";
+import { BrowserMultiFormatReader, DecodeHintType } from "@zxing/browser";
 import { useItems } from "@/hooks/useItems";
 import { useCustomers } from "@/hooks/useCustomers";
 import { ScanControls } from "./scanner/ScanControls";
@@ -41,9 +41,10 @@ export const Scanner = () => {
   useEffect(() => {
     codeReader.current = new BrowserMultiFormatReader();
     if (codeReader.current.hints) {
-      codeReader.current.hints.set(2, true);
-      codeReader.current.hints.set(3, true);
-      codeReader.current.hints.set(6, true);
+      // Optimize for barcode scanning
+      codeReader.current.hints.set(DecodeHintType.POSSIBLE_FORMATS, ["CODE_128", "EAN_13", "EAN_8", "CODE_39"]);
+      codeReader.current.hints.set(DecodeHintType.TRY_HARDER, true);
+      codeReader.current.hints.set(DecodeHintType.CHARACTER_SET, "UTF-8");
     }
     
     return () => {
@@ -76,8 +77,8 @@ export const Scanner = () => {
         video: {
           deviceId: backCamera ? { exact: backCamera.deviceId } : undefined,
           facingMode: backCamera ? undefined : "environment",
-          width: { ideal: 1920 },
-          height: { ideal: 1080 },
+          width: { ideal: 1280 }, // Reduced from 1920 for better performance
+          height: { ideal: 720 }, // Reduced from 1080 for better performance
           frameRate: { ideal: 30 },
           aspectRatio: { ideal: 1.7777777778 }
         }
@@ -145,6 +146,13 @@ export const Scanner = () => {
               autoPlay
               playsInline
             />
+            {/* Focus rectangle overlay */}
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-32 border-2 border-primary pointer-events-none">
+              <div className="absolute left-0 top-0 w-4 h-4 border-l-2 border-t-2 border-primary"></div>
+              <div className="absolute right-0 top-0 w-4 h-4 border-r-2 border-t-2 border-primary"></div>
+              <div className="absolute left-0 bottom-0 w-4 h-4 border-l-2 border-b-2 border-primary"></div>
+              <div className="absolute right-0 bottom-0 w-4 h-4 border-r-2 border-b-2 border-primary"></div>
+            </div>
           </div>
         </div>
 
