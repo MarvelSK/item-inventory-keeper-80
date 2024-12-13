@@ -10,7 +10,6 @@ import {
   DataCaptureView,
   FrameSourceState,
   configure,
-  ScanditBarcodeCaptureError,
 } from "@scandit/web-datacapture-core";
 import {
   BarcodeCapture,
@@ -101,7 +100,8 @@ export const Scanner = () => {
 
       // Create data capture view
       const view = await DataCaptureView.forContext(newContext);
-      await BarcodeCaptureOverlay.withBarcodeCaptureForView(newBarcodeCapture, view);
+      const overlay = await BarcodeCaptureOverlay.withBarcodeCapture(newBarcodeCapture);
+      view.addOverlay(overlay);
 
       // Add the view to the DOM
       const viewElement = document.getElementById('scandit-view');
@@ -116,11 +116,7 @@ export const Scanner = () => {
 
     } catch (error) {
       console.error('Error initializing scanner:', error);
-      if (error instanceof ScanditBarcodeCaptureError) {
-        toast.error(`Scanner error: ${error.message}`);
-      } else {
-        toast.error("Failed to initialize scanner");
-      }
+      toast.error("Failed to initialize scanner");
       setIsInitializing(false);
     }
   };
