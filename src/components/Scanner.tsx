@@ -30,13 +30,12 @@ export const Scanner = () => {
       const { data, error } = await supabase
         .from('scanner_settings')
         .select('scandit_key')
-        .limit(1)
-        .single();
+        .limit(1);
 
       if (error) throw error;
       
-      if (data) {
-        localStorage.setItem("scanditKey", data.scandit_key);
+      if (data && data.length > 0) {
+        localStorage.setItem("scanditKey", data[0].scandit_key);
       }
     } catch (error) {
       console.error('Error initializing Scandit key:', error);

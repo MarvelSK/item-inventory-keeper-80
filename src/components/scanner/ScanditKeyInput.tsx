@@ -17,14 +17,13 @@ export const ScanditKeyInput = () => {
       const { data, error } = await supabase
         .from('scanner_settings')
         .select('scandit_key')
-        .limit(1)
-        .single();
+        .limit(1);
 
       if (error) throw error;
       
-      if (data) {
-        setKey(data.scandit_key);
-        localStorage.setItem("scanditKey", data.scandit_key);
+      if (data && data.length > 0) {
+        setKey(data[0].scandit_key);
+        localStorage.setItem("scanditKey", data[0].scandit_key);
       }
     } catch (error) {
       console.error('Error fetching Scandit key:', error);
@@ -43,19 +42,16 @@ export const ScanditKeyInput = () => {
       const { data, error } = await supabase
         .from('scanner_settings')
         .select('id')
-        .limit(1)
-        .single();
+        .limit(1);
 
-      if (error && error.code !== 'PGRST116') {
-        throw error;
-      }
+      if (error) throw error;
 
-      if (data) {
+      if (data && data.length > 0) {
         // Update existing record
         const { error: updateError } = await supabase
           .from('scanner_settings')
           .update({ scandit_key: key.trim() })
-          .eq('id', data.id);
+          .eq('id', data[0].id);
 
         if (updateError) throw updateError;
       } else {
