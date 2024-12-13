@@ -12,13 +12,13 @@ serve(async (req) => {
   }
 
   try {
-    const key = Deno.env.get('SCANDIT_LICENSE_KEY')
+    const key = Deno.env.get('SCANDIT_API_KEY')
     if (!key) {
-      console.error('Scandit license key not found in environment variables')
-      throw new Error('Scandit license key not found')
+      console.error('Scandit API key not found in environment variables')
+      throw new Error('Scandit API key not found')
     }
 
-    console.log('Successfully retrieved Scandit license key')
+    console.log('Successfully retrieved Scandit API key')
     
     return new Response(
       JSON.stringify({ key }),
