@@ -18,4 +18,18 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    rollupOptions: {
+      external: [
+        '@scandit/web-datacapture-core',
+        '@scandit/web-datacapture-barcode'
+      ]
+    }
+  },
+  optimizeDeps: {
+    include: [
+      '@scandit/web-datacapture-core',
+      '@scandit/web-datacapture-barcode'
+    ]
+  }
 }));
