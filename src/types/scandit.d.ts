@@ -32,28 +32,28 @@ declare module '@scandit/web-datacapture-core' {
 declare module '@scandit/web-datacapture-barcode' {
   import { DataCaptureContext } from '@scandit/web-datacapture-core';
 
-  export class BarcodeTrackingSettings {
+  export class BarcodeCaptureSettings {
     enableSymbologies(symbologies: Symbology[]): void;
   }
 
-  export class BarcodeTracking {
-    static forContext(context: DataCaptureContext, settings: BarcodeTrackingSettings): BarcodeTracking;
+  export class BarcodeCapture {
+    static forContext(context: DataCaptureContext, settings: BarcodeCaptureSettings): BarcodeCapture;
     isEnabled: boolean;
     dispose(): void;
     addListener(listener: {
-      didUpdateSession: (mode: any, session: { trackedBarcodes: Array<{ barcode: { data: string } }> }) => void;
+      didScan: (mode: any, session: { newlyRecognizedBarcodes: Array<{ data: string }> }) => void;
     }): void;
   }
 
-  export class BarcodeTrackingBasicOverlay {
-    static withBarcodeTracking(tracking: BarcodeTracking): Promise<BarcodeTrackingBasicOverlay>;
+  export class BarcodeCaptureOverlay {
+    static withBarcodeCapture(capture: BarcodeCapture): Promise<BarcodeCaptureOverlay>;
   }
 
   export enum Symbology {
     QR = 'qr',
     EAN13UPCA = 'ean13-upca',
     EAN8 = 'ean8',
-    CODE128 = 'code128',
-    CODE39 = 'code39',
+    Code128 = 'code128',
+    Code39 = 'code39',
   }
 }

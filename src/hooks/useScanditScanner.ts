@@ -9,9 +9,9 @@ import {
 } from '@scandit/web-datacapture-core';
 import {
   Symbology,
-  BarcodeTracking,
-  BarcodeTrackingSettings,
-  BarcodeTrackingBasicOverlay,
+  BarcodeCapture,
+  BarcodeCaptureSettings,
+  BarcodeCaptureOverlay,
 } from '@scandit/web-datacapture-barcode';
 import { ScanMode } from '@/components/scanner/types';
 import { supabase } from '@/integrations/supabase/client';
@@ -24,7 +24,7 @@ export const useScanditScanner = (
 ) => {
   const context = useRef<DataCaptureContext>();
   const view = useRef<DataCaptureView>();
-  const barcodeTracking = useRef<BarcodeTracking>();
+  const barcodeCapture = useRef<BarcodeCapture>();
   const camera = useRef<Camera>();
   const [error, setError] = useState<string | null>(null);
   const scannedBarcodes = useRef<Set<string>>(new Set());
@@ -51,36 +51,35 @@ export const useScanditScanner = (
           context.current.setFrameSource(camera.current);
         }
 
-        // Configure barcode tracking settings
-        const settings = new BarcodeTrackingSettings();
+        // Configure barcode capture settings
+        const settings = new BarcodeCaptureSettings();
 
         // Enable all supported symbologies
         settings.enableSymbologies([
           Symbology.QR,
           Symbology.EAN13UPCA,
           Symbology.EAN8,
-          Symbology.CODE128,
-          Symbology.CODE39,
+          Symbology.Code128,
+          Symbology.Code39,
         ]);
 
-        // Create barcode tracking instance
-        barcodeTracking.current = BarcodeTracking.forContext(context.current, settings);
+        // Create barcode capture instance
+        barcodeCapture.current = BarcodeCapture.forContext(context.current, settings);
 
         // Create data capture view
         view.current = await DataCaptureView.forContext(context.current);
 
-        // Add tracking overlay
-        const overlay = await BarcodeTrackingBasicOverlay.withBarcodeTracking(barcodeTracking.current);
+        // Add capture overlay
+        await BarcodeCaptureOverlay.withBarcodeCapture(barcodeCapture.current);
 
-        // Handle tracked barcodes
-        barcodeTracking.current.addListener({
-          didUpdateSession: (_, session) => {
-            session.trackedBarcodes.forEach((trackedBarcode) => {
-              if (trackedBarcode.barcode && !scannedBarcodes.current.has(trackedBarcode.barcode.data)) {
-                scannedBarcodes.current.add(trackedBarcode.barcode.data);
-                onScan(trackedBarcode.barcode.data);
-              }
-            });
+        // Handle scanned barcodes
+        barcodeCapture.current.addListener({
+          didScan: (_, session) => {
+            const barcode = session.newlyRecognizedBarcodes[0];
+            if (barcode && !scannedBarcodes.current.has(barcode.data)) {
+              scannedBarcodes.current.add(barcode.data);
+              onScan(barcode.data);
+            }
           },
         });
 
@@ -102,8 +101,8 @@ export const useScanditScanner = (
     }
 
     return () => {
-      if (barcodeTracking.current) {
-        barcodeTracking.current.dispose();
+      if (barcodeCapture.current) {
+        barcodeCapture.current.dispose();
       }
       if (context.current) {
         context.current.dispose();
@@ -123,15 +122,15 @@ export const useScanditScanner = (
   useEffect(() => {
     if (camera.current && isScanning) {
       camera.current.switchToDesiredState(FrameSourceState.On);
-      if (barcodeTracking.current) {
-        barcodeTracking.current.isEnabled = true;
+      if (barcodeCapture.current) {
+        barcodeCapture.current.isEnabled = true;
       }
     } else {
       if (camera.current) {
         camera.current.switchToDesiredState(FrameSourceState.Off);
       }
-      if (barcodeTracking.current) {
-        barcodeTracking.current.isEnabled = false;
+      if (barcodeCapture.current) {
+        barcodeCapture.current.isEnabled = false;
       }
     }
   }, [isScanning]);
