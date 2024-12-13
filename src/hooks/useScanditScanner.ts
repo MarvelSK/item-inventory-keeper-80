@@ -30,12 +30,25 @@ export const useScanditScanner = (
   useEffect(() => {
     const initializeScandit = async () => {
       try {
-        const { data: { key }, error: keyError } = await supabase.functions.invoke('get-scandit-key');
-        if (keyError) throw new Error('Failed to get Scandit license key');
+        // Get license key from Supabase Edge Function
+        const { data, error: keyError } = await supabase.functions.invoke('get-scandit-key');
+        
+        if (keyError || !data) {
+          throw new Error('Failed to get Scandit license key');
+        }
 
+        const key = data.key;
+        if (!key) {
+          throw new Error('Invalid Scandit license key format');
+        }
+
+        // Configure Scandit license
         await configure(key);
+        
+        // Create DataCaptureContext
         context.current = await DataCaptureContext.create();
 
+        // Setup camera
         camera.current = Camera.default;
         if (camera.current) {
           const cameraSettings = new CameraSettings();
@@ -44,6 +57,7 @@ export const useScanditScanner = (
           context.current.setFrameSource(camera.current);
         }
 
+        // Configure barcode capture settings
         const settings = new BarcodeCaptureSettings();
         settings.enableSymbologies([
           Symbology.QR,
@@ -53,11 +67,16 @@ export const useScanditScanner = (
           Symbology.Code39,
         ]);
 
+        // Create barcode capture instance
         barcodeCapture.current = BarcodeCapture.forContext(context.current, settings);
+        
+        // Create data capture view
         view.current = await DataCaptureView.forContext(context.current);
         
+        // Add overlay
         await BarcodeCaptureOverlay.withBarcodeCapture(barcodeCapture.current);
 
+        // Handle scanned barcodes
         barcodeCapture.current.addListener({
           didScan: (_, session) => {
             const barcode = session.newlyRecognizedBarcodes[0];
@@ -68,6 +87,7 @@ export const useScanditScanner = (
           },
         });
 
+        // Add the view to the DOM
         const viewElement = document.getElementById('scandit-view');
         if (viewElement) {
           viewElement.replaceChildren(view.current.htmlElement);
