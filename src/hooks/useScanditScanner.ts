@@ -6,16 +6,11 @@ import {
   DataCaptureView,
   FrameSourceState,
   configure,
-  RectangularViewfinder,
-  Color,
-  Brush,
 } from '@scandit/web-datacapture-core';
 import {
   BarcodeCaptureSettings,
   BarcodeCapture,
   Symbology,
-  BarcodeCaptureOverlay,
-  BarcodeCaptureMode,
   BarcodeTracking,
   BarcodeTrackingSettings,
   BarcodeTrackingBasicOverlay,
@@ -34,6 +29,7 @@ export const useScanditScanner = (
   const barcodeTracking = useRef<BarcodeTracking>();
   const camera = useRef<Camera>();
   const [error, setError] = useState<string | null>(null);
+  const scannedBarcodes = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     const initializeScandit = async () => {
@@ -59,6 +55,8 @@ export const useScanditScanner = (
 
         // Configure barcode tracking settings
         const settings = new BarcodeTrackingSettings();
+
+        // Enable all supported symbologies
         settings.enableSymbologies([
           Symbology.QR,
           Symbology.EAN13UPCA,
@@ -70,23 +68,19 @@ export const useScanditScanner = (
         // Create barcode tracking instance
         barcodeTracking.current = BarcodeTracking.forContext(context.current, settings);
 
-        // Create and customize the tracking overlay
+        // Create data capture view
         view.current = await DataCaptureView.forContext(context.current);
+
+        // Add tracking overlay
         const overlay = await BarcodeTrackingBasicOverlay.withBarcodeTracking(barcodeTracking.current);
-        
-        // Customize the overlay appearance
-        overlay.brush = new Brush(
-          Color.fromRGBA(0, 255, 0, 0.2),
-          Color.fromRGBA(0, 255, 0, 1),
-          2
-        );
 
         // Handle tracked barcodes
         barcodeTracking.current.addListener({
-          didUpdateSession: (mode, session) => {
+          didUpdateSession: (_, session) => {
             session.trackedBarcodes.forEach((trackedBarcode) => {
-              if (trackedBarcode.barcode) {
-                onScan(trackedBarcode.barcode.data as string);
+              if (trackedBarcode.barcode && !scannedBarcodes.current.has(trackedBarcode.barcode.data)) {
+                scannedBarcodes.current.add(trackedBarcode.barcode.data);
+                onScan(trackedBarcode.barcode.data);
               }
             });
           },
@@ -106,6 +100,7 @@ export const useScanditScanner = (
 
     if (isScanning) {
       initializeScandit();
+      scannedBarcodes.current.clear(); // Clear scanned barcodes when starting new scan session
     }
 
     return () => {
@@ -115,6 +110,7 @@ export const useScanditScanner = (
       if (context.current) {
         context.current.dispose();
       }
+      scannedBarcodes.current.clear();
     };
   }, [isScanning]);
 
