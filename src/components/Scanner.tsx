@@ -1,161 +1,91 @@
-import { useEffect, useState } from "react";
-import { BrowserMultiFormatReader } from "@zxing/browser";
-import { DecodeHintType, BarcodeFormat } from "@zxing/library";
+import { useState } from "react";
 import { useItems } from "@/hooks/useItems";
 import { useCustomers } from "@/hooks/useCustomers";
 import { ScanControls } from "./scanner/ScanControls";
-import { useScanner } from "@/hooks/useScanner";
-import { useTorch } from "@/hooks/useTorch";
+import { useQuaggaScanner } from "@/hooks/useQuaggaScanner";
 import { ScannedItemsList } from "./scanner/ScannedItemsList";
 import { Item } from "@/lib/types";
 import { playSuccessSound } from "@/lib/sounds";
-
-// Extend MediaTrackConstraintSet interface to include additional properties
-declare global {
-  interface MediaTrackConstraintSet {
-    focusMode?: ConstrainDOMString;
-    exposureMode?: ConstrainDOMString;
-    whiteBalanceMode?: ConstrainDOMString;
-  }
-}
+import { ScanMode } from "./scanner/types";
 
 export const Scanner = () => {
   const { items, updateItem } = useItems();
   const { customers } = useCustomers();
   const [scannedItems, setScannedItems] = useState<Item[]>([]);
-  
-  const {
-    isScanning,
-    setIsScanning,
-    mode,
-    setMode,
-    scanStatus,
-    torchEnabled,
-    setTorchEnabled,
-    videoRef,
-    codeReader,
-    mediaStream,
-    handleScannedCode
-  } = useScanner(items, async (item: Item, showToast?: boolean) => {
-    await updateItem(item, showToast);
-    setScannedItems(prev => {
-      const exists = prev.some(existingItem => existingItem.id === item.id);
-      if (exists) return prev;
-      playSuccessSound();
-      return [item, ...prev].slice(0, 50);
-    });
-  });
+  const [isScanning, setIsScanning] = useState(false);
+  const [mode, setMode] = useState<ScanMode>("receiving");
+  const [torchEnabled, setTorchEnabled] = useState(false);
 
-  const { toggleTorch } = useTorch(mediaStream, torchEnabled, setTorchEnabled);
-
-  useEffect(() => {
-    codeReader.current = new BrowserMultiFormatReader();
-    if (codeReader.current.hints) {
-      // Enhanced configuration for better barcode detection
-      codeReader.current.hints.set(DecodeHintType.POSSIBLE_FORMATS, [
-        BarcodeFormat.CODE_128,
-        BarcodeFormat.EAN_13,
-        BarcodeFormat.EAN_8,
-        BarcodeFormat.CODE_39,
-        BarcodeFormat.QR_CODE,
-        BarcodeFormat.DATA_MATRIX
-      ]);
-      
-      // Optimize for better detection
-      codeReader.current.hints.set(DecodeHintType.TRY_HARDER, true);
-      codeReader.current.hints.set(DecodeHintType.CHARACTER_SET, "UTF-8");
-      codeReader.current.hints.set(DecodeHintType.PURE_BARCODE, true);
-      codeReader.current.hints.set(DecodeHintType.ASSUME_GS1, false);
-      codeReader.current.hints.set(DecodeHintType.NEED_RESULT_POINT_CALLBACK, true);
-      codeReader.current.hints.set(DecodeHintType.ALLOWED_LENGTHS, [6, 7, 8, 9, 10, 11, 12, 13, 14]);
-    }
+  const handleScannedCode = async (code: string) => {
+    const item = items.find(item => item.code === code);
     
-    return () => {
-      if (mediaStream.current) {
-        mediaStream.current.getTracks().forEach(track => track.stop());
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    if (isScanning) {
-      stopScanning();
-      startScanning();
+    if (!item) {
+      setScanStatus("error");
+      setTimeout(() => setScanStatus("none"), 1000);
+      return;
     }
-  }, [mode]);
 
-  const startScanning = async () => {
-    try {
-      if (!videoRef.current) return;
+    let newStatus;
+    let success = false;
 
-      const devices = await navigator.mediaDevices.enumerateDevices();
-      const videoDevices = devices.filter(device => device.kind === 'videoinput');
-      
-      const backCamera = videoDevices.find(device => 
-        device.label.toLowerCase().includes('back') || 
-        device.label.toLowerCase().includes('rear')
-      );
-
-      const constraints: MediaStreamConstraints = {
-        video: {
-          deviceId: backCamera ? { exact: backCamera.deviceId } : undefined,
-          facingMode: backCamera ? undefined : "environment",
-          width: { ideal: 1920 },
-          height: { ideal: 1080 },
-          frameRate: { ideal: 30 },
-          advanced: [{
-            focusMode: "continuous",
-            exposureMode: "continuous",
-            whiteBalanceMode: "continuous"
-          }]
+    switch (mode) {
+      case "receiving":
+        if (item.status === "waiting") {
+          newStatus = "in_stock";
+          success = true;
         }
-      };
-
-      mediaStream.current = await navigator.mediaDevices.getUserMedia(constraints);
-      
-      // Apply optimal settings for video track
-      const videoTrack = mediaStream.current.getVideoTracks()[0];
-      if (videoTrack) {
-        try {
-          await videoTrack.applyConstraints({
-            advanced: [{
-              focusMode: "continuous",
-              exposureMode: "continuous",
-              whiteBalanceMode: "continuous"
-            }]
-          });
-        } catch (error) {
-          console.warn("Could not apply advanced video constraints:", error);
+        break;
+      case "loading":
+        if (item.status === "in_stock") {
+          newStatus = "in_transit";
+          success = true;
         }
-      }
-      
-      videoRef.current.srcObject = mediaStream.current;
-      setIsScanning(true);
-
-      await codeReader.current?.decodeFromVideoDevice(
-        backCamera?.deviceId || undefined,
-        videoRef.current,
-        (result, error) => {
-          if (result) {
-            handleScannedCode(result.getText());
-          }
-          if (error && !(error instanceof TypeError)) {
-            console.error("Scanning error:", error);
-          }
+        break;
+      case "delivery":
+        if (item.status === "in_transit") {
+          newStatus = "delivered";
+          success = true;
         }
-      );
-    } catch (error) {
-      console.error("Error accessing camera:", error);
+        break;
     }
+
+    if (success && newStatus) {
+      try {
+        const updatedItem = { ...item, status: newStatus, updatedAt: new Date() };
+        await updateItem(updatedItem, false);
+        setScannedItems(prev => {
+          const exists = prev.some(existingItem => existingItem.id === item.id);
+          if (exists) return prev;
+          playSuccessSound();
+          return [updatedItem, ...prev].slice(0, 50);
+        });
+        setScanStatus("success");
+      } catch (error) {
+        setScanStatus("error");
+      }
+    } else {
+      setScanStatus("error");
+    }
+
+    setTimeout(() => setScanStatus("none"), 1000);
+  };
+
+  const { videoRef, scanStatus, setScanStatus } = useQuaggaScanner(
+    handleScannedCode,
+    isScanning
+  );
+
+  const startScanning = () => {
+    setIsScanning(true);
   };
 
   const stopScanning = () => {
-    if (mediaStream.current) {
-      mediaStream.current.getTracks().forEach(track => track.stop());
-      mediaStream.current = null;
-    }
     setIsScanning(false);
     setTorchEnabled(false);
+  };
+
+  const toggleTorch = () => {
+    setTorchEnabled(!torchEnabled);
   };
 
   const getScannerBorderColor = () => {
@@ -183,11 +113,9 @@ export const Scanner = () => {
           />
           
           <div className="relative aspect-[16/9] w-full max-w-3xl mx-auto">
-            <video
+            <div
               ref={videoRef}
-              className={`w-full h-full object-cover rounded-lg border-4 transition-colors ${getScannerBorderColor()}`}
-              autoPlay
-              playsInline
+              className={`w-full h-full rounded-lg border-4 transition-colors ${getScannerBorderColor()}`}
             />
             {/* Focus rectangle overlay */}
             <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-32 border-2 border-primary pointer-events-none">
