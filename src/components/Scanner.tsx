@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useItems } from "@/hooks/useItems";
-import { useCustomers } from "@/hooks/useCustomers";
 import { ScanControls } from "./scanner/ScanControls";
 import { ScannedItemsList } from "./scanner/ScannedItemsList";
 import { Item } from "@/lib/types";
@@ -10,10 +9,10 @@ import { useScanditScanner } from "@/hooks/useScanditScanner";
 import { ItemPreview } from "./scanner/ItemPreview";
 import { toast } from "sonner";
 import { Card } from "./ui/card";
+import { ScanditKeyInput } from "./scanner/ScanditKeyInput";
 
 export const Scanner = () => {
   const { items, updateItem } = useItems();
-  const { customers } = useCustomers();
   const [scannedItems, setScannedItems] = useState<Item[]>([]);
   const [isScanning, setIsScanning] = useState(false);
   const [mode, setMode] = useState<ScanMode>("receiving");
@@ -81,14 +80,6 @@ export const Scanner = () => {
 
   const { error } = useScanditScanner(handleScannedCode, isScanning, torchEnabled);
 
-  if (error) {
-    return (
-      <div className="flex items-center justify-center h-[50vh] text-red-500">
-        Chyba pri inicializácii skenera: {error}
-      </div>
-    );
-  }
-
   return (
     <Card className="p-4 md:p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -97,11 +88,19 @@ export const Scanner = () => {
       
       <div className="grid gap-6">
         <div className="space-y-4">
+          <ScanditKeyInput />
+          
           <ScanControls
             mode={mode}
             setMode={setMode}
             isScanning={isScanning}
-            onStartScan={() => setIsScanning(true)}
+            onStartScan={() => {
+              if (!localStorage.getItem("scanditKey")) {
+                toast.error("Please enter your Scandit API key first");
+                return;
+              }
+              setIsScanning(true);
+            }}
             onStopScan={() => {
               setIsScanning(false);
               setTorchEnabled(false);

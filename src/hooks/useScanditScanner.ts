@@ -13,7 +13,6 @@ import {
   BarcodeCaptureSettings,
   BarcodeCaptureOverlay,
 } from '@scandit/web-datacapture-barcode';
-import { supabase } from '@/integrations/supabase/client';
 
 export const useScanditScanner = (
   onScan: (code: string) => void,
@@ -30,16 +29,9 @@ export const useScanditScanner = (
   useEffect(() => {
     const initializeScandit = async () => {
       try {
-        // Get license key from Supabase Edge Function
-        const { data, error: keyError } = await supabase.functions.invoke('get-scandit-key');
-        
-        if (keyError || !data) {
-          throw new Error('Failed to get Scandit license key');
-        }
-
-        const key = data.key;
+        const key = localStorage.getItem("scanditKey");
         if (!key) {
-          throw new Error('Invalid Scandit license key format');
+          throw new Error('No Scandit license key found');
         }
 
         // Configure Scandit license
