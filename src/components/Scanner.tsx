@@ -28,6 +28,12 @@ export const Scanner = () => {
       return;
     }
 
+    // Check if the item was already scanned
+    const alreadyScanned = scannedItems.some(scannedItem => scannedItem.id === item.id);
+    if (alreadyScanned) {
+      return; // Skip if already scanned
+    }
+
     let newStatus;
     let success = false;
 
@@ -63,8 +69,6 @@ export const Scanner = () => {
         const updatedItem = { ...item, status: newStatus, updatedAt: new Date() };
         await updateItem(updatedItem, false);
         setScannedItems(prev => {
-          const exists = prev.some(existingItem => existingItem.id === item.id);
-          if (exists) return prev;
           playSuccessSound();
           return [updatedItem, ...prev].slice(0, 50);
         });
