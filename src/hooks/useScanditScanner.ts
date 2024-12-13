@@ -8,8 +8,6 @@ import {
   configure,
 } from '@scandit/web-datacapture-core';
 import {
-  BarcodeCaptureSettings,
-  BarcodeCapture,
   Symbology,
   BarcodeTracking,
   BarcodeTrackingSettings,
