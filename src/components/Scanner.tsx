@@ -80,6 +80,10 @@ export const Scanner = () => {
 
   const { error } = useScanditScanner(handleScannedCode, isScanning, torchEnabled);
 
+  if (error) {
+    toast.error(error);
+  }
+
   return (
     <Card className="p-4 md:p-6 space-y-6">
       <div className="flex items-center justify-between">

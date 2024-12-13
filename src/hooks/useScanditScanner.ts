@@ -29,9 +29,11 @@ export const useScanditScanner = (
   useEffect(() => {
     const initializeScandit = async () => {
       try {
+        // Get license key from localStorage
         const key = localStorage.getItem("scanditKey");
         if (!key) {
-          throw new Error('No Scandit license key found');
+          setError('No Scandit license key found');
+          return;
         }
 
         // Configure Scandit license
@@ -84,6 +86,8 @@ export const useScanditScanner = (
         if (viewElement) {
           viewElement.replaceChildren(view.current.htmlElement);
         }
+
+        setError(null); // Clear any previous errors
 
       } catch (err) {
         console.error('Error initializing Scandit:', err);
