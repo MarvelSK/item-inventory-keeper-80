@@ -98,11 +98,10 @@ export const Scanner = () => {
         toast.error("No camera available");
       }
 
-      // Create data capture view
+      // Create data capture view and add overlay
       const view = await DataCaptureView.forContext(newContext);
       const overlay = await BarcodeCaptureOverlay.withBarcodeCapture(newBarcodeCapture);
-      view.addOverlay(overlay);
-
+      
       // Add the view to the DOM
       const viewElement = document.getElementById('scandit-view');
       if (viewElement) {
