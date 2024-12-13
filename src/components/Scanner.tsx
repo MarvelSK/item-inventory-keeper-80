@@ -2,11 +2,13 @@ import { useState } from "react";
 import { useItems } from "@/hooks/useItems";
 import { useCustomers } from "@/hooks/useCustomers";
 import { ScanControls } from "./scanner/ScanControls";
-import { useHtml5Scanner } from "@/hooks/useHtml5Scanner";
 import { ScannedItemsList } from "./scanner/ScannedItemsList";
 import { Item } from "@/lib/types";
 import { playSuccessSound } from "@/lib/sounds";
 import { ScanMode } from "./scanner/types";
+import { useScanditScanner } from "@/hooks/useScanditScanner";
+import { ItemPreview } from "./scanner/ItemPreview";
+import { toast } from "sonner";
 
 export const Scanner = () => {
   const { items, updateItem } = useItems();
@@ -15,13 +17,14 @@ export const Scanner = () => {
   const [isScanning, setIsScanning] = useState(false);
   const [mode, setMode] = useState<ScanMode>("receiving");
   const [torchEnabled, setTorchEnabled] = useState(false);
+  const [previewItem, setPreviewItem] = useState<Item | null>(null);
 
   const handleScannedCode = async (code: string) => {
     const item = items.find(item => item.code === code);
+    setPreviewItem(item || null);
     
     if (!item) {
-      setScanStatus("error");
-      setTimeout(() => setScanStatus("none"), 1000);
+      toast.error("Položka nebola nájdená");
       return;
     }
 
@@ -33,18 +36,24 @@ export const Scanner = () => {
         if (item.status === "waiting") {
           newStatus = "in_stock";
           success = true;
+        } else {
+          toast.error("Položka nie je v stave 'čaká na dovoz'");
         }
         break;
       case "loading":
         if (item.status === "in_stock") {
           newStatus = "in_transit";
           success = true;
+        } else {
+          toast.error("Položka nie je v stave 'na sklade'");
         }
         break;
       case "delivery":
         if (item.status === "in_transit") {
           newStatus = "delivered";
           success = true;
+        } else {
+          toast.error("Položka nie je v stave 'v preprave'");
         }
         break;
     }
@@ -59,42 +68,27 @@ export const Scanner = () => {
           playSuccessSound();
           return [updatedItem, ...prev].slice(0, 50);
         });
-        setScanStatus("success");
+        toast.success("Položka bola úspešne naskenovaná");
       } catch (error) {
-        setScanStatus("error");
+        toast.error("Chyba pri aktualizácii položky");
       }
-    } else {
-      setScanStatus("error");
     }
-
-    setTimeout(() => setScanStatus("none"), 1000);
   };
 
-  const { videoRef, scanStatus, setScanStatus } = useHtml5Scanner(
+  const { error } = useScanditScanner(
     handleScannedCode,
-    isScanning
+    isScanning,
+    mode,
+    torchEnabled
   );
 
-  const startScanning = () => {
-    setIsScanning(true);
-  };
-
-  const stopScanning = () => {
-    setIsScanning(false);
-    setTorchEnabled(false);
-  };
-
-  const toggleTorch = () => {
-    setTorchEnabled(!torchEnabled);
-  };
-
-  const getScannerBorderColor = () => {
-    switch (scanStatus) {
-      case "success": return "border-success";
-      case "error": return "border-destructive";
-      default: return "border-border";
-    }
-  };
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-[50vh] text-red-500">
+        Chyba pri inicializácii skenera: {error}
+      </div>
+    );
+  }
 
   return (
     <div className="bg-card p-4 md:p-6 rounded-lg shadow-sm dark:shadow-none space-y-4 mb-8">
@@ -106,26 +100,23 @@ export const Scanner = () => {
             mode={mode}
             setMode={setMode}
             isScanning={isScanning}
-            onStartScan={startScanning}
-            onStopScan={stopScanning}
-            onToggleTorch={toggleTorch}
+            onStartScan={() => setIsScanning(true)}
+            onStopScan={() => {
+              setIsScanning(false);
+              setTorchEnabled(false);
+            }}
+            onToggleTorch={() => setTorchEnabled(!torchEnabled)}
             torchEnabled={torchEnabled}
           />
           
           <div className="relative w-full max-w-md mx-auto">
             <div
-              id="scanner"
-              ref={videoRef}
-              className={`w-full aspect-[4/3] rounded-lg border-4 transition-colors ${getScannerBorderColor()}`}
+              id="scandit-view"
+              className="w-full aspect-[4/3] rounded-lg border-4 border-border overflow-hidden"
             />
-            {/* Focus rectangle overlay */}
-            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-24 border-2 border-primary pointer-events-none">
-              <div className="absolute left-0 top-0 w-4 h-4 border-l-2 border-t-2 border-primary"></div>
-              <div className="absolute right-0 top-0 w-4 h-4 border-r-2 border-t-2 border-primary"></div>
-              <div className="absolute left-0 bottom-0 w-4 h-4 border-l-2 border-b-2 border-primary"></div>
-              <div className="absolute right-0 bottom-0 w-4 h-4 border-r-2 border-b-2 border-primary"></div>
-            </div>
           </div>
+
+          <ItemPreview item={previewItem} />
         </div>
 
         <div className="mt-4">
