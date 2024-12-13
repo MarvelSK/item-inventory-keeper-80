@@ -42,15 +42,25 @@ export const Scanner = () => {
   useEffect(() => {
     codeReader.current = new BrowserMultiFormatReader();
     if (codeReader.current.hints) {
-      // Optimize for barcode scanning
+      // Enhanced configuration for better barcode detection
       codeReader.current.hints.set(DecodeHintType.POSSIBLE_FORMATS, [
         BarcodeFormat.CODE_128,
         BarcodeFormat.EAN_13,
         BarcodeFormat.EAN_8,
-        BarcodeFormat.CODE_39
+        BarcodeFormat.CODE_39,
+        BarcodeFormat.QR_CODE, // Added for better format support
+        BarcodeFormat.DATA_MATRIX // Added for better format support
       ]);
+      
+      // Optimize for better detection
       codeReader.current.hints.set(DecodeHintType.TRY_HARDER, true);
       codeReader.current.hints.set(DecodeHintType.CHARACTER_SET, "UTF-8");
+      codeReader.current.hints.set(DecodeHintType.PURE_BARCODE, true); // Helps with noisy backgrounds
+      codeReader.current.hints.set(DecodeHintType.ASSUME_GS1, false); // Disable GS1 assumption for better general detection
+      
+      // Add these hints for better performance
+      codeReader.current.hints.set(DecodeHintType.NEED_RESULT_POINT_CALLBACK, true);
+      codeReader.current.hints.set(DecodeHintType.ALLOWED_LENGTHS, [6, 7, 8, 9, 10, 11, 12, 13, 14]); // Common barcode lengths
     }
     
     return () => {
@@ -83,16 +93,34 @@ export const Scanner = () => {
         video: {
           deviceId: backCamera ? { exact: backCamera.deviceId } : undefined,
           facingMode: backCamera ? undefined : "environment",
-          width: { ideal: 1280 }, // Reduced from 1920 for better performance
-          height: { ideal: 720 }, // Reduced from 1080 for better performance
+          width: { ideal: 1920 }, // Increased for better resolution
+          height: { ideal: 1080 }, // Increased for better resolution
           frameRate: { ideal: 30 },
-          aspectRatio: { ideal: 1.7777777778 }
+          // Advanced constraints for better image quality
+          advanced: [{
+            focusMode: "continuous",
+            exposureMode: "continuous",
+            whiteBalanceMode: "continuous"
+          }]
         }
       };
 
       mediaStream.current = await navigator.mediaDevices.getUserMedia(constraints);
-      videoRef.current.srcObject = mediaStream.current;
       
+      // Apply optimal settings for video track
+      const videoTrack = mediaStream.current.getVideoTracks()[0];
+      if (videoTrack) {
+        const capabilities = videoTrack.getCapabilities();
+        const settings: MediaTrackSettings = {};
+        
+        if (capabilities.brightness) settings.brightness = capabilities.brightness.max;
+        if (capabilities.contrast) settings.contrast = capabilities.contrast.max;
+        if (capabilities.sharpness) settings.sharpness = capabilities.sharpness.max;
+        
+        await videoTrack.applyConstraints(settings);
+      }
+      
+      videoRef.current.srcObject = mediaStream.current;
       setIsScanning(true);
 
       await codeReader.current?.decodeFromVideoDevice(
