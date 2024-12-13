@@ -17,6 +17,9 @@ import {
   BarcodeCaptureSettings,
   Symbology,
 } from "@scandit/web-datacapture-barcode";
+import { useItems } from "@/hooks/useItems";
+import { ItemPreview } from "./scanner/ItemPreview";
+import { findItemByCode } from "@/lib/services/itemService";
 
 export const Scanner = () => {
   const [isScanning, setIsScanning] = useState(false);
@@ -24,6 +27,8 @@ export const Scanner = () => {
   const [context, setContext] = useState<DataCaptureContext | null>(null);
   const [barcodeCapture, setBarcodeCapture] = useState<BarcodeCapture | null>(null);
   const [camera, setCamera] = useState<Camera | null>(null);
+  const [scannedItem, setScannedItem] = useState<any>(null);
+  const { updateItem } = useItems();
 
   useEffect(() => {
     initializeScanner();
@@ -65,24 +70,27 @@ export const Scanner = () => {
 
       // Create barcode capture settings
       const settings = new BarcodeCaptureSettings();
-      settings.enableSymbologies([
-        Symbology.QR,
-        Symbology.EAN13UPCA,
-        Symbology.EAN8,
-        Symbology.Code128,
-        Symbology.Code39,
-      ]);
+      settings.enableSymbologies([Symbology.Code128]);
 
       // Create barcode capture mode
       const newBarcodeCapture = BarcodeCapture.forContext(newContext, settings);
 
       // Register listener
       newBarcodeCapture.addListener({
-        didScan: (mode, session) => {
+        didScan: async (mode, session) => {
           const barcode = session.newlyRecognizedBarcodes[0];
           if (barcode) {
-            toast.success(`Scanned: ${barcode.data}`);
-            console.log("Barcode scanned:", barcode);
+            const code = barcode.data;
+            console.log("Barcode scanned:", code);
+            
+            // Find item by code
+            const item = await findItemByCode(code);
+            if (item) {
+              setScannedItem(item);
+              toast.success(`Found item: ${item.code}`);
+            } else {
+              toast.error(`No item found with code: ${code}`);
+            }
           }
         },
       });
@@ -183,6 +191,8 @@ export const Scanner = () => {
             className="w-full aspect-[4/3] rounded-lg border-2 border-border overflow-hidden bg-muted/10"
           />
         </div>
+
+        {scannedItem && <ItemPreview item={scannedItem} />}
       </div>
     </Card>
   );
