@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useItems } from "@/hooks/useItems";
 import { useCustomers } from "@/hooks/useCustomers";
 import { ScanControls } from "./scanner/ScanControls";
-import { useQuaggaScanner } from "@/hooks/useQuaggaScanner";
+import { useHtml5Scanner } from "@/hooks/useHtml5Scanner";
 import { ScannedItemsList } from "./scanner/ScannedItemsList";
 import { Item } from "@/lib/types";
 import { playSuccessSound } from "@/lib/sounds";
@@ -70,7 +70,7 @@ export const Scanner = () => {
     setTimeout(() => setScanStatus("none"), 1000);
   };
 
-  const { videoRef, scanStatus, setScanStatus } = useQuaggaScanner(
+  const { videoRef, scanStatus, setScanStatus } = useHtml5Scanner(
     handleScannedCode,
     isScanning
   );
@@ -114,6 +114,7 @@ export const Scanner = () => {
           
           <div className="relative w-full max-w-md mx-auto">
             <div
+              id="scanner"
               ref={videoRef}
               className={`w-full aspect-[4/3] rounded-lg border-4 transition-colors ${getScannerBorderColor()}`}
             />
