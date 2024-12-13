@@ -24,7 +24,7 @@ export const ScanditKeyInput = () => {
         <div className="flex space-x-2">
           <Input
             id="scanditKey"
-            type="password"
+            type="text"
             value={key}
             onChange={(e) => setKey(e.target.value)}
             placeholder="Enter your Scandit API key"
