@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useItems } from "@/hooks/useItems";
 import { ScanControls } from "./scanner/ScanControls";
 import { ScannedItemsList } from "./scanner/ScannedItemsList";
@@ -10,6 +10,7 @@ import { ItemPreview } from "./scanner/ItemPreview";
 import { toast } from "sonner";
 import { Card } from "./ui/card";
 import { ScanditKeyInput } from "./scanner/ScanditKeyInput";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Scanner = () => {
   const { items, updateItem } = useItems();
@@ -18,6 +19,31 @@ export const Scanner = () => {
   const [mode, setMode] = useState<ScanMode>("receiving");
   const [torchEnabled, setTorchEnabled] = useState(false);
   const [previewItem, setPreviewItem] = useState<Item | null>(null);
+  const [isInitializing, setIsInitializing] = useState(true);
+
+  useEffect(() => {
+    initializeScanditKey();
+  }, []);
+
+  const initializeScanditKey = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('scanner_settings')
+        .select('scandit_key')
+        .limit(1)
+        .single();
+
+      if (error) throw error;
+      
+      if (data) {
+        localStorage.setItem("scanditKey", data.scandit_key);
+      }
+    } catch (error) {
+      console.error('Error initializing Scandit key:', error);
+    } finally {
+      setIsInitializing(false);
+    }
+  };
 
   const handleScannedCode = async (code: string) => {
     const item = items.find(item => item.code === code);
@@ -84,6 +110,14 @@ export const Scanner = () => {
     toast.error(error);
   }
 
+  if (isInitializing) {
+    return (
+      <Card className="p-4 md:p-6">
+        <div>Initializing scanner...</div>
+      </Card>
+    );
+  }
+
   return (
     <Card className="p-4 md:p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -99,7 +133,8 @@ export const Scanner = () => {
             setMode={setMode}
             isScanning={isScanning}
             onStartScan={() => {
-              if (!localStorage.getItem("scanditKey")) {
+              const key = localStorage.getItem("scanditKey");
+              if (!key) {
                 toast.error("Please enter your Scandit API key first");
                 return;
               }
