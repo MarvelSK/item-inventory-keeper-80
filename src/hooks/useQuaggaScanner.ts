@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import Quagga from "quagga";
-import { ScanMode, ScanStatus } from "@/components/scanner/types";
-import { Item } from "@/lib/types";
+import { ScanStatus } from "@/components/scanner/types";
 
 export const useQuaggaScanner = (
   onDetected: (code: string) => void,
@@ -21,9 +20,15 @@ export const useQuaggaScanner = (
             target: videoRef.current,
             constraints: {
               facingMode: "environment",
-              width: { min: 1280 },
-              height: { min: 720 },
-              aspectRatio: { min: 1, max: 2 }
+              deviceId: "environment",
+              width: { ideal: 640 },
+              height: { ideal: 480 },
+              aspectRatio: { ideal: 1.333333 }, // 4:3 aspect ratio
+              advanced: [
+                {
+                  zoom: 1.0 // Disable zoom to prevent camera switching
+                }
+              ]
             }
           },
           decoder: {
@@ -43,8 +48,8 @@ export const useQuaggaScanner = (
           },
           locate: true,
           locator: {
-            patchSize: "large",
-            halfSample: false
+            patchSize: "medium",
+            halfSample: true
           }
         },
         (err) => {

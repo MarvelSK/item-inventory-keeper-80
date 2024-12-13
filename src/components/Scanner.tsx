@@ -112,13 +112,13 @@ export const Scanner = () => {
             torchEnabled={torchEnabled}
           />
           
-          <div className="relative aspect-[16/9] w-full max-w-3xl mx-auto">
+          <div className="relative w-full max-w-md mx-auto">
             <div
               ref={videoRef}
-              className={`w-full h-full rounded-lg border-4 transition-colors ${getScannerBorderColor()}`}
+              className={`w-full aspect-[4/3] rounded-lg border-4 transition-colors ${getScannerBorderColor()}`}
             />
             {/* Focus rectangle overlay */}
-            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-32 border-2 border-primary pointer-events-none">
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-24 border-2 border-primary pointer-events-none">
               <div className="absolute left-0 top-0 w-4 h-4 border-l-2 border-t-2 border-primary"></div>
               <div className="absolute right-0 top-0 w-4 h-4 border-r-2 border-t-2 border-primary"></div>
               <div className="absolute left-0 bottom-0 w-4 h-4 border-l-2 border-b-2 border-primary"></div>
