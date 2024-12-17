@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from "sonner";
 
 // Initialize Scanbot SDK with provided license key
@@ -21,12 +21,15 @@ const LICENSE_KEY =
 const Scanner = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const scannerRef = useRef<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     let ScanbotSDK: any;
 
     const initializeScanner = async () => {
       try {
+        setIsLoading(true);
+        
         // Load the Scanbot SDK
         const SDK = await import('scanbot-web-sdk');
         ScanbotSDK = SDK.default;
@@ -36,6 +39,14 @@ const Scanner = () => {
           licenseKey: LICENSE_KEY,
           engine: 'https://cdn.jsdelivr.net/npm/scanbot-web-sdk@5.1.3/bundle/',
         });
+
+        // Check for camera permissions
+        const hasCamera = await sdk.isCameraAvailable();
+        if (!hasCamera) {
+          toast.error('No camera available on this device');
+          setIsLoading(false);
+          return;
+        }
 
         // Create barcode scanner
         const scanner = await sdk.createBarcodeScanner({
@@ -68,9 +79,11 @@ const Scanner = () => {
         
         // Start the scanner
         await scanner.startScanning();
+        setIsLoading(false);
       } catch (error) {
         console.error('Failed to initialize scanner:', error);
-        toast.error('Failed to initialize scanner. Please try again.');
+        toast.error('Failed to initialize scanner. Please check camera permissions and try again.');
+        setIsLoading(false);
       }
     };
 
@@ -91,8 +104,17 @@ const Scanner = () => {
       <div 
         id="scanner-container" 
         ref={containerRef}
-        className="w-full h-[80vh] bg-black rounded-lg overflow-hidden"
-      />
+        className="w-full h-[80vh] bg-black rounded-lg overflow-hidden relative"
+      >
+        {isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+            <div className="text-white text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+              <p>Initializing camera...</p>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
