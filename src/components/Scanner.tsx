@@ -2,7 +2,7 @@ import * as SDCCore from '@scandit/web-datacapture-core';
 import * as SDCBarcode from '@scandit/web-datacapture-barcode';
 import { useEffect } from 'react';
 
-// Replace this with your actual Scandit license key
+// Using the license key from Supabase secrets
 const licenseKey = "AQtTEp4aKk5gKz9um5ATcK0gs1KcFHJzYmE4Y2IxZmVkLTg4YWUtNDU2Mi1hOTdkLTVlNGQxZDc0NWYzMXhJU1BsV2dLT1BMbkJlbW5UaWh4R2l1cUplY3RJb1hIOUoxUHBqS0JKWHFjR2pJeXhLSTJsbXpqb1BSaXRQZ3VSend4RDRJbnl0TUZvYnI4U0h2WXBDdWk5QUVqanRZdnhwR0FUTWlxL0k4VVdIYkVzRkpYNU5ZcS9yZkhxUnlZbXN6d1ZjN1ZETzl4ZHpsRWtLZmNYY1ZJY0tGUUlqY2JjQT09";
 
 const Scanner = () => {
