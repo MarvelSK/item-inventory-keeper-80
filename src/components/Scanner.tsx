@@ -18,10 +18,15 @@ const LICENSE_KEY =
 "pjb20ubmV2YS53YXJlaG91c2UKMTcz" +
 "NTA4NDc5OQo4Mzg4NjA3CjE5\n";
 
+// Define SDK paths
+const SDK_VERSION = '5.1.3';
+const SDK_PATH = `https://cdn.jsdelivr.net/npm/scanbot-web-sdk@${SDK_VERSION}/bundle/`;
+
 const Scanner = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const scannerRef = useRef<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let ScanbotSDK: any;
@@ -29,19 +34,28 @@ const Scanner = () => {
     const initializeScanner = async () => {
       try {
         setIsLoading(true);
+        setError(null);
         
-        // Load the Scanbot SDK
+        console.log('Loading Scanbot SDK...');
         const SDK = await import('scanbot-web-sdk');
         ScanbotSDK = SDK.default;
         
-        // Initialize the SDK with the correct CDN path
-        const sdk = await ScanbotSDK.initialize({
-          licenseKey: LICENSE_KEY,
-          engine: 'https://cdn.jsdelivr.net/npm/scanbot-web-sdk@latest/bundle/',
-          moduleDirectory: 'https://cdn.jsdelivr.net/npm/scanbot-web-sdk@latest/bundle/',
+        console.log('Initializing SDK with paths:', {
+          engine: SDK_PATH,
+          moduleDirectory: SDK_PATH
         });
 
+        // Initialize the SDK with specific version
+        const sdk = await ScanbotSDK.initialize({
+          licenseKey: LICENSE_KEY,
+          engine: SDK_PATH,
+          moduleDirectory: SDK_PATH,
+        });
+
+        console.log('SDK initialized successfully');
+
         // Create barcode scanner
+        console.log('Creating barcode scanner...');
         const scanner = await sdk.createBarcodeScanner({
           containerId: 'scanner-container',
           style: {
@@ -68,14 +82,18 @@ const Scanner = () => {
           ],
         });
 
+        console.log('Barcode scanner created successfully');
         scannerRef.current = scanner;
         
         // Start the scanner
         await scanner.startScanning();
+        console.log('Scanner started successfully');
         setIsLoading(false);
-      } catch (error) {
+      } catch (error: any) {
         console.error('Failed to initialize scanner:', error);
-        toast.error('Failed to initialize scanner. Please check your internet connection and try again.');
+        const errorMessage = error?.message || 'Unknown error occurred';
+        setError(errorMessage);
+        toast.error(`Scanner initialization failed: ${errorMessage}`);
         setIsLoading(false);
       }
     };
@@ -87,6 +105,7 @@ const Scanner = () => {
     // Cleanup function
     return () => {
       if (scannerRef.current) {
+        console.log('Disposing scanner...');
         scannerRef.current.dispose();
       }
     };
@@ -104,6 +123,20 @@ const Scanner = () => {
             <div className="text-white text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
               <p>Initializing camera...</p>
+            </div>
+          </div>
+        )}
+        {error && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+            <div className="text-white text-center p-4">
+              <p className="text-red-400 mb-2">Scanner Error</p>
+              <p className="text-sm">{error}</p>
+              <button 
+                onClick={() => window.location.reload()}
+                className="mt-4 px-4 py-2 bg-teal-600 text-white rounded hover:bg-teal-700 transition-colors"
+              >
+                Retry
+              </button>
             </div>
           </div>
         )}
