@@ -34,19 +34,12 @@ const Scanner = () => {
         const SDK = await import('scanbot-web-sdk');
         ScanbotSDK = SDK.default;
         
-        // Initialize the SDK with CDN path
+        // Initialize the SDK with the correct CDN path
         const sdk = await ScanbotSDK.initialize({
           licenseKey: LICENSE_KEY,
-          engine: 'https://cdn.jsdelivr.net/npm/scanbot-web-sdk@5.1.3/bundle/',
+          engine: 'https://cdn.jsdelivr.net/npm/scanbot-web-sdk@latest/bundle/',
+          moduleDirectory: 'https://cdn.jsdelivr.net/npm/scanbot-web-sdk@latest/bundle/',
         });
-
-        // Check for camera permissions
-        const hasCamera = await sdk.isCameraAvailable();
-        if (!hasCamera) {
-          toast.error('No camera available on this device');
-          setIsLoading(false);
-          return;
-        }
 
         // Create barcode scanner
         const scanner = await sdk.createBarcodeScanner({
@@ -82,7 +75,7 @@ const Scanner = () => {
         setIsLoading(false);
       } catch (error) {
         console.error('Failed to initialize scanner:', error);
-        toast.error('Failed to initialize scanner. Please check camera permissions and try again.');
+        toast.error('Failed to initialize scanner. Please check your internet connection and try again.');
         setIsLoading(false);
       }
     };
