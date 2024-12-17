@@ -42,7 +42,7 @@ declare module '@scandit/web-datacapture-core' {
     Off = 'off',
   }
 
-  export function configure(options: { licenseKey: string; moduleLoaders: any[] }): Promise<void>;
+  export function configure(options: { licenseKey: string; moduleLoaders: any[]; libraryLocation: string }): Promise<void>;
 }
 
 declare module '@scandit/web-datacapture-barcode' {
@@ -50,28 +50,40 @@ declare module '@scandit/web-datacapture-barcode' {
 
   export class BarcodeCaptureSettings {
     enableSymbologies(symbologies: Symbology[]): void;
+    settingsForSymbology(symbology: Symbology): any;
   }
 
   export class BarcodeCapture {
     static forContext(context: DataCaptureContext, settings: BarcodeCaptureSettings): BarcodeCapture;
     isEnabled: boolean;
+    setEnabled(enabled: boolean): Promise<void>;
     dispose(): void;
     addListener(listener: {
-      didScan: (mode: any, session: { newlyRecognizedBarcodes: Array<{ data: string }> }) => void;
+      didScan: (mode: any, session: { newlyRecognizedBarcodes: Array<{ data: string; symbology: any }> }) => void;
     }): void;
   }
 
   export class BarcodeCaptureOverlay {
-    static withBarcodeCapture(capture: BarcodeCapture): Promise<BarcodeCaptureOverlay>;
-    viewfinder: any;
+    static withBarcodeCaptureForViewWithStyle(capture: BarcodeCapture, view: DataCaptureView, style: BarcodeCaptureOverlayStyle): Promise<BarcodeCaptureOverlay>;
+    setViewfinder(viewfinder: any): Promise<void>;
+  }
+
+  export class SymbologyDescription {
+    constructor(symbology: Symbology);
+    readableName: string;
   }
 
   export enum Symbology {
     QR = 'qr',
     EAN13UPCA = 'ean13-upca',
     EAN8 = 'ean8',
+    UPCE = 'upce',
     Code128 = 'code128',
     Code39 = 'code39',
+  }
+
+  export enum BarcodeCaptureOverlayStyle {
+    Frame = 'frame',
   }
 
   export function barcodeCaptureLoader(): any;

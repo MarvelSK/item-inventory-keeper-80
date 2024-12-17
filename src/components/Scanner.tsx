@@ -1,13 +1,97 @@
+import * as SDCCore from '@scandit/web-datacapture-core';
+import * as SDCBarcode from '@scandit/web-datacapture-barcode';
+import { useEffect } from 'react';
 import { Card } from "./ui/card";
-import { ScanditView } from "./scanner/ScanditView";
 
-export const Scanner = () => {
+// Replace this with your actual Scandit license key
+const licenseKey = "AQtTEp4aKk5gKz9um5ATcK0gs1KcFHJzYmE4Y2IxZmVkLTg4YWUtNDU2Mi1hOTdkLTVlNGQxZDc0NWYzMXhJU1BsV2dLT1BMbkJlbW5UaWh4R2l1cUplY3RJb1hIOUoxUHBqS0JKWHFjR2pJeXhLSTJsbXpqb1BSaXRQZ3VSend4RDRJbnl0TUZvYnI4U0h2WXBDdWk5QUVqanRZdnhwR0FUTWlxL0k4VVdIYkVzRkpYNU5ZcS9yZkhxUnlZbXN6d1ZjN1ZETzl4ZHpsRWtLZmNYY1ZJY0tGUUlqY2JjQT09";
+
+const Scanner = () => {
+  useEffect(() => {
+    async function runScanner() {
+      await SDCCore.configure({
+        licenseKey: licenseKey,
+        libraryLocation: '/engine',
+        moduleLoaders: [SDCBarcode.barcodeCaptureLoader()]
+      });
+
+      const context = await SDCCore.DataCaptureContext.create();
+
+      const camera = SDCCore.Camera.default;
+      await context.setFrameSource(camera);
+
+      const settings = new SDCBarcode.BarcodeCaptureSettings();
+      settings.enableSymbologies([
+        SDCBarcode.Symbology.Code128,
+        SDCBarcode.Symbology.Code39,
+        SDCBarcode.Symbology.QR,
+        SDCBarcode.Symbology.EAN8,
+        SDCBarcode.Symbology.UPCE,
+        SDCBarcode.Symbology.EAN13UPCA
+      ]);
+
+      const symbologySetting = settings.settingsForSymbology(SDCBarcode.Symbology.Code39);
+      symbologySetting.activeSymbolCounts = [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
+
+      const barcodeCapture = await SDCBarcode.BarcodeCapture.forContext(context, settings);
+      await barcodeCapture.setEnabled(false);
+
+      barcodeCapture.addListener({
+        didScan: async (barcodeCapture: any, session: { newlyRecognizedBarcodes: Array<{ data: string; symbology: any }> }) => {
+          await barcodeCapture.setEnabled(false);
+          const barcode = session.newlyRecognizedBarcodes[0];
+          const symbology = new SDCBarcode.SymbologyDescription(barcode.symbology);
+          showResult(barcode.data, symbology.readableName);
+          await barcodeCapture.setEnabled(true);
+        },
+      });
+
+      const view = await SDCCore.DataCaptureView.forContext(context);
+      view.connectToElement(document.getElementById("data-capture-view"));
+      view.addControl(new SDCCore.CameraSwitchControl());
+
+      const barcodeCaptureOverlay =
+        await SDCBarcode.BarcodeCaptureOverlay.withBarcodeCaptureForViewWithStyle(
+          barcodeCapture,
+          view,
+          SDCBarcode.BarcodeCaptureOverlayStyle.Frame
+        );
+
+      const viewfinder = new SDCCore.RectangularViewfinder(
+        SDCCore.RectangularViewfinderStyle.Square,
+        SDCCore.RectangularViewfinderLineStyle.Light
+      );
+
+      await barcodeCaptureOverlay.setViewfinder(viewfinder);
+
+      await camera.switchToDesiredState(SDCCore.FrameSourceState.On);
+      await barcodeCapture.setEnabled(true);
+
+      // Cleanup function
+      return () => {
+        barcodeCapture.setEnabled(false);
+        context.dispose();
+      };
+    }
+
+    function showResult(data: string, symbology: string) {
+      alert("Scanned: " + data + " " + symbology);
+    }
+
+    runScanner().catch((error) => {
+      console.error(error);
+      alert(error);
+    });
+  }, []);
+
   return (
     <Card className="p-4 md:p-6 space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-semibold text-primary">Scanner</h2>
       </div>
-      <ScanditView />
+      <div id="data-capture-view" className="w-full aspect-video"></div>
     </Card>
   );
 };
+
+export default Scanner;
