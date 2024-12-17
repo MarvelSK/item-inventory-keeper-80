@@ -1,16 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { toast } from "sonner";
 
-// Add type declaration for ScanbotSDK on window
 declare global {
   interface Window {
-    ScanbotSDK: any; // Using 'any' for now, but we could create proper types if needed
+    ScanbotSDK: any;
   }
 }
 
-// Initialize Scanbot SDK with provided license key
-const LICENSE_KEY =
-"NUy20xKMMFxgxA3AmeMFxW0eXkySTG" +
+const LICENSE_KEY = "NUy20xKMMFxgxA3AmeMFxW0eXkySTG" +
 "68a4yEF6SfRIafsYzpa9xyBvicVMDu" +
 "gw0mgohfyR3or1GEGwUcmE463oyi6u" +
 "A7mHtTMrlRhPn4mL4aF0hrVmtu2wPz" +
@@ -25,28 +22,6 @@ const LICENSE_KEY =
 "pjb20ubmV2YS53YXJlaG91c2UKMTcz" +
 "NTA4NDc5OQo4Mzg4NjA3CjE5\n";
 
-// Load Scanbot SDK script
-const loadScanbotSDK = async () => {
-  try {
-    // Create a new script element
-    const script = document.createElement('script');
-    script.src = 'https://cdn.jsdelivr.net/npm/scanbot-web-sdk@5.1.3/bundle/ScanbotSDK.min.js';
-    script.async = true;
-    
-    const loadPromise = new Promise<typeof window.ScanbotSDK>((resolve, reject) => {
-      script.onload = () => resolve(window.ScanbotSDK);
-      script.onerror = () => reject(new Error('Failed to load Scanbot SDK script'));
-    });
-    
-    // Append the script to head
-    document.head.appendChild(script);
-    return await loadPromise;
-  } catch (error) {
-    console.error('Failed to load Scanbot SDK script:', error);
-    throw error;
-  }
-};
-
 const Scanner = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const scannerRef = useRef<any>(null);
@@ -54,42 +29,55 @@ const Scanner = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let isMounted = true;
+
     const initializeScanner = async () => {
       try {
-        setIsLoading(true);
-        setError(null);
-        
-        console.log('Loading Scanbot SDK...');
-        const ScanbotSDK = await loadScanbotSDK();
-        
-        console.log('Initializing SDK...');
-        const sdk = await ScanbotSDK.initialize({
-          licenseKey: LICENSE_KEY,
-        });
-
-        console.log('SDK initialized successfully');
-
         if (!containerRef.current) {
           throw new Error('Scanner container not found');
         }
 
+        setIsLoading(true);
+        setError(null);
+
+        // Load SDK script
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/scanbot-web-sdk@5.1.3/bundle/ScanbotSDK.min.js';
+        script.async = true;
+
+        const loadPromise = new Promise<void>((resolve, reject) => {
+          script.onload = () => resolve();
+          script.onerror = () => reject(new Error('Failed to load Scanbot SDK script'));
+        });
+
+        document.head.appendChild(script);
+        await loadPromise;
+
+        if (!isMounted) return;
+
+        // Initialize SDK
+        const sdk = await window.ScanbotSDK.initialize({
+          licenseKey: LICENSE_KEY,
+          engine: '/assets/scanbot-sdk/',
+        });
+
+        if (!isMounted) return;
+
         // Create barcode scanner
-        console.log('Creating barcode scanner...');
         const scanner = await sdk.createBarcodeScanner({
-          containerId: 'scanner-container',
+          containerId: containerRef.current.id,
           style: {
             window: {
-              borderColor: '#0D9488', // Tailwind teal-600
+              borderColor: '#0D9488',
             },
           },
           onBarcodesDetected: (result: any) => {
             if (result.barcodes.length > 0) {
               const barcode = result.barcodes[0];
-              console.log('Scanned barcode:', barcode);
               toast.success(`Scanned: ${barcode.text} (${barcode.format})`);
             }
           },
-          preferredCamera: 'camera2', // Usually the back camera
+          preferredCamera: 'camera2',
           barcodeFormats: [
             'CODE_128',
             'CODE_39',
@@ -101,48 +89,43 @@ const Scanner = () => {
           ],
         });
 
-        console.log('Barcode scanner created successfully');
+        if (!isMounted) return;
+
         scannerRef.current = scanner;
-        
-        // Start the scanner
         await scanner.startScanning();
-        console.log('Scanner started successfully');
         setIsLoading(false);
       } catch (error: any) {
-        console.error('Failed to initialize scanner:', error);
-        const errorMessage = error?.message || 'Unknown error occurred';
-        setError(errorMessage);
-        toast.error(`Scanner initialization failed: ${errorMessage}`);
-        setIsLoading(false);
+        console.error('Scanner initialization failed:', error);
+        if (isMounted) {
+          setError(error?.message || 'Failed to initialize scanner');
+          setIsLoading(false);
+          toast.error(`Scanner error: ${error?.message || 'Unknown error'}`);
+        }
       }
     };
 
+    const uniqueId = `scanner-container-${Math.random().toString(36).substr(2, 9)}`;
     if (containerRef.current) {
+      containerRef.current.id = uniqueId;
       initializeScanner();
     }
 
-    // Cleanup function
     return () => {
+      isMounted = false;
       if (scannerRef.current) {
-        console.log('Disposing scanner...');
-        scannerRef.current.dispose();
+        try {
+          scannerRef.current.dispose();
+        } catch (error) {
+          console.error('Error disposing scanner:', error);
+        }
         scannerRef.current = null;
       }
-      
-      // Remove all Scanbot SDK scripts safely
-      const scripts = document.querySelectorAll('script[src*="scanbot-web-sdk"]');
-      scripts.forEach(script => {
-        if (script.parentNode) {
-          script.parentNode.removeChild(script);
-        }
-      });
     };
   }, []);
 
   return (
     <div className="w-full h-full flex flex-col items-center justify-center">
       <div 
-        id="scanner-container" 
         ref={containerRef}
         className="w-full h-[80vh] bg-black rounded-lg overflow-hidden relative"
       >
