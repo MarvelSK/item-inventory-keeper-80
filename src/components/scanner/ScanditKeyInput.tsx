@@ -4,7 +4,11 @@ import { Button } from "../ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
-export const ScanditKeyInput = () => {
+interface ScanditKeyInputProps {
+  onKeyAdded?: () => void;
+}
+
+export const ScanditKeyInput = ({ onKeyAdded }: ScanditKeyInputProps) => {
   const [key, setKey] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
@@ -23,7 +27,6 @@ export const ScanditKeyInput = () => {
       
       if (data && data.length > 0) {
         setKey(data[0].scandit_key);
-        localStorage.setItem("scanditKey", data[0].scandit_key);
       }
     } catch (error) {
       console.error('Error fetching Scandit key:', error);
@@ -63,8 +66,8 @@ export const ScanditKeyInput = () => {
         if (insertError) throw insertError;
       }
 
-      localStorage.setItem("scanditKey", key.trim());
       toast.success("Scandit API key saved successfully");
+      onKeyAdded?.();
     } catch (error) {
       console.error('Error saving Scandit key:', error);
       toast.error("Failed to save Scandit API key");

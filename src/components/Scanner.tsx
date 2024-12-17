@@ -20,6 +20,7 @@ import {
 import { useItems } from "@/hooks/useItems";
 import { ItemPreview } from "./scanner/ItemPreview";
 import { findItemByCode } from "@/lib/services/itemService";
+import { ScanditKeyInput } from "./scanner/ScanditKeyInput";
 
 export const Scanner = () => {
   const [isScanning, setIsScanning] = useState(false);
@@ -29,20 +30,35 @@ export const Scanner = () => {
   const [camera, setCamera] = useState<Camera | null>(null);
   const [scannedItem, setScannedItem] = useState<any>(null);
   const { updateItem } = useItems();
+  const [hasLicenseKey, setHasLicenseKey] = useState(false);
 
   useEffect(() => {
-    initializeScanner();
-    return () => {
-      // Cleanup
-      if (barcodeCapture) {
-        barcodeCapture.isEnabled = false;
-        barcodeCapture.dispose();
-      }
-      if (context) {
-        context.dispose();
-      }
-    };
+    checkLicenseKey();
   }, []);
+
+  const checkLicenseKey = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('scanner_settings')
+        .select('scandit_key')
+        .limit(1);
+
+      if (error) throw error;
+      
+      if (!data || data.length === 0) {
+        setHasLicenseKey(false);
+        setIsInitializing(false);
+        return;
+      }
+
+      setHasLicenseKey(true);
+      initializeScanner();
+    } catch (error) {
+      console.error('Error checking license key:', error);
+      toast.error("Failed to check Scandit license key");
+      setIsInitializing(false);
+    }
+  };
 
   const initializeScanner = async () => {
     try {
@@ -108,7 +124,7 @@ export const Scanner = () => {
 
       // Create data capture view and add overlay
       const view = await DataCaptureView.forContext(newContext);
-      const overlay = await BarcodeCaptureOverlay.withBarcodeCapture(newBarcodeCapture);
+      await BarcodeCaptureOverlay.withBarcodeCapture(newBarcodeCapture);
       
       // Add the view to the DOM
       const viewElement = document.getElementById('scandit-view');
@@ -154,10 +170,32 @@ export const Scanner = () => {
     }
   };
 
+  useEffect(() => {
+    return () => {
+      // Cleanup
+      if (barcodeCapture) {
+        barcodeCapture.isEnabled = false;
+        barcodeCapture.dispose();
+      }
+      if (context) {
+        context.dispose();
+      }
+    };
+  }, []);
+
   if (isInitializing) {
     return (
       <Card className="p-4 md:p-6">
         <div>Initializing scanner...</div>
+      </Card>
+    );
+  }
+
+  if (!hasLicenseKey) {
+    return (
+      <Card className="p-4 md:p-6">
+        <h2 className="text-2xl font-semibold text-primary mb-4">Scanner Configuration</h2>
+        <ScanditKeyInput onKeyAdded={() => checkLicenseKey()} />
       </Card>
     );
   }
