@@ -27,9 +27,13 @@ const Scanner = () => {
   const scannerRef = useRef<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const isMounted = useRef(true);
 
   useEffect(() => {
-    let isMounted = true;
+    const uniqueId = `scanner-container-${Math.random().toString(36).substr(2, 9)}`;
+    if (containerRef.current) {
+      containerRef.current.id = uniqueId;
+    }
 
     const initializeScanner = async () => {
       try {
@@ -44,6 +48,7 @@ const Scanner = () => {
         const script = document.createElement('script');
         script.src = 'https://cdn.jsdelivr.net/npm/scanbot-web-sdk@5.1.3/bundle/ScanbotSDK.min.js';
         script.async = true;
+        script.id = 'scanbot-sdk-script';
 
         const loadPromise = new Promise<void>((resolve, reject) => {
           script.onload = () => resolve();
@@ -53,19 +58,19 @@ const Scanner = () => {
         document.head.appendChild(script);
         await loadPromise;
 
-        if (!isMounted) return;
+        if (!isMounted.current) return;
 
         // Initialize SDK
         const sdk = await window.ScanbotSDK.initialize({
           licenseKey: LICENSE_KEY,
-          engine: '/assets/scanbot-sdk/',
+          engine: 'https://cdn.jsdelivr.net/npm/scanbot-web-sdk@5.1.3/bundle/',
         });
 
-        if (!isMounted) return;
+        if (!isMounted.current) return;
 
         // Create barcode scanner
         const scanner = await sdk.createBarcodeScanner({
-          containerId: containerRef.current.id,
+          containerId: uniqueId,
           style: {
             window: {
               borderColor: '#0D9488',
@@ -89,14 +94,14 @@ const Scanner = () => {
           ],
         });
 
-        if (!isMounted) return;
+        if (!isMounted.current) return;
 
         scannerRef.current = scanner;
         await scanner.startScanning();
         setIsLoading(false);
       } catch (error: any) {
         console.error('Scanner initialization failed:', error);
-        if (isMounted) {
+        if (isMounted.current) {
           setError(error?.message || 'Failed to initialize scanner');
           setIsLoading(false);
           toast.error(`Scanner error: ${error?.message || 'Unknown error'}`);
@@ -104,14 +109,10 @@ const Scanner = () => {
       }
     };
 
-    const uniqueId = `scanner-container-${Math.random().toString(36).substr(2, 9)}`;
-    if (containerRef.current) {
-      containerRef.current.id = uniqueId;
-      initializeScanner();
-    }
+    initializeScanner();
 
     return () => {
-      isMounted = false;
+      isMounted.current = false;
       if (scannerRef.current) {
         try {
           scannerRef.current.dispose();
@@ -119,6 +120,12 @@ const Scanner = () => {
           console.error('Error disposing scanner:', error);
         }
         scannerRef.current = null;
+      }
+
+      // Clean up the script
+      const script = document.getElementById('scanbot-sdk-script');
+      if (script && script.parentNode) {
+        script.parentNode.removeChild(script);
       }
     };
   }, []);
