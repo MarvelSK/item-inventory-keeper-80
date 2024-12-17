@@ -1,21 +1,35 @@
 import { useEffect, useRef } from 'react';
-import IScanbotSDK from 'scanbot-web-sdk/dist/types/interfaces/IScanbotSDK';
 import { toast } from "sonner";
 
-// Initialize Scanbot SDK with a free trial license
-const LICENSE_KEY = 'trial';
+// Initialize Scanbot SDK with provided license key
+const LICENSE_KEY =
+"NUy20xKMMFxgxA3AmeMFxW0eXkySTG" +
+"68a4yEF6SfRIafsYzpa9xyBvicVMDu" +
+"gw0mgohfyR3or1GEGwUcmE463oyi6u" +
+"A7mHtTMrlRhPn4mL4aF0hrVmtu2wPz" +
+"vKNXT5eYxO/7C+CPwx6acrDGDhVYOV" +
+"w7KOcY3STrKgONSEgieOU5LsmqV3ew" +
+"RlBUpkxvO/STKK+VpwW5kjxN1pEkbu" +
+"OS828ZoGcnogbyzHMgP5gKG0ECb/Y" +
+"hcMXBKoJBDTJicMuASTTxR5Pkm+Bdz" +
+"OJSw0e9fpNVpoj3IMBiSWxWUiy915T" +
+"5ywDiXof+LVUCGxD3rTn++UfEQajUH" +
+"KkpH5LyiFGqw==\nU2NhbmJvdFNESw" +
+"pjb20ubmV2YS53YXJlaG91c2UKMTcz" +
+"NTA4NDc5OQo4Mzg4NjA3CjE5\n";
 
 const Scanner = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const scannerRef = useRef<any>(null);
 
   useEffect(() => {
-    let ScanbotSDK: IScanbotSDK;
+    let ScanbotSDK: any;
 
     const initializeScanner = async () => {
       try {
         // Load the Scanbot SDK
-        ScanbotSDK = await import('scanbot-web-sdk');
+        const SDK = await import('scanbot-web-sdk');
+        ScanbotSDK = SDK.default;
         
         // Initialize the SDK
         const sdk = await ScanbotSDK.initialize({
@@ -31,7 +45,7 @@ const Scanner = () => {
               borderColor: '#0D9488', // Tailwind teal-600
             },
           },
-          onBarcodesDetected: (result) => {
+          onBarcodesDetected: (result: any) => {
             if (result.barcodes.length > 0) {
               const barcode = result.barcodes[0];
               console.log('Scanned barcode:', barcode);
