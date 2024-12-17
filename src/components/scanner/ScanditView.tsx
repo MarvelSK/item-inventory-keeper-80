@@ -27,12 +27,8 @@ export const ScanditView = () => {
           SDCBarcode.Symbology.Code39,
           SDCBarcode.Symbology.QR,
           SDCBarcode.Symbology.EAN8,
-          SDCBarcode.Symbology.UPCE,
           SDCBarcode.Symbology.EAN13UPCA
         ]);
-
-        const symbologySetting = settings.settingsForSymbology(SDCBarcode.Symbology.Code39);
-        symbologySetting.activeSymbolCounts = [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
 
         const barcodeCapture = SDCBarcode.BarcodeCapture.forContext(context, settings);
         barcodeCapture.isEnabled = false;
@@ -41,10 +37,9 @@ export const ScanditView = () => {
           didScan: async (mode: any, session: { newlyRecognizedBarcodes: Array<{ data: string; symbology: any }> }) => {
             barcodeCapture.isEnabled = false;
             const barcode = session.newlyRecognizedBarcodes[0];
-            const symbology = new SDCBarcode.SymbologyDescription(barcode.symbology);
             
             // Show result using toast instead of alert
-            toast.success(`Scanned: ${barcode.data} (${symbology.readableName})`);
+            toast.success(`Scanned: ${barcode.data}`);
             
             barcodeCapture.isEnabled = true;
           },

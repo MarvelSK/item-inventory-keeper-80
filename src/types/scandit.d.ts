@@ -19,6 +19,22 @@ declare module '@scandit/web-datacapture-core' {
   export class DataCaptureView {
     static forContext(context: DataCaptureContext): Promise<DataCaptureView>;
     htmlElement: HTMLElement;
+    connectToElement(element: HTMLElement): void;
+    addControl(control: any): void;
+  }
+
+  export class CameraSwitchControl {}
+
+  export class RectangularViewfinder {
+    constructor(style: RectangularViewfinderStyle, lineStyle: RectangularViewfinderLineStyle);
+  }
+
+  export enum RectangularViewfinderStyle {
+    Square = 'square',
+  }
+
+  export enum RectangularViewfinderLineStyle {
+    Light = 'light',
   }
 
   export enum FrameSourceState {
@@ -26,11 +42,11 @@ declare module '@scandit/web-datacapture-core' {
     Off = 'off',
   }
 
-  export function configure(licenseKey: string): Promise<void>;
+  export function configure(options: { licenseKey: string; moduleLoaders: any[] }): Promise<void>;
 }
 
 declare module '@scandit/web-datacapture-barcode' {
-  import { DataCaptureContext } from '@scandit/web-datacapture-core';
+  import { DataCaptureContext, DataCaptureView } from '@scandit/web-datacapture-core';
 
   export class BarcodeCaptureSettings {
     enableSymbologies(symbologies: Symbology[]): void;
@@ -47,6 +63,7 @@ declare module '@scandit/web-datacapture-barcode' {
 
   export class BarcodeCaptureOverlay {
     static withBarcodeCapture(capture: BarcodeCapture): Promise<BarcodeCaptureOverlay>;
+    viewfinder: any;
   }
 
   export enum Symbology {
@@ -56,4 +73,6 @@ declare module '@scandit/web-datacapture-barcode' {
     Code128 = 'code128',
     Code39 = 'code39',
   }
+
+  export function barcodeCaptureLoader(): any;
 }
