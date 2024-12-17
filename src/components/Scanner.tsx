@@ -18,9 +18,27 @@ const LICENSE_KEY =
 "pjb20ubmV2YS53YXJlaG91c2UKMTcz" +
 "NTA4NDc5OQo4Mzg4NjA3CjE5\n";
 
-// Define SDK paths
-const SDK_VERSION = '5.1.3';
-const SDK_PATH = `https://cdn.jsdelivr.net/npm/scanbot-web-sdk@${SDK_VERSION}/bundle/`;
+// Load Scanbot SDK script
+const loadScanbotSDK = async () => {
+  try {
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/scanbot-web-sdk@5.1.3/bundle/ScanbotSDK.min.js';
+    script.async = true;
+    
+    const loadPromise = new Promise((resolve, reject) => {
+      script.onload = resolve;
+      script.onerror = reject;
+    });
+    
+    document.head.appendChild(script);
+    await loadPromise;
+    
+    return window.ScanbotSDK;
+  } catch (error) {
+    console.error('Failed to load Scanbot SDK script:', error);
+    throw new Error('Failed to load Scanbot SDK script');
+  }
+};
 
 const Scanner = () => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -29,27 +47,17 @@ const Scanner = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    let ScanbotSDK: any;
-
     const initializeScanner = async () => {
       try {
         setIsLoading(true);
         setError(null);
         
         console.log('Loading Scanbot SDK...');
-        const SDK = await import('scanbot-web-sdk');
-        ScanbotSDK = SDK.default;
+        const ScanbotSDK = await loadScanbotSDK();
         
-        console.log('Initializing SDK with paths:', {
-          engine: SDK_PATH,
-          moduleDirectory: SDK_PATH
-        });
-
-        // Initialize the SDK with specific version
+        console.log('Initializing SDK...');
         const sdk = await ScanbotSDK.initialize({
           licenseKey: LICENSE_KEY,
-          engine: SDK_PATH,
-          moduleDirectory: SDK_PATH,
         });
 
         console.log('SDK initialized successfully');
