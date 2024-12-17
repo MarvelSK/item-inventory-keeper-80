@@ -31,10 +31,10 @@ const Scanner = () => {
         const SDK = await import('scanbot-web-sdk');
         ScanbotSDK = SDK.default;
         
-        // Initialize the SDK
+        // Initialize the SDK with CDN path
         const sdk = await ScanbotSDK.initialize({
           licenseKey: LICENSE_KEY,
-          engine: '/scanbot-web-sdk/',
+          engine: 'https://cdn.jsdelivr.net/npm/scanbot-web-sdk@5.1.3/bundle/',
         });
 
         // Create barcode scanner
