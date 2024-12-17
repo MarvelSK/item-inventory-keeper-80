@@ -1,6 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { toast } from "sonner";
 
+// Add type declaration for ScanbotSDK on window
+declare global {
+  interface Window {
+    ScanbotSDK: any; // Using 'any' for now, but we could create proper types if needed
+  }
+}
+
 // Initialize Scanbot SDK with provided license key
 const LICENSE_KEY =
 "NUy20xKMMFxgxA3AmeMFxW0eXkySTG" +
@@ -20,29 +27,34 @@ const LICENSE_KEY =
 
 // Load Scanbot SDK script
 const loadScanbotSDK = async () => {
+  // Remove any existing script to prevent duplicates
+  const existingScript = document.querySelector('script[src*="scanbot-web-sdk"]');
+  if (existingScript) {
+    existingScript.remove();
+  }
+
   try {
     const script = document.createElement('script');
     script.src = 'https://cdn.jsdelivr.net/npm/scanbot-web-sdk@5.1.3/bundle/ScanbotSDK.min.js';
     script.async = true;
     
-    const loadPromise = new Promise((resolve, reject) => {
-      script.onload = resolve;
-      script.onerror = reject;
+    const loadPromise = new Promise<typeof window.ScanbotSDK>((resolve, reject) => {
+      script.onload = () => resolve(window.ScanbotSDK);
+      script.onerror = () => reject(new Error('Failed to load Scanbot SDK script'));
     });
     
     document.head.appendChild(script);
-    await loadPromise;
-    
-    return window.ScanbotSDK;
+    return await loadPromise;
   } catch (error) {
     console.error('Failed to load Scanbot SDK script:', error);
-    throw new Error('Failed to load Scanbot SDK script');
+    throw error;
   }
 };
 
 const Scanner = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const scannerRef = useRef<any>(null);
+  const scriptRef = useRef<HTMLScriptElement | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -61,6 +73,10 @@ const Scanner = () => {
         });
 
         console.log('SDK initialized successfully');
+
+        if (!containerRef.current) {
+          throw new Error('Scanner container not found');
+        }
 
         // Create barcode scanner
         console.log('Creating barcode scanner...');
@@ -115,6 +131,13 @@ const Scanner = () => {
       if (scannerRef.current) {
         console.log('Disposing scanner...');
         scannerRef.current.dispose();
+        scannerRef.current = null;
+      }
+      
+      // Remove the script tag on cleanup
+      const script = document.querySelector('script[src*="scanbot-web-sdk"]');
+      if (script) {
+        script.remove();
       }
     };
   }, []);
