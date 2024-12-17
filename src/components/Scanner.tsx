@@ -36,12 +36,12 @@ const Scanner = () => {
       await barcodeCapture.setEnabled(false);
 
       barcodeCapture.addListener({
-        didScan: async (barcodeCapture: any, session: { newlyRecognizedBarcodes: Array<{ data: string; symbology: any }> }) => {
-          await barcodeCapture.setEnabled(false);
+        didScan: async (mode: any, session: { newlyRecognizedBarcodes: Array<{ data: string; symbology: any }> }) => {
+          await mode.setEnabled(false);
           const barcode = session.newlyRecognizedBarcodes[0];
           const symbology = new SDCBarcode.SymbologyDescription(barcode.symbology);
-          showResult(barcode.data, symbology.readableName);
-          await barcodeCapture.setEnabled(true);
+          showResult(String(barcode.data), symbology.readableName);
+          await mode.setEnabled(true);
         },
       });
 
@@ -74,7 +74,7 @@ const Scanner = () => {
     }
 
     function showResult(data: string, symbology: string) {
-      alert("Scanned: " + data + " " + symbology);
+      alert(`Scanned: ${data} (${symbology})`);
     }
 
     runScanner().catch((error) => {
