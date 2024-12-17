@@ -1,92 +1,85 @@
-import * as SDCCore from '@scandit/web-datacapture-core';
-import * as SDCBarcode from '@scandit/web-datacapture-barcode';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
+import IScanbotSDK from 'scanbot-web-sdk/dist/types/interfaces/IScanbotSDK';
+import { toast } from "sonner";
 
-// Using the license key from Supabase secrets
-const licenseKey = "AQtTEp4aKk5gKz9um5ATcK0gs1KcFHJzYmE4Y2IxZmVkLTg4YWUtNDU2Mi1hOTdkLTVlNGQxZDc0NWYzMXhJU1BsV2dLT1BMbkJlbW5UaWh4R2l1cUplY3RJb1hIOUoxUHBqS0JKWHFjR2pJeXhLSTJsbXpqb1BSaXRQZ3VSend4RDRJbnl0TUZvYnI4U0h2WXBDdWk5QUVqanRZdnhwR0FUTWlxL0k4VVdIYkVzRkpYNU5ZcS9yZkhxUnlZbXN6d1ZjN1ZETzl4ZHpsRWtLZmNYY1ZJY0tGUUlqY2JjQT09";
+// Initialize Scanbot SDK with a free trial license
+const LICENSE_KEY = 'trial';
 
 const Scanner = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const scannerRef = useRef<any>(null);
+
   useEffect(() => {
-    async function runScanner() {
-      await SDCCore.configure({
-        licenseKey: licenseKey,
-        libraryLocation: '/engine',
-        moduleLoaders: [SDCBarcode.barcodeCaptureLoader()]
-      });
+    let ScanbotSDK: IScanbotSDK;
 
-      const context = await SDCCore.DataCaptureContext.create();
+    const initializeScanner = async () => {
+      try {
+        // Load the Scanbot SDK
+        ScanbotSDK = await import('scanbot-web-sdk');
+        
+        // Initialize the SDK
+        const sdk = await ScanbotSDK.initialize({
+          licenseKey: LICENSE_KEY,
+          engine: '/scanbot-web-sdk/',
+        });
 
-      const camera = SDCCore.Camera.default;
-      await context.setFrameSource(camera);
+        // Create barcode scanner
+        const scanner = await sdk.createBarcodeScanner({
+          containerId: 'scanner-container',
+          style: {
+            window: {
+              borderColor: '#0D9488', // Tailwind teal-600
+            },
+          },
+          onBarcodesDetected: (result) => {
+            if (result.barcodes.length > 0) {
+              const barcode = result.barcodes[0];
+              console.log('Scanned barcode:', barcode);
+              toast.success(`Scanned: ${barcode.text} (${barcode.format})`);
+            }
+          },
+          preferredCamera: 'camera2', // Usually the back camera
+          barcodeFormats: [
+            'CODE_128',
+            'CODE_39',
+            'EAN_8',
+            'EAN_13',
+            'UPC_A',
+            'UPC_E',
+            'QR_CODE',
+          ],
+        });
 
-      const settings = new SDCBarcode.BarcodeCaptureSettings();
-      settings.enableSymbologies([
-        SDCBarcode.Symbology.Code128,
-        SDCBarcode.Symbology.Code39,
-        SDCBarcode.Symbology.QR,
-        SDCBarcode.Symbology.EAN8,
-        SDCBarcode.Symbology.UPCE,
-        SDCBarcode.Symbology.EAN13UPCA
-      ]);
+        scannerRef.current = scanner;
+        
+        // Start the scanner
+        await scanner.startScanning();
+      } catch (error) {
+        console.error('Failed to initialize scanner:', error);
+        toast.error('Failed to initialize scanner. Please try again.');
+      }
+    };
 
-      const symbologySetting = settings.settingsForSymbology(SDCBarcode.Symbology.Code39);
-      symbologySetting.activeSymbolCounts = [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
-
-      const barcodeCapture = await SDCBarcode.BarcodeCapture.forContext(context, settings);
-      await barcodeCapture.setEnabled(false);
-
-      barcodeCapture.addListener({
-        didScan: async (mode: any, session: any) => {
-          await mode.setEnabled(false);
-          const barcode = session.newlyRecognizedBarcodes[0];
-          console.log('Scanned barcode:', barcode); // Debug log
-          const symbology = new SDCBarcode.SymbologyDescription(barcode.symbology);
-          const barcodeData = typeof barcode.data === 'object' ? JSON.stringify(barcode.data) : String(barcode.data);
-          showResult(barcodeData, symbology.readableName);
-          await mode.setEnabled(true);
-        },
-      });
-
-      const view = await SDCCore.DataCaptureView.forContext(context);
-      view.connectToElement(document.getElementById("data-capture-view"));
-      view.addControl(new SDCCore.CameraSwitchControl());
-
-      const barcodeCaptureOverlay =
-        await SDCBarcode.BarcodeCaptureOverlay.withBarcodeCaptureForViewWithStyle(
-          barcodeCapture,
-          view,
-          SDCBarcode.BarcodeCaptureOverlayStyle.Frame
-        );
-
-      const viewfinder = new SDCCore.RectangularViewfinder(
-        SDCCore.RectangularViewfinderStyle.Square,
-        SDCCore.RectangularViewfinderLineStyle.Light
-      );
-
-      await barcodeCaptureOverlay.setViewfinder(viewfinder);
-
-      await camera.switchToDesiredState(SDCCore.FrameSourceState.On);
-      await barcodeCapture.setEnabled(true);
-
-      // Cleanup function
-      return () => {
-        barcodeCapture.setEnabled(false);
-        context.dispose();
-      };
+    if (containerRef.current) {
+      initializeScanner();
     }
 
-    function showResult(data: string, symbology: string) {
-      alert(`Scanned: ${data} (${symbology})`);
-    }
-
-    runScanner().catch((error) => {
-      console.error(error);
-      alert(error);
-    });
+    // Cleanup function
+    return () => {
+      if (scannerRef.current) {
+        scannerRef.current.dispose();
+      }
+    };
   }, []);
 
   return (
-    <div id="data-capture-view"></div>
+    <div className="w-full h-full flex flex-col items-center justify-center">
+      <div 
+        id="scanner-container" 
+        ref={containerRef}
+        className="w-full h-[80vh] bg-black rounded-lg overflow-hidden"
+      />
+    </div>
   );
 };
 
