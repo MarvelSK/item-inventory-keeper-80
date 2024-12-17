@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ManualEntry } from "@/components/ManualEntry";
-import { Scanner } from "@/components/Scanner";
+import Scanner from "@/components/Scanner";
 import { InventoryList } from "@/components/InventoryList";
 
 const Index = () => {
