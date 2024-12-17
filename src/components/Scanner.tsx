@@ -1,7 +1,6 @@
 import * as SDCCore from '@scandit/web-datacapture-core';
 import * as SDCBarcode from '@scandit/web-datacapture-barcode';
 import { useEffect } from 'react';
-import { Card } from "./ui/card";
 
 // Replace this with your actual Scandit license key
 const licenseKey = "AQtTEp4aKk5gKz9um5ATcK0gs1KcFHJzYmE4Y2IxZmVkLTg4YWUtNDU2Mi1hOTdkLTVlNGQxZDc0NWYzMXhJU1BsV2dLT1BMbkJlbW5UaWh4R2l1cUplY3RJb1hIOUoxUHBqS0JKWHFjR2pJeXhLSTJsbXpqb1BSaXRQZ3VSend4RDRJbnl0TUZvYnI4U0h2WXBDdWk5QUVqanRZdnhwR0FUTWlxL0k4VVdIYkVzRkpYNU5ZcS9yZkhxUnlZbXN6d1ZjN1ZETzl4ZHpsRWtLZmNYY1ZJY0tGUUlqY2JjQT09";
@@ -85,12 +84,7 @@ const Scanner = () => {
   }, []);
 
   return (
-    <Card className="p-4 md:p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-semibold text-primary">Scanner</h2>
-      </div>
-      <div id="data-capture-view" className="w-full aspect-video"></div>
-    </Card>
+    <div id="data-capture-view"></div>
   );
 };
 
