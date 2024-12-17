@@ -27,13 +27,8 @@ const LICENSE_KEY =
 
 // Load Scanbot SDK script
 const loadScanbotSDK = async () => {
-  // Remove any existing script to prevent duplicates
-  const existingScript = document.querySelector('script[src*="scanbot-web-sdk"]');
-  if (existingScript) {
-    existingScript.remove();
-  }
-
   try {
+    // Create a new script element
     const script = document.createElement('script');
     script.src = 'https://cdn.jsdelivr.net/npm/scanbot-web-sdk@5.1.3/bundle/ScanbotSDK.min.js';
     script.async = true;
@@ -43,6 +38,7 @@ const loadScanbotSDK = async () => {
       script.onerror = () => reject(new Error('Failed to load Scanbot SDK script'));
     });
     
+    // Append the script to head
     document.head.appendChild(script);
     return await loadPromise;
   } catch (error) {
@@ -54,7 +50,6 @@ const loadScanbotSDK = async () => {
 const Scanner = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const scannerRef = useRef<any>(null);
-  const scriptRef = useRef<HTMLScriptElement | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -134,11 +129,13 @@ const Scanner = () => {
         scannerRef.current = null;
       }
       
-      // Remove the script tag on cleanup
-      const script = document.querySelector('script[src*="scanbot-web-sdk"]');
-      if (script) {
-        script.remove();
-      }
+      // Remove all Scanbot SDK scripts safely
+      const scripts = document.querySelectorAll('script[src*="scanbot-web-sdk"]');
+      scripts.forEach(script => {
+        if (script.parentNode) {
+          script.parentNode.removeChild(script);
+        }
+      });
     };
   }, []);
 
