@@ -36,11 +36,13 @@ const Scanner = () => {
       await barcodeCapture.setEnabled(false);
 
       barcodeCapture.addListener({
-        didScan: async (mode: any, session: { newlyRecognizedBarcodes: Array<{ data: string; symbology: any }> }) => {
+        didScan: async (mode: any, session: any) => {
           await mode.setEnabled(false);
           const barcode = session.newlyRecognizedBarcodes[0];
+          console.log('Scanned barcode:', barcode); // Debug log
           const symbology = new SDCBarcode.SymbologyDescription(barcode.symbology);
-          showResult(String(barcode.data), symbology.readableName);
+          const barcodeData = typeof barcode.data === 'object' ? JSON.stringify(barcode.data) : String(barcode.data);
+          showResult(barcodeData, symbology.readableName);
           await mode.setEnabled(true);
         },
       });
